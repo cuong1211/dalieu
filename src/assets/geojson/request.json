@@ -1,0 +1,144 @@
+{
+  "requests": [
+    {
+      "id": 1,
+      "name": "Yêu cầu 1",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.84, 21.59] },
+      "cluster_id": 1
+    },
+    {
+      "id": 2,
+      "name": "Yêu cầu 2",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.845, 21.595] },
+      "cluster_id": 1
+    },
+    {
+      "id": 3,
+      "name": "Yêu cầu 3",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.85, 21.6] },
+      "cluster_id": 1
+    },
+    {
+      "id": 4,
+      "name": "Yêu cầu 4",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.855, 21.605] },
+      "cluster_id": 1
+    },
+    {
+      "id": 5,
+      "name": "Yêu cầu 5",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.9, 21.58] },
+      "cluster_id": 2
+    },
+    {
+      "id": 6,
+      "name": "Yêu cầu 6",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.905, 21.585] },
+      "cluster_id": 2
+    },
+    {
+      "id": 7,
+      "name": "Yêu cầu 7",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.91, 21.59] },
+      "cluster_id": 2
+    },
+    {
+      "id": 8,
+      "name": "Yêu cầu 8",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.915, 21.595] },
+      "cluster_id": 2
+    },
+    {
+      "id": 9,
+      "name": "Yêu cầu 9",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.78, 21.57] },
+      "cluster_id": 3
+    },
+    {
+      "id": 10,
+      "name": "Yêu cầu 10",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.785, 21.575] },
+      "cluster_id": 3
+    },
+    {
+      "id": 11,
+      "name": "Yêu cầu 11",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.79, 21.58] },
+      "cluster_id": 3
+    },
+    {
+      "id": 12,
+      "name": "Yêu cầu 12",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.795, 21.585] },
+      "cluster_id": 3
+    },
+    {
+      "id": 13,
+      "name": "Yêu cầu 13",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.86, 21.52] },
+      "cluster_id": 4
+    },
+    {
+      "id": 14,
+      "name": "Yêu cầu 14",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.865, 21.525] },
+      "cluster_id": 4
+    },
+    {
+      "id": 15,
+      "name": "Yêu cầu 15",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.87, 21.53] },
+      "cluster_id": 4
+    },
+    {
+      "id": 16,
+      "name": "Yêu cầu 16",
+      "type": 2,
+      "geojson": { "type": "Point", "coordinates": [105.875, 21.535] },
+      "cluster_id": 4
+    },
+    {
+      "id": 17,
+      "name": "Yêu cầu 17",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.82, 21.62] },
+      "cluster_id": 5
+    },
+    {
+      "id": 18,
+      "name": "Yêu cầu 18",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.825, 21.625] },
+      "cluster_id": 5
+    },
+    {
+      "id": 19,
+      "name": "Yêu cầu 19",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.83, 21.63] },
+      "cluster_id": 5
+    },
+    {
+      "id": 20,
+      "name": "Yêu cầu 20",
+      "type": 1,
+      "geojson": { "type": "Point", "coordinates": [105.835, 21.635] },
+      "cluster_id": 5
+    }
+  ]
+}

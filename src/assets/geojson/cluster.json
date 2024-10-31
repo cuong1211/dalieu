@@ -1,0 +1,9 @@
+{
+  "clusters": [
+    { "id": 1, "color": "#FF0000", "coordinates": [105.8475, 21.5975], "count": 4 },
+    { "id": 2, "color": "#00FF00", "coordinates": [105.9075, 21.5875], "count": 4 },
+    { "id": 3, "color": "#0000FF", "coordinates": [105.7875, 21.5775], "count": 4 },
+    { "id": 4, "color": "#FFFF00", "coordinates": [105.8675, 21.5275], "count": 4 },
+    { "id": 5, "color": "#FF00FF", "coordinates": [105.8275, 21.6275], "count": 4 }
+  ]
+}
