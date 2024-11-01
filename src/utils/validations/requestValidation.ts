@@ -11,14 +11,14 @@ export const useRequestValidation = (form: Ref<DermatologyRequestForm>) => {
         let isValid = true;
 
         // Validate fullName
-        if (!form.value.fullName?.trim()) {
-            errors.value.fullName = 'Vui lòng nhập họ tên';
+        if (!form.value.name?.trim()) {
+            errors.value.name = 'Vui lòng nhập họ tên';
             isValid = false;
         }
 
         // Validate dateOfBirth
-        if (!form.value.dateOfBirth) {
-            errors.value.dateOfBirth = 'Vui lòng chọn ngày sinh';
+        if (!form.value.birthday) {
+            errors.value.birthday = 'Vui lòng chọn ngày sinh';
             isValid = false;
         }
 
@@ -52,29 +52,14 @@ export const useRequestValidation = (form: Ref<DermatologyRequestForm>) => {
         }
 
         // Validate symptomsStartDate
-        if (!form.value.symptomsStartDate) {
-            errors.value.symptomsStartDate = 'Vui lòng chọn thời điểm bắt đầu có triệu chứng';
-            isValid = false;
-        }
 
         // Validate images
-        if (!form.value.images || form.value.images.length === 0) {
-            errors.value.images = 'Vui lòng tải lên ít nhất 1 ảnh triệu chứng';
+        if (!form.value.image) {
+            errors.value.image = 'Vui lòng tải lên ít nhất 1 ảnh triệu chứng';
             isValid = false;
         }
 
         // Validate preferredDateTime
-        if (!form.value.preferredDateTime) {
-            errors.value.preferredDateTime = 'Vui lòng chọn thời gian khám mong muốn';
-            isValid = false;
-        } else {
-            const selectedDate = new Date(form.value.preferredDateTime);
-            const now = new Date();
-            if (selectedDate < now) {
-                errors.value.preferredDateTime = 'Thời gian khám phải lớn hơn thời gian hiện tại';
-                isValid = false;
-            }
-        }
 
         return isValid;
     };

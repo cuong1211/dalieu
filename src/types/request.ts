@@ -1,17 +1,15 @@
+// Sửa lại interface cho form
 export interface DermatologyRequestForm {
-    id: number;
-    fullName: string;
-    dateOfBirth: string;
-    gender: 'male' | 'female' | 'other';
-    phone: string;
-    email: string;
-    address: string;
-    symptoms: string;
-    symptomsStartDate: string;
-    previousTreatments: string;
-    allergies: string;
-    images: string[];
-    preferredDateTime: string;
-    doctorId: number | null;
-    departmentId: number;
-  }
+  id: number;
+  name: string;
+  birthday: string;
+  gender: string;
+  id_number: string;
+  phone: string;
+  email: string;
+  address: string;
+  symptoms: string;
+  image: File | null; // Thay đổi từ string sang File
+}
+
+// Sửa lại initialFormData

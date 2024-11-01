@@ -14,7 +14,9 @@ import VueApexCharts from "vue3-apexcharts";
 import App from './App.vue'
 import router from './router'
 import '@/assets/styles/index.css';
-
+import 'filepond/dist/filepond.min.css';
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+import '@pqina/pintura/pintura.css';
 
 const app = createApp(App)
 const pinia = createPinia()

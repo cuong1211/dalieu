@@ -1,130 +1,74 @@
 <template>
-    <div class="container">
-        <div class="d-flex flex-column flex-lg-row">
-            <!-- Form section -->
-            <div class="flex-lg-row-fluid me-lg-10 order-2 order-lg-1 mb-10 mb-lg-0">
-                <div v-if="form">
-                    <form class="form" @submit.prevent="handleSubmit">
-                        <!-- Thông tin cá nhân -->
-                        <FormCard title="Thông tin cá nhân">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <FormInput v-model="form.fullName" label="Họ và tên" :error="errors.fullName"
-                                        placeholder="Nhập họ và tên"
-                                        @input="(value) => handleInput('fullName', value)" />
-                                </div>
-                                <div class="col-md-6">
-                                    <FormInput v-model="form.dateOfBirth" label="Ngày sinh" type="date"
-                                        :error="errors.dateOfBirth"
-                                        @input="(value) => handleInput('dateOfBirth', value)" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <FormSelect v-model="form.gender" label="Giới tính" :options="genderOptions"
-                                        :error="errors.gender" @input="(value) => handleInput('gender', value)" />
-                                </div>
-                                <div class="col-md-6">
-                                    <FormInput v-model="form.phone" label="Số điện thoại" :error="errors.phone"
-                                        placeholder="Nhập số điện thoại" @input="(value) => handleInput('phone', value)"
-                                        type="tel" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <FormInput v-model="form.email" label="Email" type="email" :error="errors.email"
-                                        placeholder="Nhập email" @input="(value) => handleInput('email', value)" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <FormInput v-model="form.address" label="Địa chỉ" :error="errors.address"
-                                        placeholder="Nhập địa chỉ" @input="(value) => handleInput('address', value)" />
-                                </div>
-                            </div>
-                        </FormCard>
-
-                        <!-- Thông tin triệu chứng -->
-                        <FormCard title="Thông tin triệu chứng">
-                            <div class="row">
-                                <div class="col-12">
-                                    <FormTextarea v-model="form.symptoms" label="Mô tả triệu chứng"
-                                        :error="errors.symptoms"
-                                        placeholder="Mô tả chi tiết các triệu chứng bạn đang gặp phải"
-                                        @input="(value) => handleInput('symptoms', value)" rows="4" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <FormInput v-model="form.symptomsStartDate" label="Thời điểm bắt đầu có triệu chứng"
-                                        type="date" :error="errors.symptomsStartDate"
-                                        @input="(value) => handleInput('symptomsStartDate', value)" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <FormTextarea v-model="form.previousTreatments" label="Điều trị trước đây (nếu có)"
-                                        :error="errors.previousTreatments"
-                                        placeholder="Mô tả các phương pháp điều trị đã thực hiện trước đây"
-                                        @input="(value) => handleInput('previousTreatments', value)" rows="3" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <FormTextarea v-model="form.allergies" label="Dị ứng (nếu có)"
-                                        :error="errors.allergies"
-                                        placeholder="Liệt kê các loại thuốc, thực phẩm hoặc các chất gây dị ứng"
-                                        @input="(value) => handleInput('allergies', value)" rows="2" />
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="col-12">
-
-                                    <ImageUploader v-model="form.images" label="Hình ảnh triệu chứng" required
-                                        :error="errors.images" :maxFiles="5"
-                                        :acceptedFileTypes="['image/png', 'image/jpeg']" :imageResizeTargetWidth="1080"
-                                        :imageResizeTargetHeight="1080" imageCropAspectRatio="1:1" maxFileSize="5MB"
-                                        helpText="Tải lên tối đa 5 ảnh, mỗi ảnh không quá 5MB"
-                                        @fileAdded="handleFileAdded" @fileRemoved="handleFileRemoved"
-                                        @filesUpdated="handleFilesUpdated" />
-
-                                </div>
-                            </div>
-                        </FormCard>
-
-                        <!-- Thông tin đặt lịch -->
-                        <FormCard title="Thông tin đặt lịch">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <FormInput v-model="form.preferredDateTime" label="Thời gian mong muốn"
-                                        type="datetime-local" :error="errors.preferredDateTime"
-                                        @input="(value) => handleInput('preferredDateTime', value)" />
-                                </div>
-                                <div class="col-md-6">
-                                    <FormSelect v-model="form.doctorId" label="Bác sĩ" :options="doctorOptions"
-                                        :error="errors.doctorId" @input="(value) => handleInput('doctorId', value)"
-                                        placeholder="Chọn bác sĩ (không bắt buộc)" />
-                                </div>
-                            </div>
-                        </FormCard>
-
-                        <!-- Nút submit -->
-                        <div class="d-flex justify-content-end mt-5">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-send me-2"></i>
-                                Gửi yêu cầu khám
-                            </button>
+    <div class="paper-container">
+        <div class="paper-content">
+            <form class="appointment-form" @submit.prevent="handleSubmit" novalidate>
+                <!-- Thông tin cá nhân -->
+                <FormCard title="Thông tin cá nhân">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <FormInput v-model="form.name" label="Họ và tên" placeholder="Nhập họ và tên"
+                                :error="errors.name" required @input="(value) => handleInput('name', value)" />
                         </div>
-                    </form>
+
+                        <div class="col-md-6">
+                            <FormDateTimePicker v-model="form.birthday" label="Ngày sinh"
+                                placeholder="Chọn hoặc nhập ngày sinh" :error="errors.birthday"
+                                :yearRange="[1900, 2024]" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <FormSelect v-model="form.gender" label="Giới tính" placeholder="Chọn giới tính"
+                                :options="genderOptions" :error="errors.gender" required
+                                @change="(value) => handleInput('gender', value)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <FormInput v-model="form.id_number" label="Số CCCD" placeholder="Nhập số CCCD" type="number"
+                                maxlength="12" :error="errors.id_number" required @input="handleIdentityNumberInput" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <FormInput v-model="form.phone" label="Số điện thoại" placeholder="Nhập số điện thoại"
+                                type="tel" :error="errors.phone" required
+                                @input="(value) => handleInput('phone', value)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <FormInput v-model="form.email" label="Email" placeholder="Nhập địa chỉ email" type="email"
+                                :error="errors.email" @input="(value) => handleInput('email', value)" />
+                        </div>
+
+                        <div class="col-12">
+                            <FormInput v-model="form.address" label="Địa chỉ" placeholder="Nhập địa chỉ hiện tại"
+                                :error="errors.address" required @input="(value) => handleInput('address', value)" />
+                        </div>
+                    </div>
+                </FormCard>
+
+                <!-- Thông tin triệu chứng -->
+                <FormCard title="Thông tin triệu chứng" class="mt-4">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <FormTextarea v-model="form.symptoms" label="Mô tả triệu chứng"
+                                placeholder="Mô tả chi tiết các triệu chứng bạn đang gặp phải" :error="errors.symptoms"
+                                :rows="4" required @input="(value) => handleInput('symptoms', value)" />
+                        </div>
+
+                        <div class="col-12">
+                            <ImageUploader v-model="form.image" label="Hình ảnh triệu chứng" :error="errors.image"
+                                required @file-changed="handleImageChanged" />
+                        </div>
+                    </div>
+                </FormCard>
+
+                <!-- Submit button -->
+                <div class="form-actions">
+                    <button type="submit" class="submit-button">
+                        <i class="bi bi-send"></i>
+                        Gửi yêu cầu
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </template>
@@ -137,36 +81,29 @@ import FormCard from '@/components/Form/FormCard.vue';
 import FormInput from '@/components/Form/FormInput.vue';
 import FormTextarea from '@/components/Form/FormTextarea.vue';
 import FormSelect from '@/components/Form/FormSelect.vue';
+import FormDateTimePicker from '@/components/Form/FormDateTimePicker/FormDateTimePicker.vue';
 import { useRequestValidation } from '@/utils/validations/requestValidation';
 import { useRequestStore } from '@/stores/requestStore';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-
-// Import styles cho FilePond
-import 'filepond/dist/filepond.min.css';
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
 const router = useRouter();
 const toast = useToast();
 const requestStore = useRequestStore();
 const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null);
 
+
 const initialFormData: DermatologyRequestForm = {
     id: 0,
-    fullName: '',
-    dateOfBirth: '',
+    name: '',
+    birthday: '',
     gender: 'other',
+    id_number: '',
     phone: '',
     email: '',
     address: '',
     symptoms: '',
-    symptomsStartDate: '',
-    previousTreatments: '',
-    allergies: '',
-    images: [],
-    preferredDateTime: '',
-    doctorId: null,
-    departmentId: 1, // ID khoa da liễu
+    image: null, // Khởi tạo null
 };
 
 const form = ref<DermatologyRequestForm>(initialFormData);
@@ -177,33 +114,42 @@ const genderOptions = [
     { value: 'other', label: 'Khác' }
 ];
 
-const doctorOptions = ref([
-    { value: 1, label: 'BS. Nguyễn Văn A' },
-    { value: 2, label: 'BS. Trần Thị B' },
-    // Thêm các bác sĩ khác
-]);
-
 const { errors, validateForm, handleInput } = useRequestValidation(form);
 
+// Xử lý validate số CCCD
+const handleIdentityNumberInput = (value: string | number) => {
+    // Chỉ cho phép nhập số và giới hạn 12 kí tự
+    const numbersOnly = String(value).replace(/\D/g, '').slice(0, 12);
+    form.value.id_number = numbersOnly;
+    handleInput('id_number', numbersOnly);
+
+    // Validate số CCCD
+    if (numbersOnly.length !== 12) {
+        errors.value.id_number = 'Số CCCD phải đủ 12 số';
+    } else {
+        errors.value.id_number = '';
+    }
+};
+
 const handleSubmit = async () => {
+    // Validate CCCD trước khi submit
+    if (form.value.id_number.length !== 12) {
+        errors.value.id_number = 'Số CCCD phải đủ 12 số';
+        return;
+    }
+
     if (validateForm()) {
         try {
             const formData = new FormData();
 
             // Thêm các trường thông tin vào FormData
             Object.entries(form.value).forEach(([key, value]) => {
-                if (key !== 'images') {
+                if (key === 'image' && value instanceof File) {
+                    formData.append('image', value);
+                } else if (key !== 'image') {
                     formData.append(key, String(value));
                 }
             });
-
-            // Lấy files từ FilePond và thêm vào FormData
-            const imageFiles = imageUploader.value?.getFiles();
-            if (imageFiles && imageFiles.length > 0) {
-                imageFiles.forEach((file, index) => {
-                    formData.append(`images[${index}]`, file);
-                });
-            }
 
             const response = await requestStore.createRequest(formData);
             toast.success('Đăng ký khám thành công');
@@ -217,20 +163,82 @@ const handleSubmit = async () => {
         }
     }
 };
+
+const handleImageChanged = (file: File | null) => {
+    form.value.image = file;
+    handleInput('image', file);
+};
+
 </script>
-<style>
-/* Tùy chỉnh style cho FilePond nếu cần */
-.filepond--panel-root {
-    background-color: #f8f9fa;
-    border: 2px dashed #ced4da;
+
+<style scoped>
+.paper-container {
+    padding: 2rem;
+    background-color: #f8fafc;
+    min-height: 100vh;
 }
 
-.filepond--drop-label {
-    color: #6c757d;
+.paper-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
 }
 
-.filepond--label-action {
-    color: #0d6efd;
-    text-decoration: underline;
+.appointment-form {
+    width: 100%;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.submit-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+    background-color: #2563eb;
+}
+
+.submit-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .paper-container {
+        padding: 1rem;
+    }
+
+    .paper-content {
+        padding: 1.5rem;
+    }
+
+    .form-actions {
+        margin-top: 1.5rem;
+    }
+
+    .submit-button {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>
