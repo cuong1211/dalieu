@@ -1,0 +1,50 @@
+{
+  "id": 2,
+  "name": "Bệnh trứng cá",
+  "category": "Bệnh da phổ biến",
+  "image": "/media/diseases/acne.jpg",
+  "sections": [
+    {
+      "title": "1. Tổng quan",
+      "type": "text",
+      "content": "Trứng cá là một bệnh viêm da mãn tính ở nang lông và tuyến bã, thường gặp ở tuổi dậy thì và thanh niên. Bệnh gây ảnh hưởng đến thẩm mỹ và tâm lý người bệnh."
+    },
+    {
+      "title": "2. Nguyên nhân",
+      "type": "list",
+      "content": [
+        "Rối loạn nội tiết tố (đặc biệt là androgen)",
+        "Tăng tiết bã nhờn",
+        "Vi khuẩn P.acnes phát triển",
+        "Yếu tố di truyền",
+        "Chế độ ăn uống và lối sống"
+      ]
+    },
+    {
+      "title": "3. Triệu chứng",
+      "type": "list",
+      "content": [
+        "Nhân mụn đầu đen, đầu trắng",
+        "Mụn viêm đỏ, có mủ",
+        "Sẹo lõm hoặc sẹo thâm sau mụn",
+        "Da nhờn, lỗ chân lông to"
+      ]
+    },
+    {
+      "title": "4. Điều trị",
+      "type": "text",
+      "content": "- Sử dụng thuốc bôi kháng sinh, benzoyl peroxide<br>- Thuốc uống kháng sinh trong trường hợp nặng<br>- Isotretinoin cho trường hợp kháng trị<br>- Điều trị các yếu tố thuận lợi<br>- Chăm sóc da đúng cách"
+    },
+    {
+      "title": "5. Phòng ngừa",
+      "type": "list",
+      "content": [
+        "Vệ sinh da mặt sạch sẽ",
+        "Tránh sử dụng mỹ phẩm gây bít tắc lỗ chân lông",
+        "Chế độ ăn uống lành mạnh",
+        "Không nặn mụn tùy tiện",
+        "Tránh stress và giữ tinh thần thoải mái"
+      ]
+    }
+  ]
+}
