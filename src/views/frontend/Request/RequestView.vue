@@ -62,19 +62,62 @@
                 </FormCard>
 
                 <!-- Submit button -->
-                <div class="form-actions">
-                    <button type="submit" class="submit-button">
-                        <i class="bi bi-send"></i>
-                        Gửi yêu cầu
+                <div class="form-actions" v-if="!diagnosisResult">
+                    <button type="submit" class="submit-button" :disabled="isProcessing">
+                        <template v-if="isProcessing">
+                            <i class="bi bi-arrow-repeat loading-icon"></i>
+                            Đang xử lý...
+                        </template>
+                        <template v-else>
+                            <i class="bi bi-send"></i>
+                            Gửi yêu cầu
+                        </template>
                     </button>
                 </div>
             </form>
+            <div v-if="diagnosisResult" class="diagnosis-section">
+                <FormCard title="Kết quả chẩn đoán">
+                    <div class="diagnosis-content">
+                        <!-- Kết quả chẩn đoán -->
+                        <div class="result-box mb-4">
+                            <h5 class="result-title">
+                                <i class="bi bi-clipboard2-pulse me-2"></i>
+                                Kết luận
+                            </h5>
+                            <p class="result-text">{{ diagnosisResult.data.result }}</p>
+                        </div>
+
+                        <!-- Danh sách bệnh liên quan -->
+                        <div class="diseases-box">
+                            <h5 class="diseases-title">
+                                <i class="bi bi-link-45deg me-2"></i>
+                                Bệnh liên quan
+                            </h5>
+                            <div class="diseases-grid">
+                                <router-link v-for="disease in relatedDiseases" :key="disease.id"
+                                    :to="{ name: 'disease.detail', params: { id: disease.id } }" class="disease-card">
+                                    <div class="disease-icon">
+                                        <i class="bi bi-journal-medical"></i>
+                                    </div>
+                                    <div class="disease-info">
+                                        <h6 class="disease-name">{{ disease.name }}</h6>
+                                        <span class="view-detail">
+                                            Xem chi tiết
+                                            <i class="bi bi-arrow-right ms-1"></i>
+                                        </span>
+                                    </div>
+                                </router-link>
+                            </div>
+                        </div>
+                    </div>
+                </FormCard>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import type { DermatologyRequestForm } from '@/types/request';
 import ImageUploader from '@/components/ImageUploader/ImageUploader.vue';
 import FormCard from '@/components/Form/FormCard.vue';
@@ -86,6 +129,10 @@ import { useRequestValidation } from '@/utils/validations/requestValidation';
 import { useRequestStore } from '@/stores/requestStore';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
+import { mockApiService } from '@/stores/mockApi';
+import type { RequestResponse, DiseaseInfo } from '@/types/request';
+const isProcessing = ref(false);
+const diagnosisResult = ref<RequestResponse | null>(null);
 
 const router = useRouter();
 const toast = useToast();
@@ -131,8 +178,12 @@ const handleIdentityNumberInput = (value: string | number) => {
     }
 };
 
+const relatedDiseases = computed(() => {
+    if (!diagnosisResult.value?.data.info.sub) return [];
+    return diagnosisResult.value.data.info.sub.flat();
+});
+
 const handleSubmit = async () => {
-    // Validate CCCD trước khi submit
     if (form.value.id_number.length !== 12) {
         errors.value.id_number = 'Số CCCD phải đủ 12 số';
         return;
@@ -140,26 +191,20 @@ const handleSubmit = async () => {
 
     if (validateForm()) {
         try {
-            const formData = new FormData();
+            isProcessing.value = true;
 
-            // Thêm các trường thông tin vào FormData
-            Object.entries(form.value).forEach(([key, value]) => {
-                if (key === 'image' && value instanceof File) {
-                    formData.append('image', value);
-                } else if (key !== 'image') {
-                    formData.append(key, String(value));
-                }
-            });
+            // Gọi mock API service
+            const response = await mockApiService.submitRequest(form.value);
 
-            const response = await requestStore.createRequest(formData);
-            toast.success('Đăng ký khám thành công');
-            router.push({
-                name: 'request-success',
-                params: { id: response.data.id }
-            });
+            // Lưu kết quả
+            diagnosisResult.value = response;
+
+            toast.success(response.message);
         } catch (error) {
             console.error('Lỗi khi tạo yêu cầu:', error);
             toast.error('Đăng ký khám thất bại. Vui lòng thử lại.');
+        } finally {
+            isProcessing.value = false;
         }
     }
 };
@@ -240,5 +285,151 @@ const handleImageChanged = (file: File | null) => {
         width: 100%;
         justify-content: center;
     }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    font-size: 1.125rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.loading-subtext {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.loading-icon {
+    animation: spin 1s linear infinite;
+}
+
+.diagnosis-section {
+    margin-top: 2rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.result-box,
+.diseases-box {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.result-title,
+.diseases-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.125rem;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.result-text {
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.diseases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.disease-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.disease-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.disease-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border-radius: 8px;
+    margin-right: 1rem;
+}
+
+.disease-info {
+    flex: 1;
+}
+
+.disease-name {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.view-detail {
+    font-size: 0.875rem;
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    margin-top: 0.25rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.submit-button:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
 }
 </style>

@@ -18,12 +18,12 @@
                             </svg>
                         </span>
                     </button>
-                    <a href="../../demo8/dist/landing.html">
+                    <RouterLink to="/" class="d-flex align-items-center">
                         <div class="logo-container">
                             <img alt="Logo" src="/media/icons/map/rescue.svg" class="h-50px h-lg-50px" />
                             <h1 class="logo-text">CUUHO</h1>
                         </div>
-                    </a>
+                    </RouterLink>
                 </div>
 
                 <!-- Center section with menu items -->
@@ -37,23 +37,6 @@
                                     :class="{ 'active': isActive(item.name) }">
                                     {{ item.label }}
                                 </RouterLink>
-                            </div>
-
-                            <!-- Từ điển bệnh dropdown menu -->
-                            <div class="menu-item">
-                                <div class="dropdown">
-                                    <button class="menu-link nav-link py-3 px-4 px-xxl-6 dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                        Từ điển bệnh
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li v-for="disease in diseases" :key="disease.name">
-                                            <RouterLink :to="disease.to" class="dropdown-item">
-                                                {{ disease.label }}
-                                            </RouterLink>
-                                        </li>
-                                    </ul>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -80,32 +63,21 @@ interface MenuItem {
     label: string;
 }
 
-interface Disease {
-    name: string;
-    to: { name: string };
-    label: string;
-}
-
 const route = useRoute();
 
 const menuItems = ref<MenuItem[]>([
     { name: 'request', to: { name: 'request' }, label: 'Tạo yêu cầu' },
-    // { name: 'news', to: { name: 'news' }, label: 'Tin tức' },
+    { name: 'search', to: { name: 'search' }, label: 'Tìm kiếm' },
+    { name: 'diseases', to: { name: 'diseases' }, label: 'Từ điển bệnh' },
     // { name: 'contact', to: { name: 'contact' }, label: 'Liên hệ' }
 ]);
 
-const diseases = ref<Disease[]>([
-    { name: 'vitiligo', to: { name: 'bach_bien' }, label: 'Bệnh bạch biến' },
-    { name: 'acne', to: { name: 'trungca' }, label: 'Bệnh trứng cá' },
-    { name: 'ringworm', to: { name: 'haclao' }, label: 'Bệnh hắc lào' },
-    { name: 'tinea-versicolor', to: { name: 'langben' }, label: 'Bệnh lang ben' },
-    { name: 'melasma', to: { name: 'benh_samda' }, label: 'Bệnh sạm da' },
-    { name: 'dermatitis', to: { name: 'viemda_codia' }, label: 'Bệnh viêm da cơ địa' },
-    { name: 'psoriasis', to: { name: 'benh_vaynen' }, label: 'Bệnh vảy nến' },
-    { name: 'scabies', to: { name: 'benhghe' }, label: 'Bệnh ghẻ' }
-]);
-
-const isActive = computed(() => (name: string) => route.name === name);
+const isActive = computed(() => (name: string) => {
+    if (name === 'diseases') {
+        return route.name === 'diseases' || route.name === 'disease.detail';
+    }
+    return route.name === name;
+});
 </script>
 
 <style scoped>
@@ -115,52 +87,44 @@ const isActive = computed(() => (name: string) => route.name === name);
     gap: 10px;
 }
 
-.logo-image {
-    height: 45px;
-    width: auto;
-}
-
 .logo-text {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #ffffff;
+    color: #181C32;
     margin: 0;
 }
 
-.dropdown-menu {
-    padding: 0.5rem 0;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
+.menu-link {
+    cursor: pointer;
     color: #181C32;
     transition: all 0.2s ease;
+    font-weight: 500;
+    text-decoration: none;
 }
 
-.dropdown-item:hover {
-    background-color: #F5F8FA;
+.menu-link.active {
+    color: #009EF7;
+    font-weight: 600;
+}
+
+.menu-link:hover {
     color: #009EF7;
 }
 
-.menu-link.dropdown-toggle {
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-weight: inherit;
-    color: inherit;
-}
+@media (max-width: 991.98px) {
+    #kt_header_nav_wrapper {
+        display: none;
+    }
 
-.menu-link.dropdown-toggle::after {
-    display: inline-block;
-    margin-left: 0.5em;
-    vertical-align: 0.255em;
-    content: "";
-    border-top: 0.3em solid;
-    border-right: 0.3em solid transparent;
-    border-bottom: 0;
-    border-left: 0.3em solid transparent;
+    #kt_header_nav_wrapper.active {
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 1rem;
+        box-shadow: 0 10px 30px 0 rgb(82 63 105 / 5%);
+    }
 }
 </style>

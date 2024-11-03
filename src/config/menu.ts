@@ -14,6 +14,11 @@ export const menuItems: MenuItem[] = [
         route: 'request.index',
     },
     {
+        title: 'Danh sách bệnh',
+        icon: 'bi bi-list-task',
+        route: 'diseases.index',
+    },
+    {
         title: 'Hệ thống',
         icon: 'bi bi-gear',
         children: [

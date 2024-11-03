@@ -1,22 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
 // Frontend views
-import Home from '@/views/frontend/HomeView.vue'
-import DiseaseList from '@/views/frontend/Disease/DiseaseList.vue'
-import DiseaseDetail from '@/views/frontend/Disease/BaseDetailView.vue'
+import Home from '@/views/frontend/HomeView.vue';
+import DiseaseList from '@/views/frontend/Disease/DiseaseList.vue';
+import DiseaseDetail from '@/views/frontend/Disease/BaseDetailView.vue';
 
 // Backend views
-import HomeView from '@/views/backend/HomeView.vue'
-import LoginView from '@/views/backend/Login/LoginView.vue'
-import PermissonView from '@/views/backend/Permission/PermissonView.vue'
-import RoleView from '@/views/backend/Role/RoleView.vue'
-import UserView from '@/views/backend/User/UserView.vue'
-import UserCreateView from '@/views/backend/User/UserCreateView.vue'
-import UserEditView from '@/views/backend/User/UserEditView.vue'
-import RequestView from '@/views/backend/Request/RequestView.vue'
-import RequestCreateView from '@/views/backend/Request/RequestCreateView.vue'
-import RequestEditView from '@/views/backend/Request/RequestEditView.vue'
+import HomeView from '@/views/backend/HomeView.vue';
+import LoginView from '@/views/backend/Login/LoginView.vue';
+import PermissonView from '@/views/backend/Permission/PermissonView.vue';
+import RoleView from '@/views/backend/Role/RoleView.vue';
+import UserView from '@/views/backend/User/UserView.vue';
+import UserCreateView from '@/views/backend/User/UserCreateView.vue';
+import UserEditView from '@/views/backend/User/UserEditView.vue';
+import RequestView from '@/views/backend/Request/RequestView.vue';
+import RequestCreateView from '@/views/backend/Request/RequestCreateView.vue';
+import RequestEditView from '@/views/backend/Request/RequestEditView.vue';
+import DiseaseView from '@/views/backend/Diseases/DiseasesView.vue';
+import DiseaseCreateView from '@/views/backend/Diseases/DiseasesCreateView.vue';
+import DiseaseEditView from '@/views/backend/Diseases/DiseasesEditView.vue';
 
 const routes = [
   {
@@ -28,184 +31,43 @@ const routes = [
         component: () => import('@/views/frontend/Request/RequestView.vue'),
         meta: { hideFooter: true }
       },
-      // Routes cho từ điển bệnh
+      {
+        path: 'search',
+        name: 'search',
+        component: () => import('@/views/frontend/Patient/PatientSearchView.vue'),
+        meta: { hideFooter: true }
+      },
+      // Routes cho từ điển bệnh frontend
       {
         path: 'diseases',
-        name: 'diseases',
-        component: DiseaseList,
-        meta: { breadcrumb: 'Từ điển bệnh' }
-      },
-      {
-        path: 'disease',
         children: [
           {
-            path: 'bach-bien',
-            name: 'bach_bien',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh bạch biến',
-              diseaseId: 1
+            path: '',
+            name: 'diseases',
+            component: DiseaseList,
+            meta: { 
+              breadcrumb: 'Từ điển bệnh',
+              title: 'Danh sách bệnh da liễu'
             }
           },
           {
-            path: 'trung-ca',
-            name: 'trungca',
+            path: ':id',
+            name: 'disease.detail',
             component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh trứng cá',
-              diseaseId: 2
-            }
-          },
-          {
-            path: 'hac-lao',
-            name: 'haclao',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh hắc lào',
-              diseaseId: 3
-            }
-          },
-          {
-            path: 'lang-ben',
-            name: 'langben',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh lang ben',
-              diseaseId: 4
-            }
-          },
-          {
-            path: 'sam-da',
-            name: 'benh_samda',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh sạm da',
-              diseaseId: 5
-            }
-          },
-          {
-            path: 'viem-da-co-dia',
-            name: 'viemda_codia',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh viêm da cơ địa',
-              diseaseId: 6
-            }
-          },
-          {
-            path: 'vay-nen',
-            name: 'benh_vaynen',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh vảy nến',
-              diseaseId: 7
-            }
-          },
-          {
-            path: 'ghe',
-            name: 'benhghe',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh ghẻ',
-              diseaseId: 8
-            }
-          },
-          {
-            path: 'choc-lo',
-            name: 'choclo',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh chốc lở',
-              diseaseId: 9
-            }
-          },
-          {
-            path: 'ram-ma',
-            name: 'benh_ramma',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh rám má',
-              diseaseId: 10
-            }
-          },
-          {
-            path: 'nhot',
-            name: 'benhnhot',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh nhọt',
-              diseaseId: 11
-            }
-          },
-          {
-            path: 'vien-nang-long',
-            name: 'viennanglong',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh viêm nang lông',
-              diseaseId: 12
-            }
-          },
-          {
-            path: 'lao-da',
-            name: 'benhlao',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh lao da',
-              diseaseId: 13
-            }
-          },
-          {
-            path: 'phong',
-            name: 'benhphong',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh phong',
-              diseaseId: 14
-            }
-          },
-          {
-            path: 'nam-toc',
-            name: 'benhnamtoc',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh nấm tóc',
-              diseaseId: 15
-            }
-          },
-          {
-            path: 'nam-mong',
-            name: 'benhnammong',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh nấm móng',
-              diseaseId: 16
-            }
-          },
-          {
-            path: 'zona-than-kinh',
-            name: 'zola_thanhkinh',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh Zona thần kinh',
-              diseaseId: 17
-            }
-          },
-          {
-            path: 'lupus-ban-do',
-            name: 'benh_lopus_bando',
-            component: DiseaseDetail,
-            meta: {
-              breadcrumb: 'Bệnh Lupus ban đỏ',
-              diseaseId: 18
-            }
+            meta: { 
+              breadcrumb: 'Chi tiết bệnh',
+              title: 'Thông tin chi tiết bệnh'
+            },
+            // Tùy chọn: Thêm props để component có thể nhận params
+            props: true
           }
         ]
-      }
+      },
     ],
   },
   {
     path: '/admin',
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
@@ -213,6 +75,7 @@ const routes = [
         component: HomeView,
         meta: { breadcrumb: 'Trang chủ' }
       },
+      // Routes quản lý người dùng
       {
         path: 'user',
         children: [
@@ -226,16 +89,17 @@ const routes = [
             path: 'create',
             name: 'user.create',
             component: UserCreateView,
-            meta: { breadcrumb: 'Thêm' }
+            meta: { breadcrumb: 'Thêm người dùng' }
           },
           {
             path: ':id',
             name: 'user.edit',
             component: UserEditView,
-            meta: { breadcrumb: 'Sửa' }
+            meta: { breadcrumb: 'Sửa người dùng' }
           },
         ]
       },
+      // Routes quản lý phân quyền
       {
         path: 'permission',
         name: 'permission',
@@ -248,6 +112,7 @@ const routes = [
         component: RoleView,
         meta: { breadcrumb: 'Quản trị vai trò' }
       },
+      // Routes quản lý yêu cầu
       {
         path: 'request',
         children: [
@@ -271,13 +136,40 @@ const routes = [
           },
         ]
       },
-    ],
-    meta: { requiresAuth: true }
+      // Routes quản lý bệnh (admin)
+      {
+        path: 'diseases',
+        children: [
+          {
+            path: '',
+            name: 'diseases.index',
+            component: DiseaseView,
+            meta: { breadcrumb: 'Quản lý bệnh' }
+          },
+          {
+            path: 'create',
+            name: 'diseases.create',
+            component: DiseaseCreateView,
+            meta: { breadcrumb: 'Thêm bệnh' }
+          },
+          {
+            path: ':id',
+            name: 'diseases.edit',
+            component: DiseaseEditView,
+            meta: { breadcrumb: 'Sửa bệnh' }
+          },
+        ]
+      },
+    ]
   },
   {
     path: '/admin/login',
     name: 'admin.login',
-    component: LoginView
+    component: LoginView,
+    meta: { 
+      title: 'Đăng nhập hệ thống',
+      guest: true 
+    }
   },
 ];
 
@@ -286,12 +178,19 @@ const router = createRouter({
   routes,
 });
 
+// Navigation guards
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
 
+  // Cập nhật title trang
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - Hệ thống quản lý bệnh da liễu`;
+  }
+
+  // Kiểm tra authentication
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
     next({ name: 'admin.login' });
-  } else if (to.name === 'admin.login' && authStore.isLoggedIn) {
+  } else if (to.meta.guest && authStore.isLoggedIn) {
     next({ name: 'admin.home' });
   } else {
     next();
