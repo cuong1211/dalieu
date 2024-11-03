@@ -77,6 +77,12 @@
             </form>
             <div v-if="diagnosisResult" class="diagnosis-section">
                 <FormCard title="Kết quả chẩn đoán">
+                    <div class="action-buttons mb-4">
+                        <button @click="handlePrint" class="print-button">
+                            <i class="bi bi-printer"></i>
+                            In kết quả
+                        </button>
+                    </div>
                     <div class="diagnosis-content">
                         <!-- Kết quả chẩn đoán -->
                         <div class="result-box mb-4">
@@ -111,6 +117,9 @@
                         </div>
                     </div>
                 </FormCard>
+                <div v-if="diagnosisResult" class="d-none">
+                    <DiagnosisPrintForm ref="printFormRef" :diagnosis-result="diagnosisResult" />
+                </div>
             </div>
         </div>
     </div>
@@ -131,6 +140,7 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { mockApiService } from '@/stores/mockApi';
 import type { RequestResponse, DiseaseInfo } from '@/types/request';
+import DiagnosisPrintForm from './DiagnosisPrintForm.vue';
 const isProcessing = ref(false);
 const diagnosisResult = ref<RequestResponse | null>(null);
 
@@ -138,7 +148,7 @@ const router = useRouter();
 const toast = useToast();
 const requestStore = useRequestStore();
 const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null);
-
+const printFormRef = ref<InstanceType<typeof DiagnosisPrintForm> | null>(null);
 
 const initialFormData: DermatologyRequestForm = {
     id: 0,
@@ -184,36 +194,76 @@ const relatedDiseases = computed(() => {
 });
 
 const handleSubmit = async () => {
-    if (form.value.id_number.length !== 12) {
-        errors.value.id_number = 'Số CCCD phải đủ 12 số';
-        return;
+    // if (form.value.id_number.length !== 12) {
+    //     errors.value.id_number = 'Số CCCD phải đủ 12 số';
+    //     return;
+    // }
+    try {
+        isProcessing.value = true;
+
+        // Gọi mock API service
+        const response = await mockApiService.submitRequest(form.value);
+
+        // Lưu kết quả
+        diagnosisResult.value = response;
+
+        toast.success(response.message);
+    } catch (error) {
+        console.error('Lỗi khi tạo yêu cầu:', error);
+        toast.error('Đăng ký khám thất bại. Vui lòng thử lại.');
+    } finally {
+        isProcessing.value = false;
     }
+    // if (validateForm()) {
 
-    if (validateForm()) {
-        try {
-            isProcessing.value = true;
-
-            // Gọi mock API service
-            const response = await mockApiService.submitRequest(form.value);
-
-            // Lưu kết quả
-            diagnosisResult.value = response;
-
-            toast.success(response.message);
-        } catch (error) {
-            console.error('Lỗi khi tạo yêu cầu:', error);
-            toast.error('Đăng ký khám thất bại. Vui lòng thử lại.');
-        } finally {
-            isProcessing.value = false;
-        }
-    }
+    // }
 };
 
 const handleImageChanged = (file: File | null) => {
     form.value.image = file;
     handleInput('image', file);
 };
+const handlePrint = () => {
+    const content = printFormRef.value?.$el.outerHTML;
 
+    if (!content) return;
+
+    // Tạo cửa sổ in mới
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    // Thiết lập nội dung
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Kết quả chẩn đoán</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                @page {
+                    size: A4;
+                    margin: 2cm;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                }
+            </style>
+        </head>
+        <body>
+            ${content}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    // In sau khi tất cả tài nguyên đã load
+    printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+        // printWindow.close();
+    };
+};
 </script>
 
 <style scoped>
@@ -431,5 +481,68 @@ const handleImageChanged = (file: File | null) => {
 .submit-button:disabled {
     background-color: #94a3b8;
     cursor: not-allowed;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.print-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.print-button:hover {
+    background-color: #334155;
+}
+
+.print-button i {
+    font-size: 1.1rem;
+}
+
+/* Ẩn các phần không cần thiết khi in */
+@media print {
+    .paper-container {
+        padding: 0;
+    }
+
+    .paper-content {
+        box-shadow: none;
+    }
+
+    .action-buttons,
+    .form-actions,
+    .loading-overlay {
+        display: none !important;
+    }
+
+    .disease-card {
+        border: 1px solid #e2e8f0 !important;
+        break-inside: avoid;
+    }
+
+    /* Đảm bảo links vẫn hiển thị màu đúng khi in */
+    a {
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    /* Đảm bảo background và màu sắc hiển thị đúng khi in */
+    .result-box,
+    .diseases-box {
+        background-color: white !important;
+        border: 1px solid #e2e8f0;
+    }
 }
 </style>
