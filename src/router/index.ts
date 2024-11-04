@@ -49,13 +49,15 @@ const routes = [
             path: '',
             name: 'diseases',
             component: DiseaseList,
+            meta: { hideFooter: true }
           },
           {
             path: ':id',
             name: 'disease.detail',
             component: DiseaseDetail,
             // Tùy chọn: Thêm props để component có thể nhận params
-            props: true
+            props: true,
+            meta: { hideFooter: true }
           }
         ]
       },

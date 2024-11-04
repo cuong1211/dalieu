@@ -1,5 +1,5 @@
 <template>
-    <div class="container my-8">
+    <div class="container my-8 w-100">
         <div class="row justify-content-center">
             <div class="col-lg-12">
                 <!-- Search Card -->
@@ -69,69 +69,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body py-0">
-                                <div class="table-responsive">
-                                    <table
-                                        class="table table-hover table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
-                                        <thead>
-                                            <tr class="fw-bold text-muted bg-light">
-                                                <th class="ps-4 min-w-25px">#</th>
-                                                <th class="min-w-150px">Họ tên</th>
-                                                <th class="min-w-125px">CMND/CCCD</th>
-                                                <th class="min-w-50px">Tuổi</th>
-                                                <th class="min-w-100px">Giới tính</th>
-                                                <th class="min-w-125px">Điện thoại</th>
-                                                <th class="min-w-200px">Triệu chứng</th>
-                                                <th class="min-w-200px">Kết quả</th>
-                                                <th class="min-w-150px">Ngày khám</th>
-                                                <th class="min-w-100px text-end pe-4">Thao tác</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="(patient, index) in patients" :key="patient.id">
-                                                <td class="ps-4">
-                                                    <span class="text-dark fw-semibold">{{ index + 1 }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="text-dark fw-semibold">{{ patient.name }}</span>
-                                                </td>
-                                                <td>
-                                                    <span>{{ patient.identification }}</span>
-                                                </td>
-                                                <td>{{ patient.age }}</td>
-                                                <td>
-                                                    <span
-                                                        :class="patient.gender === 'male' ? 'badge-light-primary' : 'badge-light-success'"
-                                                        class="badge">
-                                                        {{ patient.gender === 'male' ? 'Nam' : 'Nữ' }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="text-primary">{{ patient.phone }}</span>
-                                                </td>
-                                                <td>
-                                                    <span>{{ truncateText(patient.symptom, 50) }}</span>
-                                                </td>
-                                                <td>
-                                                    <span>{{ truncateText(patient.result, 50) }}</span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center text-gray-600">
-                                                        <i class="bi bi-calendar-event me-2"></i>
-                                                        {{ formatDate(patient.created_at) }}
-                                                    </div>
-                                                </td>
-                                                <td class="text-end pe-4">
-                                                    <button class="btn btn-icon btn-light-primary btn-sm"
-                                                        @click="showDetails(patient.id)">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+
                         </div>
 
                         <div v-else class="alert alert-info d-flex align-items-center p-5">
@@ -142,7 +80,69 @@
                         </div>
                     </template>
                 </template>
+
             </div>
+
+        </div>
+    </div>
+    <div v-if="patients.length > 0" class="card-body py-0">
+        <div class="table-responsive w-100">
+            <table class="table table-hover table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                <thead>
+                    <tr class="fw-bold text-muted bg-light">
+                        <th class="ps-4 min-w-25px">#</th>
+                        <th class="min-w-150px">Họ tên</th>
+                        <th class="min-w-125px">CMND/CCCD</th>
+                        <th class="min-w-50px">Tuổi</th>
+                        <th class="min-w-100px">Giới tính</th>
+                        <th class="min-w-125px">Điện thoại</th>
+                        <th class="min-w-200px">Triệu chứng</th>
+                        <th class="min-w-200px">Kết quả</th>
+                        <th class="min-w-150px">Ngày khám</th>
+                        <th class="min-w-100px text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(patient, index) in patients" :key="patient.id">
+                        <td class="ps-4">
+                            <span class="text-dark fw-semibold">{{ index + 1 }}</span>
+                        </td>
+                        <td>
+                            <span class="text-dark fw-semibold">{{ patient.name }}</span>
+                        </td>
+                        <td>
+                            <span>{{ patient.identification }}</span>
+                        </td>
+                        <td>{{ patient.age }}</td>
+                        <td>
+                            <span :class="patient.gender === 'male' ? 'badge-light-primary' : 'badge-light-success'"
+                                class="badge">
+                                {{ patient.gender === 'male' ? 'Nam' : 'Nữ' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-primary">{{ patient.phone }}</span>
+                        </td>
+                        <td>
+                            <span>{{ truncateText(patient.symptom, 50) }}</span>
+                        </td>
+                        <td>
+                            <span>{{ truncateText(patient.result, 50) }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center text-gray-600">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                {{ formatDate(patient.created_at) }}
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-icon btn-light-primary btn-sm" @click="showDetails(patient.id)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     <DetailModal v-if="showModal" :patient-id="selectedPatientId" @close="closeModal" />

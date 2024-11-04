@@ -61,18 +61,34 @@
                     </div>
                 </FormCard>
 
-                <!-- Submit button -->
-                <div class="form-actions" v-if="!diagnosisResult">
-                    <button type="submit" class="submit-button" :disabled="isProcessing">
-                        <template v-if="isProcessing">
-                            <i class="bi bi-arrow-repeat loading-icon"></i>
-                            Đang xử lý...
-                        </template>
-                        <template v-else>
-                            <i class="bi bi-send"></i>
-                            Gửi yêu cầu
-                        </template>
-                    </button>
+                <LoadingOverlay :show="isProcessing" title="Đang xử lý yêu cầu"
+                    description="Hệ thống đang phân tích triệu chứng của bạn..." />
+
+                <!-- Cập nhật nút submit -->
+                <div class="form-actions">
+                    <div class="submit-wrapper">
+                        <button type="submit" class="submit-button" :disabled="isProcessing || isSubmitDisabled" :class="{
+                            'is-processing': isProcessing,
+                            'is-disabled': isSubmitDisabled
+                        }">
+                            <template v-if="isProcessing">
+                                <i class="bi bi-arrow-repeat loading-icon"></i>
+                                Đang xử lý...
+                            </template>
+                            <template v-else-if="isSubmitDisabled">
+                                <i class="bi bi-clock"></i>
+                                Vui lòng đợi
+                            </template>
+                            <template v-else>
+                                <i class="bi bi-send"></i>
+                                Gửi yêu cầu
+                            </template>
+                        </button>
+                        <!-- Thông báo cooldown -->
+                        <div v-if="isSubmitDisabled" class="cooldown-message">
+                            Bạn có thể gửi yêu cầu mới sau {{ cooldownTimer }} giây
+                        </div>
+                    </div>
                 </div>
             </form>
             <div v-if="diagnosisResult" class="diagnosis-section">
@@ -156,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted, nextTick } from 'vue';
 import type { DermatologyRequestForm } from '@/types/request';
 import ImageUploader from '@/components/ImageUploader/ImageUploader.vue';
 import FormCard from '@/components/Form/FormCard.vue';
@@ -168,6 +184,7 @@ import { useToast } from 'vue-toastification';
 import { useDiagnosisStore } from '@/stores/diagnosisStore';
 import type { RequestResponse, } from '@/types/request';
 import DiagnosisPrintForm from './DiagnosisPrintForm.vue';
+import LoadingOverlay from './LoadingOverlay.vue';
 const isProcessing = ref(false);
 const diagnosisResult = ref<RequestResponse | null>(null);
 
@@ -196,20 +213,50 @@ const genderOptions = [
     { value: 'Khác', label: 'Khác' }
 ];
 
-const { errors, validateForm, handleInput, handleIdentificationInput  } = useRequestValidation(form);
+const { errors, validateForm, handleInput, handleIdentificationInput } = useRequestValidation(form);
 
 // Xử lý validate số CCCD
 const handleIdNumberChange = (value: string | number) => {
     handleIdentificationInput(value);
 };
 
+const COOLDOWN_TIME = 2; // Thời gian chờ (giây)
+const isSubmitDisabled = ref(false);
+const cooldownTimer = ref(COOLDOWN_TIME);
+let timerInterval: NodeJS.Timer | null = null;
+
+// Hàm đếm ngược
+const startCooldownTimer = () => {
+    isSubmitDisabled.value = true;
+    cooldownTimer.value = COOLDOWN_TIME;
+
+    timerInterval = setInterval(() => {
+        cooldownTimer.value--;
+        if (cooldownTimer.value <= 0) {
+            clearInterval(timerInterval as NodeJS.Timer);
+            isSubmitDisabled.value = false;
+            cooldownTimer.value = COOLDOWN_TIME;
+        }
+    }, 1000);
+};
+
+// Xóa interval khi component unmount
+onUnmounted(() => {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+});
+
+// Cập nhật hàm handleSubmit
 const handleSubmit = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
+
     try {
         isProcessing.value = true;
         const response = await diagnosisStore.submitDiagnosis(form.value);
         diagnosisResult.value = response;
         toast.success(response.message);
+        startCooldownTimer(); // Bắt đầu đếm ngược sau khi có kết quả
     } catch (error) {
         console.error(error);
         toast.error('Gửi yêu cầu thất bại. Vui lòng thử lại.');
@@ -423,14 +470,53 @@ const handlePrint = () => {
 }
 
 @media print {
-    .disease-item {
-        background-color: white !important;
-        border-color: #ddd;
-    }
-    
-    .treatment-content {
-        page-break-inside: avoid;
-    }
+  /* Đảm bảo mỗi phần chính bắt đầu trên trang mới */
+  .diagnosis-section {
+    page-break-before: always;
+  }
+
+  /* Ngăn các phần bị cắt giữa các trang */
+  .result-box,
+  .diseases-box,
+  .disease-item {
+    page-break-inside: avoid;
+  }
+
+  /* Reset các margin và padding */
+  .paper-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .paper-content {
+    margin: 0 !important;
+    padding: 1cm !important;
+    box-shadow: none !important;
+  }
+
+  /* Đảm bảo nội dung luôn hiển thị đầy đủ */
+  * {
+    overflow: visible !important;
+  }
+
+  /* Điều chỉnh khoảng cách giữa các phần */
+  .section-box {
+    margin-bottom: 20px !important;
+  }
+
+  /* Fix vấn đề với flexbox khi in */
+  .form-header,
+  .disease-header {
+    display: block !important;
+  }
+
+  /* Ẩn các phần không cần thiết khi in */
+  .action-buttons,
+  .form-actions,
+  .submit-wrapper,
+  .cooldown-message {
+    display: none !important;
+  }
 }
             </style>
         </head>
@@ -442,12 +528,25 @@ const handlePrint = () => {
 
 </html>
 `);
-
+    const prepareForPrint = () => {
+        // Đảm bảo tất cả nội dung đã load
+        nextTick(() => {
+            // Tính toán và điều chỉnh chiều cao các phần
+            const sections = document.querySelectorAll('.section-box');
+            sections.forEach(section => {
+                const height = (section as HTMLElement).offsetHeight;
+                if (height > 900) { // Khoảng 80% chiều cao A4
+                    (section as HTMLElement).style.pageBreakAfter = 'always';
+                }
+            });
+        });
+    };
     printWindow.document.close();
 
     // In sau khi tất cả tài nguyên đã load
     printWindow.onload = () => {
         printWindow.focus();
+        prepareForPrint();
         printWindow.print();
         // printWindow.close();
     };
@@ -865,5 +964,80 @@ const handlePrint = () => {
     .disease-header {
         border-bottom-color: #ddd;
     }
+}
+
+.submit-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-button:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.submit-button i {
+    transition: all 0.3s ease;
+}
+
+.submit-button i.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.submit-button i.show {
+    opacity: 1;
+}
+
+.submit-button i.spin {
+    animation: spin 1s linear infinite;
+}
+
+.submit-button.is-processing {
+    background-color: #4b5563;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Hiệu ứng ripple khi click */
+.submit-button::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform .5s, opacity 1s;
+}
+
+.submit-button:active::after {
+    transform: scale(0, 0);
+    opacity: .3;
+    transition: 0s;
+}
+
+/* Thêm hiệu ứng hover */
+.submit-button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.3);
+}
+
+.submit-button:not(:disabled):active {
+    transform: translateY(0px);
 }
 </style>
