@@ -1,10 +1,30 @@
 <template>
     <div class="print-form">
-        <!-- Action buttons - Chỉ hiển thị khi không phải chế độ in -->
-
         <div class="print-container">
-            <!-- Patient Info -->
+            <!-- Header with Logo -->
+            <div class="form-header">
+                <div class="header-left">
+                    <img src="/media/logos/logo.png" alt="Logo" class="logo" style="width: 100px;" />
+                    <div class="hospital-info">
+                        <h3 class="hospital-name">DA LIỄU HÀ VINH</h3>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="document-info">
+                        <p class="document-id">Mã phiếu: {{ formatRefNumber(data.id) }}</p>
+                        <p class="document-date">Ngày khám: {{ formatDate(data.created_at) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="form-title">
+                <h2>PHIẾU KẾT QUẢ CHẨN ĐOÁN</h2>
+            </div>
+
+            <!-- Content Sections -->
             <div class="content-section">
+                <!-- Patient Info -->
                 <div class="section-box patient-info">
                     <h4 class="section-title">
                         <i class="bi bi-person-vcard me-2"></i>
@@ -34,7 +54,7 @@
                     </div>
                 </div>
 
-                <!-- Symptoms with Image -->
+                <!-- Symptoms -->
                 <div class="section-box symptoms-section">
                     <h4 class="section-title">
                         <i class="bi bi-clipboard2-pulse me-2"></i>
@@ -46,7 +66,7 @@
                         <div v-if="data.image" class="symptom-image-section">
                             <h5 class="image-title">Hình ảnh triệu chứng:</h5>
                             <div class="image-container">
-                                <img :src="`/uploads/${data.image}`" alt="Triệu chứng" class="symptom-image">
+                                <img :src="getImageUrl(data.image)" alt="Triệu chứng" class="symptom-image">
                             </div>
                         </div>
                     </div>
@@ -61,16 +81,52 @@
                     <div class="diagnosis-content">
                         <p class="diagnosis-text">{{ data.result }}</p>
 
-                        <div class="related-diseases">
-                            <h5 class="sub-title">Bệnh liên quan:</h5>
-                            <div class="diseases-grid">
+                        <!-- Bệnh chính -->
+                        <div v-if="mainDiseases.length" class="diseases-section">
+                            <h5 class="sub-title">
+                                <i class="bi bi-clipboard-heart me-2"></i>
+                                Bệnh chính:
+                            </h5>
+                            <div class="diseases-list">
+                                <div v-for="disease in mainDiseases" :key="disease.id" class="disease-item">
+                                    <h6 class="disease-name">
+                                        <i class="bi bi-journal-medical me-2"></i>
+                                        {{ disease.name }}
+                                    </h6>
+                                    <div v-if="disease.treatment" class="treatment-content" v-html="disease.treatment">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bệnh liên quan -->
+                        <div v-if="relatedDiseases.length" class="diseases-section">
+                            <h5 class="sub-title">
+                                <i class="bi bi-link-45deg me-2"></i>
+                                Bệnh liên quan:
+                            </h5>
+                            <div class="diseases-list">
                                 <div v-for="disease in relatedDiseases" :key="disease.id" class="disease-item">
-                                    <i class="bi bi-journal-medical me-2"></i>
-                                    {{ disease.name }}
+                                    <h6 class="disease-name">
+                                        <i class="bi bi-journal-medical me-2"></i>
+                                        {{ disease.name }}
+                                    </h6>
+                                    <div v-if="disease.treatment" class="treatment-content" v-html="disease.treatment">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="form-footer">
+                <div class="footer-text">
+                    <p class="note">Lưu ý: Trên đây là hệ thống chẩn đoán và định hướng điều trị cho bạn từ những thông
+                        tin mô tả và hình ảnh mà bạn cung cấp. .</p>
+                    <p class="recommend">Nhằm đảm bảo chính xác hơn cho sức khoẻ làn da của bạn, hãy liên hệ với bác sỹ
+                        chuyên khoa da liễu gần nhất để được tư vấn và điều trị cụ thể. .</p>
                 </div>
             </div>
         </div>
@@ -78,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import type { RequestResponse } from '@/types/request';
 
 const props = defineProps<{
@@ -87,18 +143,36 @@ const props = defineProps<{
 }>();
 
 const data = computed(() => props.diagnosisResult.data);
-const relatedDiseases = computed(() => {
-    if (!data.value.info.sub) return [];
-    return data.value.info.sub.flat();
+
+const mainDiseases = computed(() => {
+    if (!data.value.info?.main) return [];
+    return data.value.info.main.flat();
 });
 
-// Helper functions
-const formatDate = (date: Date): string => {
-    return new Intl.DateTimeFormat('vi-VN', {
+const relatedDiseases = computed(() => {
+    if (!data.value.info?.sub) return [];
+    return data.value.info.sub.flat();
+});
+const formatRefNumber = (id: number): string => {
+    return `CD${String(id).padStart(6, '0')}`;
+};
+
+const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+const formatCurrentDate = (): string => {
+    return new Date().toLocaleDateString('vi-VN', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
-    }).format(date);
+    });
 };
 
 const formatGender = (gender: string): string => {
@@ -110,172 +184,13 @@ const formatGender = (gender: string): string => {
     return genderMap[gender] || gender;
 };
 
+const getImageUrl = (fileId: string): string => {
+    return `${import.meta.env.VITE_API_URL}/files/${fileId}`;
+};
+
 const handlePrint = () => {
     window.print();
 };
 </script>
 
-<style scoped>
-.print-form {
-    background: white;
-    padding: 20px;
-}
-
-.action-buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-}
-
-.print-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background-color: #0ea5e9;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.print-button:hover {
-    background-color: #0284c7;
-}
-
-.content-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.section-box {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.5rem;
-    background-color: #fff;
-}
-
-.section-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #0f172a;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    text-transform: uppercase;
-}
-
-.info-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.info-row {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    align-items: baseline;
-}
-
-.info-label {
-    font-weight: 500;
-    color: #64748b;
-}
-
-.info-value {
-    color: #0f172a;
-}
-
-.symptoms-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.symptom-text {
-    color: #334155;
-    line-height: 1.6;
-}
-
-.symptom-image-section {
-    margin-top: 1rem;
-}
-
-.image-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-    margin-bottom: 1rem;
-}
-
-.image-container {
-    max-width: 300px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.symptom-image {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-.diagnosis-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.diagnosis-text {
-    color: #334155;
-    line-height: 1.6;
-    margin: 0;
-}
-
-.sub-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 1rem;
-}
-
-.diseases-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.disease-item {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    background-color: #f8fafc;
-    border-radius: 6px;
-    color: #0f172a;
-    font-size: 14px;
-}
-
-@media print {
-    .print-form {
-        padding: 0;
-    }
-
-    .action-buttons {
-        display: none;
-    }
-
-    .section-box {
-        break-inside: avoid;
-        border: none;
-        padding: 1rem 0;
-    }
-
-    .image-container {
-        break-inside: avoid;
-        max-width: 200px;
-    }
-}
-</style>
+```

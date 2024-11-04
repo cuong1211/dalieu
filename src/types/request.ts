@@ -2,9 +2,9 @@
 export interface DermatologyRequestForm {
   id: number;
   name: string;
-  birthday: string;
+  age: string;
   gender: string;
-  id_number: string;
+  identification: string;
   phone: string;
   email: string;
   address: string;
@@ -33,5 +33,18 @@ export interface RequestResponse {
     result: string;
     image: string;
   };
+}
+export interface Request {
+  id: number;
+  name: string;
+  age: string;
+  gender: string;
+  phone: string;
+  address: string;
+  symptom: string;
+  result: string | null;
+  image: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 // Sửa lại initialFormData

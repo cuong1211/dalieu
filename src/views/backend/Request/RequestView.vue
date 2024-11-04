@@ -4,11 +4,7 @@
             <div class="card-title">
                 <SearchBar @search="handleSearch" />
             </div>
-            <div class="card-toolbar">
-                <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
-                    <AddButton @add="handleAdd" />
-                </div>
-            </div>
+            
         </div>
         <div class="card-body pt-0">
             <div v-if="loading" class="d-flex justify-content-center align-items-center" style="height: 400px;">

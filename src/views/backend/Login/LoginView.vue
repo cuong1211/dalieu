@@ -69,7 +69,7 @@ const onSubmitLogin = handleSubmit(async (values: LoginCredentials) => {
                 <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
                     <!--begin::Logo-->
                     <a href="/" class="mb-12">
-                        <img alt="Logo" src="/media/logos/logo-1-dark.svg" class="h-40px" />
+                        <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img w-60px"/>
                     </a>
                     <!--end::Logo-->
                     <!--begin::Wrapper-->
@@ -79,7 +79,7 @@ const onSubmitLogin = handleSubmit(async (values: LoginCredentials) => {
                             <!--begin::Heading-->
                             <div class="text-center mb-10">
                                 <!--begin::Title-->
-                                <h1 class="text-dark mb-3">Đăng nhập <br> Hệ thống cứu hộ</h1>
+                                <h1 class="text-dark mb-3">Đăng nhập <br> Da liễu Hà Vinh</h1>
                                 
                                 <!--end::Title-->
                             </div>

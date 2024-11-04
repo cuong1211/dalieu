@@ -9,6 +9,7 @@
                         <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img" />
                         <div class="logo-text">
                             <div class="text-primary">DA LIỄU HÀ VINH</div>
+                            <div class="text-secondary">Trường THPT số 1 huyện Bảo Thắng</div>
                         </div>
                     </RouterLink>
 
@@ -92,8 +93,8 @@ const isActive = (name: string): boolean => {
 }
 
 .logo-text .text-secondary {
-    font-size: 1rem;
-    color: #009ef7;
+    font-size: 1.3rem;
+    color: #000000 !important;
 }
 
 .btn-search {

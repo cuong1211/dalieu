@@ -15,8 +15,6 @@ import UserView from '@/views/backend/User/UserView.vue';
 import UserCreateView from '@/views/backend/User/UserCreateView.vue';
 import UserEditView from '@/views/backend/User/UserEditView.vue';
 import RequestView from '@/views/backend/Request/RequestView.vue';
-import RequestCreateView from '@/views/backend/Request/RequestCreateView.vue';
-import RequestEditView from '@/views/backend/Request/RequestEditView.vue';
 import DiseaseView from '@/views/backend/Diseases/DiseasesView.vue';
 import DiseaseCreateView from '@/views/backend/Diseases/DiseasesCreateView.vue';
 import DiseaseEditView from '@/views/backend/Diseases/DiseasesEditView.vue';
@@ -118,20 +116,14 @@ const routes = [
             path: '',
             name: 'request.index',
             component: RequestView,
-            meta: { breadcrumb: 'Quản trị yêu cầu' }
-          },
-          {
-            path: 'create',
-            name: 'request.create',
-            component: RequestCreateView,
-            meta: { breadcrumb: 'Thêm yêu cầu' }
+            meta: { breadcrumb: 'Danh sách yêu cầu' }
           },
           {
             path: ':id',
-            name: 'request.edit',
-            component: RequestEditView,
-            meta: { breadcrumb: 'Sửa yêu cầu' }
-          },
+            name: 'request.detail',
+            component: () => import('@/views/backend/Request/RequestDetailView.vue'),
+            meta: { breadcrumb: 'Chi tiết yêu cầu' }
+          }
         ]
       },
       // Routes quản lý bệnh (admin)

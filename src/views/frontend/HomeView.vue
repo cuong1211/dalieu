@@ -43,38 +43,15 @@
         </section>
 
         <!-- Giới thiệu các trung tâm -->
-        <section class="section centers-intro bg-light">
-            <div class="container">
-                <h2 class="section-title">Mạng Lưới Y Tế Liên Kết</h2>
-                <div class="row g-4">
-                    <div v-for="center in medicalCenters" :key="center.id" class="col-md-6 col-lg-4">
-                        <div class="center-card">
-                            <img :src="center.image" :alt="center.name" class="center-image">
-                            <div class="center-content">
-                                <h3 class="center-title">{{ center.name }}</h3>
-                                <p class="center-address">
-                                    <i class="bi bi-geo-alt"></i>
-                                    {{ center.address }}
-                                </p>
-                                <p class="center-description">{{ center.description }}</p>
-                                <!-- <RouterLink :to="{ name: 'center.detail', params: { id: center.id } }"
-                                    class="btn btn-outline-primary">
-                                    Xem chi tiết
-                                </RouterLink> -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    
 
         <!-- Giới thiệu chuyên gia -->
         <section class="section experts-intro">
             <div class="container">
                 <h2 class="section-title">Đội Ngũ Chuyên Gia</h2>
                 <div class="row g-4">
-                    <div v-for="expert in experts" :key="expert.id" class="col-md-6 col-lg-3">
-                        <div class="expert-card">
+                    <div v-for="expert in experts" :key="expert.id" class="col-md-6 col-lg-3 ">
+                        <div class="expert-card h-100">
                             <div class="expert-image">
                                 <img :src="expert.image" :alt="expert.name">
                             </div>
@@ -156,9 +133,33 @@ const medicalCenters = ref<MedicalCenter[]>([
 const experts = ref<Expert[]>([
     {
         id: 1,
-        name: 'PGS.TS Nguyễn Văn A',
-        image: '/media/experts/expert-1.jpg',
+        name: 'PGS.TS Phạm Thị Lan',
+        image: '/media/images/doctor/1.jpg',
         position: 'Trưởng khoa Da liễu',
+        qualification: 'Phó giáo sư Y khoa',
+        specialties: ['Da liễu', 'Thẩm mỹ da']
+    },
+    {
+        id: 2,
+        name: 'PGS.TS Nguyễn Văn Thường',
+        image: '/media/images/doctor/2.jpg',
+        position: 'Nguyên giám độc bệnh viện Da liễu Trung ương',
+        qualification: 'Phó giáo sư Y khoa',
+        specialties: ['Da liễu', 'Thẩm mỹ da']
+    },
+    {
+        id: 3,
+        name: 'TS.BS Đinh Hữu Nghị',
+        image: '/media/images/doctor/3.jpg',
+        position: 'Trưởng khoa phẫu thuật bệnh',
+        qualification: 'Tiến sĩ Y khoa',
+        specialties: ['Da liễu', 'Thẩm mỹ da']
+    },
+    {
+        id: 4,
+        name: 'TS.BS Phạm Thị Minh Phương',
+        image: '/media/images/doctor/4.jpg',
+        position: 'Trưởng khoa Khám bệnh',
         qualification: 'Tiến sĩ Y khoa',
         specialties: ['Da liễu', 'Thẩm mỹ da']
     },

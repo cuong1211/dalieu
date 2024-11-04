@@ -1,28 +1,27 @@
-export interface Patient {
+// types/patient.ts
+export interface Disease {
     id: number;
     name: string;
-    identification: string;
+    treatment?: string;
+}
+
+export interface DiagnosisInfo {
+    sub: Disease[][];
+}
+
+export interface PatientDiagnosis {
+    name: string;
+    age: string;
+    gender: string;
     phone: string;
     address: string;
-    age: number;
-    gender: 'male' | 'female';
     symptom: string;
+    info: DiagnosisInfo;
     result: string;
-    created_at: string | null;
-    updated_at: string | null;
-    deleted_at: string | null;
-    created_by: number | null;
-    updated_by: number | null;
-    deleted_by: number | null;
+    image: string;
 }
-export interface MedicalHistory {
-    id: number;
-    examination_date: string;
-    symptoms: string;
-    diagnosis: string;
-    treatment: string;
-    doctor_name: string;
-    department: string;
-    next_appointment?: string;
-    status: 'completed' | 'pending' | 'cancelled';
+
+export interface DiagnosisResponse {
+    message: string;
+    data: PatientDiagnosis;
 }

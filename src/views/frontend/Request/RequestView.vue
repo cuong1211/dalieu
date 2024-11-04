@@ -11,9 +11,8 @@
                         </div>
 
                         <div class="col-md-6">
-                            <FormDateTimePicker v-model="form.birthday" label="Ngày sinh"
-                                placeholder="Chọn hoặc nhập ngày sinh" :error="errors.birthday"
-                                :yearRange="[1900, 2024]" />
+                            <FormInput v-model="form.age" label="Tuổi" placeholder="Nhập tuổi" type="tel"
+                                :error="errors.age" required @input="(value) => handleInput('age', value)" />
                         </div>
 
                         <div class="col-md-6">
@@ -23,8 +22,9 @@
                         </div>
 
                         <div class="col-md-6">
-                            <FormInput v-model="form.id_number" label="Số CCCD" placeholder="Nhập số CCCD" type="number"
-                                maxlength="12" :error="errors.id_number" required @input="handleIdentityNumberInput" />
+                            <FormInput v-model="form.identification" label="Số CCCD" placeholder="Nhập số CCCD"
+                                type="text" maxlength="12" :error="errors.identification" required
+                                @input="handleIdentityNumberInput" />
                         </div>
 
                         <div class="col-md-6">
@@ -93,28 +93,58 @@
                             <p class="result-text">{{ diagnosisResult.data.result }}</p>
                         </div>
 
+                        <!-- Danh sách bệnh chính -->
+                        <div v-if="diagnosisStore.mainDiseases.length" class="diseases-box">
+                            <h5 class="diseases-title">
+                                <i class="bi bi-clipboard-heart me-2"></i>
+                                Bệnh chính
+                            </h5>
+                            <div class="diseases-list">
+                                <div v-for="disease in diagnosisStore.mainDiseases" :key="disease.id"
+                                    class="disease-item mb-4">
+                                    <div class="disease-header">
+                                        <h6 class="disease-name mb-3">
+                                            <i class="bi bi-journal-medical me-2"></i>
+                                            {{ disease.name }}
+                                        </h6>
+                                        <router-link :to="{ name: 'disease.detail', params: { id: disease.id } }"
+                                            class="view-detail-btn">
+                                            <span>Xem chi tiết</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                        </router-link>
+                                    </div>
+                                    <div class="treatment-content" v-if="disease.treatment" v-html="disease.treatment">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Danh sách bệnh liên quan -->
-                        <div class="diseases-box">
+                        <div v-if="diagnosisStore.relatedDiseases.length" class="diseases-box">
                             <h5 class="diseases-title">
                                 <i class="bi bi-link-45deg me-2"></i>
                                 Bệnh liên quan
                             </h5>
-                            <div class="diseases-grid">
-                                <router-link v-for="disease in relatedDiseases" :key="disease.id"
-                                    :to="{ name: 'disease.detail', params: { id: disease.id } }" class="disease-card">
-                                    <div class="disease-icon">
-                                        <i class="bi bi-journal-medical"></i>
+                            <div class="diseases-list">
+                                <div v-for="disease in diagnosisStore.relatedDiseases" :key="disease.id"
+                                    class="disease-item mb-4">
+                                    <div class="disease-header">
+                                        <h6 class="disease-name mb-3">
+                                            <i class="bi bi-journal-medical me-2"></i>
+                                            {{ disease.name }}
+                                        </h6>
+                                        <router-link :to="{ name: 'disease.detail', params: { id: disease.id } }"
+                                            class="view-detail-btn">
+                                            <span>Xem chi tiết</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                        </router-link>
                                     </div>
-                                    <div class="disease-info">
-                                        <h6 class="disease-name">{{ disease.name }}</h6>
-                                        <span class="view-detail">
-                                            Xem chi tiết
-                                            <i class="bi bi-arrow-right ms-1"></i>
-                                        </span>
+                                    <div class="treatment-content" v-if="disease.treatment" v-html="disease.treatment">
                                     </div>
-                                </router-link>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </FormCard>
                 <div v-if="diagnosisResult" class="d-none">
@@ -126,36 +156,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import type { DermatologyRequestForm } from '@/types/request';
 import ImageUploader from '@/components/ImageUploader/ImageUploader.vue';
 import FormCard from '@/components/Form/FormCard.vue';
 import FormInput from '@/components/Form/FormInput.vue';
 import FormTextarea from '@/components/Form/FormTextarea.vue';
 import FormSelect from '@/components/Form/FormSelect.vue';
-import FormDateTimePicker from '@/components/Form/FormDateTimePicker/FormDateTimePicker.vue';
 import { useRequestValidation } from '@/utils/validations/requestValidation';
-import { useRequestStore } from '@/stores/requestStore';
-import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { mockApiService } from '@/stores/mockApi';
-import type { RequestResponse, DiseaseInfo } from '@/types/request';
+import { useDiagnosisStore } from '@/stores/diagnosisStore';
+import type { RequestResponse, } from '@/types/request';
 import DiagnosisPrintForm from './DiagnosisPrintForm.vue';
 const isProcessing = ref(false);
 const diagnosisResult = ref<RequestResponse | null>(null);
 
-const router = useRouter();
 const toast = useToast();
-const requestStore = useRequestStore();
-const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null);
 const printFormRef = ref<InstanceType<typeof DiagnosisPrintForm> | null>(null);
+const diagnosisStore = useDiagnosisStore();
 
 const initialFormData: DermatologyRequestForm = {
     id: 0,
     name: '',
-    birthday: '',
-    gender: 'other',
-    id_number: '',
+    age: '',
+    gender: '',
+    identification: '',
     phone: '',
     email: '',
     address: '',
@@ -166,9 +191,9 @@ const initialFormData: DermatologyRequestForm = {
 const form = ref<DermatologyRequestForm>(initialFormData);
 
 const genderOptions = [
-    { value: 'male', label: 'Nam' },
-    { value: 'female', label: 'Nữ' },
-    { value: 'other', label: 'Khác' }
+    { value: 'Nam', label: 'Nam' },
+    { value: 'Nữ', label: 'Nữ' },
+    { value: 'Khác', label: 'Khác' }
 ];
 
 const { errors, validateForm, handleInput } = useRequestValidation(form);
@@ -177,47 +202,31 @@ const { errors, validateForm, handleInput } = useRequestValidation(form);
 const handleIdentityNumberInput = (value: string | number) => {
     // Chỉ cho phép nhập số và giới hạn 12 kí tự
     const numbersOnly = String(value).replace(/\D/g, '').slice(0, 12);
-    form.value.id_number = numbersOnly;
-    handleInput('id_number', numbersOnly);
+    form.value.identification = numbersOnly;
+    handleInput('identification', numbersOnly);
 
     // Validate số CCCD
     if (numbersOnly.length !== 12) {
-        errors.value.id_number = 'Số CCCD phải đủ 12 số';
+        errors.value.identification = 'Số CCCD phải đủ 12 số';
     } else {
-        errors.value.id_number = '';
+        errors.value.identification = '';
     }
 };
 
-const relatedDiseases = computed(() => {
-    if (!diagnosisResult.value?.data.info.sub) return [];
-    return diagnosisResult.value.data.info.sub.flat();
-});
-
 const handleSubmit = async () => {
-    // if (form.value.id_number.length !== 12) {
-    //     errors.value.id_number = 'Số CCCD phải đủ 12 số';
-    //     return;
-    // }
+    // if (!validateForm()) return
     try {
         isProcessing.value = true;
-
-        // Gọi mock API service
-        const response = await mockApiService.submitRequest(form.value);
-
-        // Lưu kết quả
+        const response = await diagnosisStore.submitDiagnosis(form.value);
         diagnosisResult.value = response;
-
         toast.success(response.message);
     } catch (error) {
-        console.error('Lỗi khi tạo yêu cầu:', error);
-        toast.error('Đăng ký khám thất bại. Vui lòng thử lại.');
+        console.error(error);
+        toast.error('Gửi yêu cầu thất bại. Vui lòng thử lại.');
     } finally {
         isProcessing.value = false;
     }
-    // if (validateForm()) {
-
-    // }
-};
+}
 
 const handleImageChanged = (file: File | null) => {
     form.value.image = file;
@@ -238,22 +247,211 @@ const handlePrint = () => {
         <html>
         <head>
             <title>Kết quả chẩn đoán</title>
+            <!-- Bootstrap CSS -->
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <!-- Bootstrap Icons -->
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+            <!-- Google Fonts -->
+            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
             <style>
+                /* Print Settings */
                 @page {
                     size: A4;
                     margin: 2cm;
                 }
+
+                /* Global Styles */
                 body {
-                    font-family: Arial, sans-serif;
+                    font-family: 'Roboto', Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
                 }
+
+                /* Form Styles */
+                .print-form {
+                    background: white;
+                    padding: 40px;
+                    max-width: 1000px;
+                    margin: 0 auto;
+                }
+
+                /* Header Styles */
+                .form-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 30px;
+                    padding-bottom: 20px;
+                    border-bottom: 2px solid #e2e8f0;
+                }
+
+                .hospital-name {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #1e3a8a;
+                    margin: 0;
+                }
+
+                /* Section Styles */
+                .section-box {
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    border: 1px solid #e2e8f0;
+                    page-break-inside: avoid;
+                }
+
+                .section-title {
+                    color: #1e3a8a;
+                    font-size: 16px;
+                    font-weight: 600;
+                    margin-bottom: 20px;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid #e2e8f0;
+                }
+
+                /* Image Styles */
+                .image-container {
+                    max-width: 300px;
+                    background: white;
+                    padding: 10px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+
+                .symptom-image {
+                    width: 100%;
+                    height: auto;
+                    border-radius: 4px;
+                }
+
+                /* Footer Styles */
+                .form-footer {
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 2px solid #e2e8f0;
+                    page-break-inside: avoid;
+                }
+
+                .doctor-signature {
+                    text-align: center;
+                    width: 200px;
+                    margin-left: auto;
+                }
+
+                .signature-space {
+                    height: 80px;
+                }
+
+                /* Info Grid Styles */
+                .info-grid {
+                    display: grid;
+                    gap: 1rem;
+                }
+
+                .info-row {
+                    display: grid;
+                    grid-template-columns: 120px 1fr;
+                    align-items: baseline;
+                }
+
+                /* Print Specific Styles */
+                @media print {
+                    .print-form {
+                        padding: 20px;
+                    }
+
+                    .section-box {
+                        background: white;
+                        border: 1px solid #ddd;
+                    }
+
+                    .image-container {
+                        box-shadow: none;
+                        border: 1px solid #ddd;
+                    }
+                }
+                    .diseases-section {
+    margin-top: 1.5rem;
+}
+
+.diseases-list {
+    margin-top: 1rem;
+}
+
+.disease-item {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.disease-name {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+}
+
+.disease-name i {
+    color: #3b82f6;
+}
+
+.treatment-content {
+    color: #334155;
+    line-height: 1.8;
+}
+
+.treatment-content :deep(h3) {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 1rem;
+}
+
+.treatment-content :deep(p) {
+    margin-bottom: 1rem;
+}
+
+.signature-section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.signature-space {
+    height: 80px;
+}
+
+.doctor-name {
+    font-weight: 600;
+}
+
+@media print {
+    .disease-item {
+        background-color: white !important;
+        border-color: #ddd;
+    }
+    
+    .treatment-content {
+        page-break-inside: avoid;
+    }
+}
             </style>
         </head>
         <body>
             ${content}
-        </body>
-        </html>
-    `);
+            <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js">
+</body>
+
+</html>
+`);
 
     printWindow.document.close();
 
@@ -543,6 +741,139 @@ const handlePrint = () => {
     .diseases-box {
         background-color: white !important;
         border: 1px solid #e2e8f0;
+    }
+
+}
+
+.diseases-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.disease-item {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.disease-name {
+    color: #1e293b;
+    font-size: 1.125rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.disease-name i {
+    color: #3b82f6;
+    font-size: 1.25rem;
+}
+
+.treatment-content {
+    margin-top: 1rem;
+    color: #334155;
+    line-height: 1.8;
+}
+
+.treatment-content :deep(h3) {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 1rem;
+}
+
+.treatment-content :deep(p) {
+    margin-bottom: 1rem;
+}
+
+.treatment-content :deep(strong) {
+    color: #1e293b;
+}
+
+.treatment-content :deep(ul) {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.treatment-content :deep(li) {
+    margin-bottom: 0.5rem;
+}
+
+.disease-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.disease-name {
+    color: #1e293b;
+    font-size: 1.125rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.view-detail-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #f8fafc;
+    color: #3b82f6;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.view-detail-btn:hover {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.view-detail-btn i {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.view-detail-btn:hover i {
+    transform: translateX(2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .disease-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .view-detail-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Print styles */
+@media print {
+    .view-detail-btn {
+        display: none;
+    }
+
+    .disease-header {
+        border-bottom-color: #ddd;
     }
 }
 </style>

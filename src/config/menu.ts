@@ -9,7 +9,7 @@ interface MenuItem {
 
 export const menuItems: MenuItem[] = [
     {
-        title: 'Yêu cầu cứu trợ',
+        title: 'Danh sách chuẩn đoán',
         icon: 'bi bi-list-task',
         route: 'request.index',
     },

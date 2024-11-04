@@ -3,8 +3,8 @@
         <div class="header-brand" style="padding-left: 10px;">
             <router-link to="/admin" class="logo-link">
                 <div class="logo-container">
-                    <img alt="Logo" src="/media/icons/map/rescue.svg" class="logo-image" />
-                    <h1 class="logo-text">CUUHO</h1>
+                    <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img w-60px"/>
+                    <h1 class="logo-text">DLHV</h1>
                 </div>
             </router-link>
             <div id="kt_aside_toggle" class="btn btn-icon w-auto px-0 btn-active-color-primary aside-minimize"
@@ -93,7 +93,7 @@ defineEmits(['toggle-aside'])
 }
 
 .logo-image {
-    height: 45px;
+    height: 10px;
     width: auto;
 }
 

@@ -247,16 +247,19 @@ const togglePicker = () => {
 };
 
 const toggleYearSelect = () => {
+    event?.preventDefault();
     showYearSelect.value = !showYearSelect.value;
     showMonthSelect.value = false;
 };
 
 const toggleMonthSelect = () => {
+    event?.preventDefault();
     showMonthSelect.value = !showMonthSelect.value;
     showYearSelect.value = false;
 };
 
 const scrollYears = (delta: number) => {
+    event?.preventDefault();
     const newStart = yearListStart.value + delta;
     const [minYear, maxYear] = props.yearRange;
 
@@ -266,11 +269,13 @@ const scrollYears = (delta: number) => {
 };
 
 const selectYear = (year: number) => {
+    event?.preventDefault();
     currentDate.value = new Date(year, currentMonth.value, 1);
     showYearSelect.value = false;
 };
 
 const selectMonth = (month: number) => {
+    event?.preventDefault();
     currentDate.value = new Date(currentYear.value, month, 1);
     showMonthSelect.value = false;
 };
