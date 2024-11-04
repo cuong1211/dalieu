@@ -47,7 +47,7 @@
                     <div class="d-flex align-items-center">
                         <div class="d-flex">
                             <div class="d-flex align-items-center">
-                                <RouterLink :to="{ name: 'request' }"
+                                <RouterLink :to="{ name: 'home' }"
                                     class="btn btn-sm btn-icon btn-active-light-primary position-relative">
                                     <span class="svg-icon svg-icon-1">
                                         <i class="bi bi-house-door-fill text-primary" style="font-size: 1.5rem;"></i>

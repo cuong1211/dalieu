@@ -1,60 +1,41 @@
+// components/Header.vue
 <template>
-    <div class="landing-header">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between">
-                <!-- Left section with logo and mobile menu -->
-                <div class="d-flex align-items-center flex-equal">
-                    <button class="btn btn-icon btn-active-color-primary me-3 d-flex d-lg-none"
-                        id="kt_landing_menu_toggle">
-                        <span class="svg-icon svg-icon-2hx">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none">
-                                <path
-                                    d="M21 7H3C2.4 7 2 6.6 2 6V4C2 3.4 2.4 3 3 3H21C21.6 3 22 3.4 22 4V6C22 6.6 21.6 7 21 7Z"
-                                    fill="black" />
-                                <path opacity="0.3"
-                                    d="M21 14H3C2.4 14 2 13.6 2 13V11C2 10.4 2.4 10 3 10H21C21.6 10 22 10.4 22 11V13C22 13.6 21.6 14 21 14ZM22 20V18C22 17.4 21.6 17 21 17H3C2.4 17 2 17.4 2 18V20C2 20.6 2.4 21 3 21H21C21.6 21 22 20.6 22 20Z"
-                                    fill="black" />
-                            </svg>
-                        </span>
-                    </button>
-                    <RouterLink to="/" class="d-flex align-items-center">
-                        <div class="logo-container">
-                            <img alt="Logo" src="/media/icons/map/rescue.svg" class="h-50px h-lg-50px" />
-                            <h1 class="logo-text">CUUHO</h1>
+    <header class="main-header">
+        <div class="top-header">
+            <div class="container">
+                <div class="d-flex align-items-center justify-content-between">
+                    <!-- Logo -->
+                    <RouterLink to="/" class="header-logo">
+                        <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img" />
+                        <div class="logo-text">
+                            <div class="text-primary">DA LIỄU HÀ VINH</div>
                         </div>
                     </RouterLink>
-                </div>
 
-                <!-- Center section with menu items -->
-                <div class="d-lg-block" id="kt_header_nav_wrapper">
-                    <div class="d-lg-block p-5 p-lg-0">
-                        <div class="menu menu-column flex-nowrap menu-rounded menu-lg-row menu-title-light menu-state-title-primary nav nav-flush fs-5 fw-bold"
-                            id="kt_landing_menu">
-                            <!-- Regular menu items -->
-                            <div v-for="item in menuItems" :key="item.name" class="menu-item">
-                                <RouterLink :to="item.to" class="menu-link nav-link py-3 px-4 px-xxl-6"
-                                    :class="{ 'active': isActive(item.name) }">
-                                    {{ item.label }}
-                                </RouterLink>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right section with admin button -->
-                <div class="flex-equal text-end ms-1">
-                    <RouterLink :to="{ name: 'admin.home' }" class="btn btn-success">
-                        Quản lý
-                    </RouterLink>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Main navigation -->
+        <nav class="main-nav">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Menu items -->
+                    <div class="nav-menu">
+                        <div v-for="item in menuItems" :key="item.name" class="nav-item">
+                            <RouterLink :to="item.to" class="nav-link" :class="{ 'active': isActive(item.name) }">
+                                {{ item.label }}
+                            </RouterLink>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 interface MenuItem {
@@ -66,65 +47,98 @@ interface MenuItem {
 const route = useRoute();
 
 const menuItems = ref<MenuItem[]>([
+    { name: 'home', to: { name: 'home' }, label: 'Trang chủ' },
     { name: 'request', to: { name: 'request' }, label: 'Tạo yêu cầu' },
     { name: 'search', to: { name: 'search' }, label: 'Tìm kiếm' },
     { name: 'diseases', to: { name: 'diseases' }, label: 'Từ điển bệnh' },
     // { name: 'contact', to: { name: 'contact' }, label: 'Liên hệ' }
 ]);
-
-const isActive = computed(() => (name: string) => {
-    if (name === 'diseases') {
-        return route.name === 'diseases' || route.name === 'disease.detail';
-    }
+const isActive = (name: string): boolean => {
     return route.name === name;
-});
+};
 </script>
 
 <style scoped>
-.logo-container {
+.main-header {
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.top-header {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.header-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    text-decoration: none;
+    gap: 1rem;
+}
+
+.logo-img {
+    height: 60px;
 }
 
 .logo-text {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #181C32;
-    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.menu-link {
+.logo-text .text-primary {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #009ef7;
+}
+
+.logo-text .text-secondary {
+    font-size: 1rem;
+    color: #009ef7;
+}
+
+.btn-search {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #009ef7;
     cursor: pointer;
-    color: #181C32;
-    transition: all 0.2s ease;
-    font-weight: 500;
+}
+
+.main-nav {
+    background: #009ef7;
+    padding: 0.5rem 0;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-link {
+    color: #fff;
     text-decoration: none;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
-.menu-link.active {
-    color: #009EF7;
-    font-weight: 600;
-}
-
-.menu-link:hover {
-    color: #009EF7;
+.nav-link:hover,
+.nav-link.active {
+    color: #ffd700;
 }
 
 @media (max-width: 991.98px) {
-    #kt_header_nav_wrapper {
-        display: none;
+    .nav-menu {
+        flex-direction: column;
+        width: 100%;
     }
 
-    #kt_header_nav_wrapper.active {
-        display: block;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        padding: 1rem;
-        box-shadow: 0 10px 30px 0 rgb(82 63 105 / 5%);
+    .logo-text {
+        font-size: 0.9rem;
+    }
+
+    .logo-img {
+        height: 40px;
     }
 }
 </style>

@@ -26,6 +26,12 @@ const routes = [
     path: '/',
     children: [
       {
+        path: '',
+        name: 'home',
+        component: () => import('@/views/frontend/HomeView.vue'),
+        meta: { hideFooter: true }
+      },
+      {
         path: 'request',
         name: 'request',
         component: () => import('@/views/frontend/Request/RequestView.vue'),
@@ -45,19 +51,11 @@ const routes = [
             path: '',
             name: 'diseases',
             component: DiseaseList,
-            meta: { 
-              breadcrumb: 'Từ điển bệnh',
-              title: 'Danh sách bệnh da liễu'
-            }
           },
           {
             path: ':id',
             name: 'disease.detail',
             component: DiseaseDetail,
-            meta: { 
-              breadcrumb: 'Chi tiết bệnh',
-              title: 'Thông tin chi tiết bệnh'
-            },
             // Tùy chọn: Thêm props để component có thể nhận params
             props: true
           }

@@ -5,7 +5,7 @@
                 <tr>
                     <th>Mã bệnh</th>
                     <th>Tên bệnh</th>
-                    <th>Triệu chứng</th>
+                    <!-- <th>Triệu chứng</th> -->
                     <!-- <th>Điều trị</th> -->
                     <th>Thao tác</th>
                 </tr>
@@ -15,7 +15,7 @@
                     <td>{{ disease.code }}</td>
                     <td>{{ disease.name }}</td>
                     <!-- <td>{{ disease.symptom }}</td> -->
-                    <td>{{ disease.treatment }}</td>
+                    <!-- <td>{{ disease.treatment }}</td> -->
                     <td>
                         <button class="btn btn-sm btn-primary me-2" @click="$emit('edit', disease.id)">
                             Sửa
