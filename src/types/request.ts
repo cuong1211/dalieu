@@ -8,7 +8,7 @@ export interface DermatologyRequestForm {
   phone: string;
   email: string;
   address: string;
-  symptoms: string;
+  symptom: string;
   image: File | null; // Thay đổi từ string sang File
 }
 // types/response.ts

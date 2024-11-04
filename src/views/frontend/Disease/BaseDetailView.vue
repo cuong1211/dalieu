@@ -16,7 +16,7 @@
                                 <div class="d-flex align-items-center mb-4 mb-md-0">
                                     <div class="symbol symbol-100px me-4">
                                         <div class="symbol-label bg-light">
-                                            <i class="bi bi-clipboard2-pulse fs-2x text-primary"></i>
+                                            <i class="bi bi-clipboard-data fs-2x text-primary"></i>
                                         </div>
                                     </div>
                                     <div>

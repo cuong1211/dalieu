@@ -24,7 +24,7 @@
                         <div class="col-md-6">
                             <FormInput v-model="form.identification" label="Số CCCD" placeholder="Nhập số CCCD"
                                 type="text" maxlength="12" :error="errors.identification" required
-                                @input="handleIdentityNumberInput" />
+                                @input="handleIdNumberChange" />
                         </div>
 
                         <div class="col-md-6">
@@ -49,9 +49,9 @@
                 <FormCard title="Thông tin triệu chứng" class="mt-4">
                     <div class="row g-4">
                         <div class="col-12">
-                            <FormTextarea v-model="form.symptoms" label="Mô tả triệu chứng"
-                                placeholder="Mô tả chi tiết các triệu chứng bạn đang gặp phải" :error="errors.symptoms"
-                                :rows="4" required @input="(value) => handleInput('symptoms', value)" />
+                            <FormTextarea v-model="form.symptom" label="Mô tả triệu chứng"
+                                placeholder="Mô tả chi tiết các triệu chứng bạn đang gặp phải" :error="errors.symptom"
+                                :rows="4" required @input="(value) => handleInput('symptom', value)" />
                         </div>
 
                         <div class="col-12">
@@ -184,7 +184,7 @@ const initialFormData: DermatologyRequestForm = {
     phone: '',
     email: '',
     address: '',
-    symptoms: '',
+    symptom: '',
     image: null, // Khởi tạo null
 };
 
@@ -196,25 +196,15 @@ const genderOptions = [
     { value: 'Khác', label: 'Khác' }
 ];
 
-const { errors, validateForm, handleInput } = useRequestValidation(form);
+const { errors, validateForm, handleInput, handleIdentificationInput  } = useRequestValidation(form);
 
 // Xử lý validate số CCCD
-const handleIdentityNumberInput = (value: string | number) => {
-    // Chỉ cho phép nhập số và giới hạn 12 kí tự
-    const numbersOnly = String(value).replace(/\D/g, '').slice(0, 12);
-    form.value.identification = numbersOnly;
-    handleInput('identification', numbersOnly);
-
-    // Validate số CCCD
-    if (numbersOnly.length !== 12) {
-        errors.value.identification = 'Số CCCD phải đủ 12 số';
-    } else {
-        errors.value.identification = '';
-    }
+const handleIdNumberChange = (value: string | number) => {
+    handleIdentificationInput(value);
 };
 
 const handleSubmit = async () => {
-    // if (!validateForm()) return
+    if (!validateForm()) return
     try {
         isProcessing.value = true;
         const response = await diagnosisStore.submitDiagnosis(form.value);

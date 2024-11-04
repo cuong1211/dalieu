@@ -1,32 +1,7 @@
 <template>
   <div class="container my-8">
     <div class="row">
-      <!-- Left sidebar for disease categories -->
-      <div class="col-lg-3">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Danh mục bệnh</h3>
-          </div>
-          <div class="card-body">
-            <div class="menu menu-column menu-rounded menu-sub-indention">
-              <div v-for="category in categories" :key="category.id" class="menu-item">
-                <a href="#" class="menu-link">
-                  <span class="menu-bullet">
-                    <span class="bullet bullet-dot"></span>
-                  </span>
-                  <span class="menu-title">{{ category.name }}</span>
-                  <span class="menu-badge">
-                    <span class="badge badge-light-primary">{{ category.count }}</span>
-                  </span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main content -->
-      <div class="col-lg-9">
+      <div class="col-lg-12">
         <!-- Search and filters -->
         <div class="card mb-6">
           <div class="card-body">
@@ -56,7 +31,7 @@
                   <div class="d-flex align-items-center mb-2">
                     <div class="symbol symbol-50px me-3">
                       <div class="symbol-label bg-light">
-                        <i class="bi bi-clipboard2-pulse fs-2x text-primary"></i>
+                        <i class="bi bi-clipboard-data fs-2x text-primary"></i>
                       </div>
                     </div>
                     <div>
@@ -69,7 +44,6 @@
                       <span class="text-muted fs-7">Mã bệnh: {{ disease.code }}</span>
                     </div>
                   </div>
-                  <p class="text-gray-600 fs-6 mb-0 line-clamp-2">{{ disease.symptom }}</p>
                 </div>
                 <div class="mt-auto">
                   <router-link :to="{ name: 'disease.detail', params: { id: disease.id } }"

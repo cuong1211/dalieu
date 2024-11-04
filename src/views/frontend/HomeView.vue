@@ -43,45 +43,34 @@
         </section>
 
         <!-- Giới thiệu các trung tâm -->
-    
+
 
         <!-- Giới thiệu chuyên gia -->
-        <section class="section experts-intro">
-            <div class="container">
-                <h2 class="section-title">Đội Ngũ Chuyên Gia</h2>
-                <div class="row g-4">
-                    <div v-for="expert in experts" :key="expert.id" class="col-md-6 col-lg-3 ">
-                        <div class="expert-card h-100">
-                            <div class="expert-image">
-                                <img :src="expert.image" :alt="expert.name">
-                            </div>
-                            <div class="expert-info">
-                                <h3 class="expert-name">{{ expert.name }}</h3>
-                                <p class="expert-position">{{ expert.position }}</p>
-                                <p class="expert-qualification">{{ expert.qualification }}</p>
-                                <div class="expert-specialties">
-                                    <span v-for="specialty in expert.specialties" :key="specialty"
-                                        class="badge bg-light text-primary">
-                                        {{ specialty }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Quá trình phát triển -->
         <section class="section development-timeline bg-light">
             <div class="container">
-                <h2 class="section-title">Quá Trình Phát Triển</h2>
+                <div class="section-header text-center mb-5">
+                    <h2 class="section-title">Quá Trình Phát Triển</h2>
+                    <p class="section-subtitle">
+                        Hành trình xây dựng và phát triển hệ thống chẩn đoán da liễu thông minh
+                    </p>
+                </div>
+
                 <div class="timeline">
-                    <div v-for="milestone in developmentTimeline" :key="milestone.year" class="timeline-item">
-                        <div class="timeline-badge">{{ milestone.year }}</div>
+                    <div v-for="(milestone, index) in developmentTimeline" :key="milestone.year" class="timeline-item"
+                        :class="{ 'timeline-item-left': index % 2 === 0 }">
+                        <div class="timeline-badge">
+                            <span class="badge-month">{{ milestone.month }}</span>
+                            <span class="badge-year">{{ milestone.year }}</span>
+                        </div>
                         <div class="timeline-content">
-                            <h3>{{ milestone.title }}</h3>
-                            <p>{{ milestone.description }}</p>
+                            <div class="timeline-icon">
+                                <i :class="getTimelineIcon(index)"></i>
+                            </div>
+                            <div class="timeline-body">
+                                <h3 class="timeline-title">{{ milestone.title }}</h3>
+                                <p class="timeline-description">{{ milestone.description }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -114,6 +103,7 @@ interface Expert {
 
 interface Milestone {
     year: number;
+    month: number;
     title: string;
     description: string;
 }
@@ -130,63 +120,82 @@ const medicalCenters = ref<MedicalCenter[]>([
     // Thêm các trung tâm khác
 ]);
 
-const experts = ref<Expert[]>([
-    {
-        id: 1,
-        name: 'PGS.TS Phạm Thị Lan',
-        image: '/media/images/doctor/1.jpg',
-        position: 'Trưởng khoa Da liễu',
-        qualification: 'Phó giáo sư Y khoa',
-        specialties: ['Da liễu', 'Thẩm mỹ da']
-    },
-    {
-        id: 2,
-        name: 'PGS.TS Nguyễn Văn Thường',
-        image: '/media/images/doctor/2.jpg',
-        position: 'Nguyên giám độc bệnh viện Da liễu Trung ương',
-        qualification: 'Phó giáo sư Y khoa',
-        specialties: ['Da liễu', 'Thẩm mỹ da']
-    },
-    {
-        id: 3,
-        name: 'TS.BS Đinh Hữu Nghị',
-        image: '/media/images/doctor/3.jpg',
-        position: 'Trưởng khoa phẫu thuật bệnh',
-        qualification: 'Tiến sĩ Y khoa',
-        specialties: ['Da liễu', 'Thẩm mỹ da']
-    },
-    {
-        id: 4,
-        name: 'TS.BS Phạm Thị Minh Phương',
-        image: '/media/images/doctor/4.jpg',
-        position: 'Trưởng khoa Khám bệnh',
-        qualification: 'Tiến sĩ Y khoa',
-        specialties: ['Da liễu', 'Thẩm mỹ da']
-    },
-    // Thêm các chuyên gia khác
-]);
-
+const getTimelineIcon = (index: number): string => {
+    const icons = [
+        'bi bi-list-stars',      // Khởi động
+        'bi bi-box',            // Cơ sở dữ liệu
+        'bi bi-cpu',                 // Nghiên cứu AI
+        'bi bi-gear',                // Huấn luyện
+        'bi bi-graph-up',            // Đánh giá
+        'bi bi-code-square',         // Backend
+        'bi bi-window',              // Frontend
+        'bi bi-bug',                 // Testing
+        'bi bi-lightning-charge',    // Tối ưu
+        'bi bi-check-circle'         // Triển khai
+    ];
+    return icons[index] || 'bi bi-circle';
+};
 const developmentTimeline = ref<Milestone[]>([
     {
-        year: 2020,
-        title: 'Khởi động dự án',
-        description: 'Bắt đầu nghiên cứu và phát triển hệ thống AI chẩn đoán bệnh da liễu'
+        year: 2024,
+        month: 1,
+        title: 'Khởi động dự án & Thu thập dữ liệu',
+        description: 'Bắt đầu quá trình thu thập và phân loại dữ liệu hình ảnh từ các bệnh viện da liễu. Xây dựng kế hoạch chi tiết và thành lập nhóm nghiên cứu.'
     },
     {
-        year: 2020,
-        title: 'Khởi động dự án',
-        description: 'Bắt đầu nghiên cứu và phát triển hệ thống AI chẩn đoán bệnh da liễu'
+        year: 2024,
+        month: 2,
+        title: 'Xây dựng cơ sở dữ liệu',
+        description: 'Tiến hành gán nhãn và phân loại hình ảnh bệnh da liễu. Xây dựng hệ thống cơ sở dữ liệu chuẩn hoá cho việc huấn luyện mô hình AI.'
     },
     {
-        year: 2020,
-        title: 'Khởi động dự án',
-        description: 'Bắt đầu nghiên cứu và phát triển hệ thống AI chẩn đoán bệnh da liễu'
+        year: 2024,
+        month: 3,
+        title: 'Nghiên cứu & Lựa chọn mô hình',
+        description: 'Nghiên cứu và thử nghiệm các mô hình deep learning khác nhau (CNN, ResNet, VGG) để tìm ra mô hình phù hợp nhất cho việc nhận diện bệnh da liễu.'
     },
     {
-        year: 2020,
-        title: 'Khởi động dự án',
-        description: 'Bắt đầu nghiên cứu và phát triển hệ thống AI chẩn đoán bệnh da liễu'
+        year: 2024,
+        month: 4,
+        title: 'Huấn luyện mô hình ban đầu',
+        description: 'Tiến hành huấn luyện mô hình AI với tập dữ liệu đã chuẩn bị. Thực hiện các điều chỉnh và tối ưu hoá ban đầu.'
     },
+    {
+        year: 2024,
+        month: 5,
+        title: 'Đánh giá & Cải thiện mô hình',
+        description: 'Đánh giá hiệu suất mô hình, xác định các điểm yếu và thực hiện các cải tiến cần thiết. Tối ưu hoá độ chính xác trong việc nhận diện bệnh.'
+    },
+    {
+        year: 2024,
+        month: 6,
+        title: 'Phát triển API & Backend',
+        description: 'Xây dựng hệ thống API và backend để tích hợp mô hình AI. Thiết kế cơ sở dữ liệu và các endpoint cần thiết cho ứng dụng.'
+    },
+    {
+        year: 2024,
+        month: 7,
+        title: 'Phát triển giao diện người dùng',
+        description: 'Thiết kế và phát triển giao diện web/mobile thân thiện cho người dùng. Tích hợp các tính năng upload ảnh và hiển thị kết quả chẩn đoán.'
+    },
+    {
+        year: 2024,
+        month: 8,
+        title: 'Thử nghiệm & Kiểm thử',
+        description: 'Tiến hành thử nghiệm hệ thống với dữ liệu thực tế. Thu thập phản hồi từ các bác sĩ da liễu và người dùng thử nghiệm.'
+    },
+    {
+        year: 2024,
+        month: 9,
+        title: 'Tối ưu hoá & Hoàn thiện',
+        description: 'Cải thiện hiệu suất tổng thể của hệ thống. Tối ưu hoá tốc độ xử lý và độ chính xác. Hoàn thiện tài liệu hướng dẫn sử dụng.'
+    },
+    {
+        year: 2024,
+        month: 10,
+        title: 'Triển khai & Vận hành',
+        description: 'Triển khai hệ thống lên môi trường production. Đào tạo người dùng và bắt đầu giai đoạn vận hành thử nghiệm trong thực tế.'
+    }
 ]);
 </script>
 
@@ -278,6 +287,204 @@ const developmentTimeline = ref<Milestone[]>([
 
     .timeline-item {
         margin-left: 2rem;
+    }
+}
+
+.section-header {
+    max-width: 700px;
+    margin: 0 auto 4rem;
+}
+
+.section-subtitle {
+    color: #64748b;
+    font-size: 1.125rem;
+    margin-top: 1rem;
+}
+
+.timeline {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom,
+            rgba(0, 68, 124, 0) 0%,
+            rgba(0, 68, 124, 1) 10%,
+            rgba(0, 68, 124, 1) 90%,
+            rgba(0, 68, 124, 0) 100%);
+    transform: translateX(-50%);
+}
+
+.timeline-item {
+    position: relative;
+    width: 50%;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.timeline-item-left {
+    left: 0;
+    padding-right: 3rem;
+}
+
+.timeline-item:not(.timeline-item-left) {
+    left: 50%;
+    padding-left: 3rem;
+}
+
+.timeline-badge {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #00447c;
+    color: #fff;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-item-left .timeline-badge {
+    right: -1.5rem;
+}
+
+.timeline-item:not(.timeline-item-left) .timeline-badge {
+    left: -1.5rem;
+}
+
+.badge-month {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.badge-year {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.timeline-content {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.timeline-content:hover {
+    transform: translateY(-5px);
+}
+
+.timeline-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: #eff6ff;
+    color: #00447c;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.timeline-title {
+    color: #00447c;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.timeline-description {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.timeline-item {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+.timeline-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.timeline-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.timeline-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.timeline-item:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.timeline-item:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.timeline-item:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.timeline-item:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.timeline-item:nth-child(8) {
+    animation-delay: 0.8s;
+}
+
+.timeline-item:nth-child(9) {
+    animation-delay: 0.9s;
+}
+
+.timeline-item:nth-child(10) {
+    animation-delay: 1s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 2rem;
+    }
+
+    .timeline-item {
+        width: 100%;
+        left: 0 !important;
+        padding: 1rem 1rem 1rem 4rem !important;
+    }
+
+    .timeline-badge {
+        left: 0 !important;
+    }
+
+    .timeline-content {
+        padding: 1rem;
     }
 }
 </style>

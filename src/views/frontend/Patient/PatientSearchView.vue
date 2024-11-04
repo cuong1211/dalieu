@@ -84,6 +84,7 @@
                                                 <th class="min-w-200px">Triệu chứng</th>
                                                 <th class="min-w-200px">Kết quả</th>
                                                 <th class="min-w-150px">Ngày khám</th>
+                                                <th class="min-w-100px text-end pe-4">Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -120,6 +121,12 @@
                                                         {{ formatDate(patient.created_at) }}
                                                     </div>
                                                 </td>
+                                                <td class="text-end pe-4">
+                                                    <button class="btn btn-icon btn-light-primary btn-sm"
+                                                        @click="showDetails(patient.id)">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -138,13 +145,40 @@
             </div>
         </div>
     </div>
+    <DetailModal v-if="showModal" :patient-id="selectedPatientId" @close="closeModal" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { api } from '@/utils/api';
-import type { Patient } from '@/types/patient';
+import DetailModal from './DetailModal.vue';
+import DiagnosisPrintForm from '../Request/DiagnosisPrintForm.vue';
+interface Patient {
+    id: number;
+    identification: string;
+    name: string;
+    age: number;
+    gender: string;
+    phone: string;
+    address: string;
+    symptom: string;
+    result: string | null;
+    created_at: string;
+    updated_at: string | null;
+    file_id: string;
+}
+const showModal = ref(false);
+const selectedPatientId = ref<number | null>(null);
 
+const showDetails = (patientId: number) => {
+    selectedPatientId.value = patientId;
+    showModal.value = true;
+};
+
+const closeModal = () => {
+    showModal.value = false;
+    selectedPatientId.value = null;
+};
 const searchQuery = ref('');
 const loading = ref(false);
 const error = ref<string | null>(null);
