@@ -115,9 +115,9 @@
                         </td>
                         <td>{{ patient.age }}</td>
                         <td>
-                            <span :class="patient.gender === 'male' ? 'badge-light-primary' : 'badge-light-success'"
+                            <span :class="patient.gender === 'Nam' ? 'badge-light-primary' : 'badge-light-success'"
                                 class="badge">
-                                {{ patient.gender === 'male' ? 'Nam' : 'Nữ' }}
+                                {{ patient.gender}}
                             </span>
                         </td>
                         <td>
