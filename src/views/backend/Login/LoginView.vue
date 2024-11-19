@@ -69,7 +69,7 @@ const onSubmitLogin = handleSubmit(async (values: LoginCredentials) => {
                 <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
                     <!--begin::Logo-->
                     <a href="/" class="mb-12">
-                        <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img w-60px"/>
+                        <img src="/media/logos/logo.png" alt="" class="logo-img w-60px"/>
                     </a>
                     <!--end::Logo-->
                     <!--begin::Wrapper-->

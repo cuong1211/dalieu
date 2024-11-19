@@ -3,7 +3,7 @@
         <div class="header-brand" style="padding-left: 10px;">
             <router-link to="/admin" class="logo-link">
                 <div class="logo-container">
-                    <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img w-60px"/>
+                    <img src="/media/logos/logo.png" alt="" class="logo-img w-60px"/>
                     <h1 class="logo-text">DLHV</h1>
                 </div>
             </router-link>

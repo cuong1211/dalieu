@@ -6,7 +6,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <!-- Logo -->
                     <RouterLink to="/" class="header-logo">
-                        <img src="/media/logos/logo.png" alt="Logo ICTU" class="logo-img" />
+                        <img src="/media/logos/logo.png" alt="" class="logo-img" />
                         <div class="logo-text">
                             <div class="text-primary">DA LIỄU HÀ VINH</div>
                             <div class="text-secondary">Trường THPT số 1 huyện Bảo Thắng</div>
