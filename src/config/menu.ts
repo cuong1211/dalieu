@@ -37,6 +37,11 @@ export const menuItems: MenuItem[] = [
                 route: 'role',
                 icon: 'bi bi-person-badge'
             },
+            {
+                title: 'Cấu hình URL',
+                route: 'config',
+                icon: 'bi bi-sliders'
+            },
             // {
             //     title: 'Cấu hình',
             //     route: 'settings',

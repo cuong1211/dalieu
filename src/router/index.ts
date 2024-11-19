@@ -73,6 +73,12 @@ const routes = [
         component: HomeView,
         meta: { breadcrumb: 'Trang chủ' }
       },
+      {
+        path: '/config',
+        name: 'config',
+        component: () => import('@/views/backend/Config/ConfigForm.vue'),
+        meta: { breadcrumb: 'Cấu hình URL' }
+      },
       // Routes quản lý người dùng
       {
         path: 'user',
@@ -158,9 +164,9 @@ const routes = [
     path: '/admin/login',
     name: 'admin.login',
     component: LoginView,
-    meta: { 
+    meta: {
       title: 'Đăng nhập hệ thống',
-      guest: true 
+      guest: true
     }
   },
 ];
