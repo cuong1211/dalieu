@@ -331,6 +331,8 @@ const handleSubmit = async () => {
         const response = await diagnosisStore.submitDiagnosis(form.value);
         diagnosisResult.value = response;
         diagnosisStore.setCurrentDiagnosisId(response.data.id);
+        console.log(response);
+        
         toast.success(response.message);
         startCooldownTimer();
     } catch (error) {

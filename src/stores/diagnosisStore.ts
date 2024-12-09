@@ -4,7 +4,7 @@ import { api } from '@/utils/api';
 // Types & Interfaces
 interface Disease {
   id: number;
-  code: string;
+  code: number;
   name: string;
   symptom: string;
   treatment: string;
@@ -85,8 +85,11 @@ export const useDiagnosisStore = defineStore('diagnosis', {
     allDiseaseIds(): number[] {
       const mainDiseases = this.initialMainDiseases;
       const relatedDiseases = this.initialRelatedDiseases;
-      return [...mainDiseases, ...relatedDiseases].map(disease => disease.id);
+      return [...mainDiseases, ...relatedDiseases]
+        .map(disease => Number(disease.code)) // Chuyển code sang số
+        .filter(code => !isNaN(code)); // Loại bỏ các giá trị không hợp lệ
     },
+
 
     hasInitialDiagnosis(): boolean {
       return this.currentDiagnosis !== null;
