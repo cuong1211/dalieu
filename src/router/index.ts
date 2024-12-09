@@ -70,7 +70,7 @@ const routes = [
       {
         path: '',
         name: 'admin.home',
-        component: HomeView,
+        component: RequestView,
         meta: { breadcrumb: 'Trang chủ' }
       },
       {

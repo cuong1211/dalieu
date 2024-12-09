@@ -1,17 +1,20 @@
-// stores/diagnosisStore.ts
 import { defineStore } from 'pinia';
 import { api } from '@/utils/api';
 
 // Types & Interfaces
 interface Disease {
   id: number;
+  code: string;
   name: string;
-  treatment?: string;
+  symptom: string;
+  treatment: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface DiagnosisInfo {
-  main?: Disease[][];  // Optional vì có thể không tồn tại
-  sub?: Disease[][];   // Optional vì có thể không tồn tại
+  main?: Disease[][];
+  sub?: Disease[][];
 }
 
 interface PatientDiagnosis {
@@ -35,6 +38,8 @@ interface DiagnosisState {
   currentDiagnosis: PatientDiagnosis | null;
   loading: boolean;
   error: string | null;
+  currentDiagnosisId: number | null;
+  diagnosedDiseases: Disease[]; // Chỉ dùng một mảng để lưu kết quả sau khi trả lời câu hỏi
 }
 
 interface DiagnosisForm {
@@ -50,22 +55,57 @@ interface DiagnosisForm {
   image: File | null;
 }
 
+interface AdditionalDiagnosisResponse {
+  status: boolean;
+  data: Disease[];
+}
+
 export const useDiagnosisStore = defineStore('diagnosis', {
   state: (): DiagnosisState => ({
     currentDiagnosis: null,
     loading: false,
-    error: null
+    error: null,
+    currentDiagnosisId: null,
+    diagnosedDiseases: [],
   }),
 
+  getters: {
+    // Lấy các bệnh từ kết quả chẩn đoán ban đầu
+    initialMainDiseases(): Disease[] {
+      if (!this.currentDiagnosis?.info.main) return [];
+      return this.currentDiagnosis.info.main.flat();
+    },
+
+    initialRelatedDiseases(): Disease[] {
+      if (!this.currentDiagnosis?.info.sub) return [];
+      return this.currentDiagnosis.info.sub.flat();
+    },
+
+    // Lấy tất cả các ID bệnh từ kết quả chẩn đoán ban đầu
+    allDiseaseIds(): number[] {
+      const mainDiseases = this.initialMainDiseases;
+      const relatedDiseases = this.initialRelatedDiseases;
+      return [...mainDiseases, ...relatedDiseases].map(disease => disease.id);
+    },
+
+    hasInitialDiagnosis(): boolean {
+      return this.currentDiagnosis !== null;
+    },
+
+    // Kiểm tra có kết quả chẩn đoán bổ sung không
+    hasAdditionalDiagnosis(): boolean {
+      return this.diagnosedDiseases.length > 0;
+    }
+  },
+
   actions: {
+    // Chẩn đoán ban đầu
     async submitDiagnosis(formData: DiagnosisForm): Promise<DiagnosisResponse> {
       this.loading = true;
       this.error = null;
 
       try {
         const form = new FormData();
-        
-        // Append form fields
         Object.entries(formData).forEach(([key, value]) => {
           if (key === 'image' && value instanceof File) {
             form.append('image', value);
@@ -75,9 +115,7 @@ export const useDiagnosisStore = defineStore('diagnosis', {
         });
 
         const response = await api.post<DiagnosisResponse>('/patients', form, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
 
         this.currentDiagnosis = response.data;
@@ -87,70 +125,59 @@ export const useDiagnosisStore = defineStore('diagnosis', {
         const errorMessage = error instanceof Error ? error.message : 'Không thể gửi yêu cầu chẩn đoán';
         this.error = errorMessage;
         throw new Error(errorMessage);
-
       } finally {
         this.loading = false;
       }
     },
 
+    // Tạo kết luận dựa trên số lượng bệnh được chẩn đoán
+    generateDiagnosisResult(diseases: Disease[]): string {
+      if (diseases.length === 0) {
+        return 'Không thể xác định chính xác bệnh từ các triệu chứng đã cung cấp.';
+      }
+
+      if (diseases.length === 1) {
+        return `Dựa trên các triệu chứng bổ sung, có thể xác định bạn đang mắc bệnh ${diseases[0].name}.`;
+      }
+
+      const diseaseNames = diseases.map(d => d.name).join(', ');
+      return `Dựa trên các triệu chứng bổ sung, bạn có thể liên quan đến các bệnh sau: ${diseaseNames}.`;
+    },
+
+    // Chẩn đoán bổ sung sau khi trả lời câu hỏi
+    async submitAdditionalDiagnosis(payload: { diseases: number[]; symptoms: { id: number; answer: boolean; }[] }) {
+      if (!this.currentDiagnosisId) {
+        throw new Error('Không tìm thấy ID chẩn đoán');
+      }
+
+      try {
+        const response = await api.post<AdditionalDiagnosisResponse>(
+          `/diagnose/${this.currentDiagnosisId}`,
+          payload
+        );
+
+        this.diagnosedDiseases = response.data;
+
+        return {
+          status: response.status,
+          data: response.data,
+          result: this.generateDiagnosisResult(response.data)
+        };
+      } catch (error) {
+        console.error('Lỗi khi gửi yêu cầu chẩn đoán bổ sung:', error);
+        throw error;
+      }
+    },
+
+    setCurrentDiagnosisId(id: number): void {
+      this.currentDiagnosisId = id;
+    },
+
     clearDiagnosis(): void {
       this.currentDiagnosis = null;
       this.error = null;
+      this.currentDiagnosisId = null;
+      this.diagnosedDiseases = [];
     }
-  },
-
-  getters: {
-    // Lấy bệnh chính (từ main)
-    mainDiseases: (state): Disease[] => {
-      if (!state.currentDiagnosis?.info.main) return [];
-      return state.currentDiagnosis.info.main.flat();
-    },
-
-    // Lấy bệnh phụ (từ sub)
-    relatedDiseases: (state): Disease[] => {
-      if (!state.currentDiagnosis?.info.sub) return [];
-      return state.currentDiagnosis.info.sub.flat();
-    },
-
-    // Lấy tất cả bệnh (cả main và sub)
-    allDiseases: (state): Disease[] => {
-      const diseases: Disease[] = [];
-      
-      // Thêm bệnh chính nếu có
-      if (state.currentDiagnosis?.info.main) {
-        diseases.push(...state.currentDiagnosis.info.main.flat());
-      }
-      
-      // Thêm bệnh phụ nếu có
-      if (state.currentDiagnosis?.info.sub) {
-        diseases.push(...state.currentDiagnosis.info.sub.flat());
-      }
-
-      return diseases;
-    },
-
-    // Kiểm tra có bệnh chính không
-    hasMainDiseases: (state): boolean => {
-      return !!state.currentDiagnosis?.info.main && 
-             state.currentDiagnosis.info.main.flat().length > 0;
-    },
-
-    // Kiểm tra có bệnh phụ không 
-    hasRelatedDiseases: (state): boolean => {
-      return !!state.currentDiagnosis?.info.sub &&
-             state.currentDiagnosis.info.sub.flat().length > 0;
-    },
-
-    // Lấy thông tin chi tiết của một bệnh
-    getDiseaseById: (state) => (id: number): Disease | undefined => {
-      const allDiseases = [...(state.currentDiagnosis?.info.main || []).flat(),
-                          ...(state.currentDiagnosis?.info.sub || []).flat()];
-      return allDiseases.find(disease => disease.id === id);
-    },
-
-    // Các getters tiện ích khác
-    isLoading: (state): boolean => state.loading,
-    getError: (state): string | null => state.error,
-    hasDiagnosis: (state): boolean => state.currentDiagnosis !== null
   }
 });

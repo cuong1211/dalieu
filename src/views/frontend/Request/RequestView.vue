@@ -65,7 +65,7 @@
                     description="Hệ thống đang phân tích triệu chứng của bạn..." />
 
                 <!-- Cập nhật nút submit -->
-                <div class="form-actions">
+                <div class="form-actions" v-if="!isSecondDiagnosis">
                     <div class="submit-wrapper">
                         <button type="submit" class="submit-button" :disabled="isProcessing || isSubmitDisabled" :class="{
                             'is-processing': isProcessing,
@@ -93,89 +93,75 @@
             </form>
             <div v-if="diagnosisResult" class="diagnosis-section">
                 <FormCard title="Kết quả chẩn đoán">
+                    <!-- Action buttons -->
                     <div class="action-buttons mb-4">
-                        <div class="note-box">
-                            <p class="note-text">
-                                <i class="bi bi-info-circle me-2"></i>
-                                Để có kết quả chính xác hơn, bạn có thể trả lời thêm một số câu hỏi
-                            </p>
-                        </div>
-                        <button @click="showQuestionModal = true" class="answer-more-btn">
-                            <i class="bi bi-question-circle"></i>
-                            Trả lời thêm câu hỏi
-                        </button>
+                        <template v-if="!isSecondDiagnosis">
+                            <div class="note-box">
+                                <p class="note-text">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Để có kết quả chính xác hơn, bạn có thể trả lời thêm một số câu hỏi
+                                </p>
+                            </div>
+                            <button @click="showQuestionModal = true" class="answer-more-btn">
+                                <i class="bi bi-question-circle"></i>
+                                Trả lời thêm câu hỏi
+                            </button>
+                        </template>
+                        <template v-else>
+                            <button @click="handlePrint" class="print-button ">
+                                <i class="bi bi-printer"></i>
+                                In kết quả
+                            </button>
+                        </template>
                     </div>
 
-                    <QuestionModal :show="showQuestionModal" :questions="additionalQuestions"
-                        @close="showQuestionModal = false" @submit="handleAnswersSubmit" />
                     <div class="diagnosis-content">
                         <!-- Kết quả chẩn đoán -->
                         <div class="result-box mb-4">
-                            <h5 class="result-title">
-                                <i class="bi bi-clipboard2-pulse me-2"></i>
-                                Kết luận
-                            </h5>
                             <p class="result-text">{{ diagnosisResult.data.result }}</p>
                         </div>
 
-                        <!-- Danh sách bệnh chính -->
-                        <div v-if="diagnosisStore.mainDiseases.length" class="diseases-box">
-                            <h5 class="diseases-title">
-                                <i class="bi bi-clipboard-heart me-2"></i>
-                                Bệnh chính
-                            </h5>
-                            <div class="diseases-list">
-                                <div v-for="disease in diagnosisStore.mainDiseases" :key="disease.id"
-                                    class="disease-item mb-4">
-                                    <div class="disease-header">
-                                        <h6 class="disease-name mb-3">
-                                            <i class="bi bi-journal-medical me-2"></i>
-                                            {{ disease.name }}
-                                        </h6>
-                                        <router-link :to="{ name: 'disease.detail', params: { id: disease.id } }"
-                                            class="view-detail-btn">
-                                            <span>Xem chi tiết</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </router-link>
-                                    </div>
-                                    <div class="treatment-content" v-if="disease.treatment" v-html="disease.treatment">
-                                    </div>
+                        <!-- Hiển thị kết quả lần 1 -->
+                        <template v-if="!isSecondDiagnosis">
+                            <div v-if="diagnosisStore.initialMainDiseases.length" class="diseases-box">
+                                <h5 class="diseases-title">
+                                    <i class="bi bi-clipboard-heart me-2"></i>
+                                    Bệnh chính
+                                </h5>
+                                <DiseaseList :diseases="diagnosisStore.initialMainDiseases" />
+                            </div>
+
+                            <div v-if="diagnosisStore.initialRelatedDiseases.length" class="diseases-box">
+                                <h5 class="diseases-title">
+                                    <i class="bi bi-link-45deg me-2"></i>
+                                    Bệnh liên quan
+                                </h5>
+                                <DiseaseList :diseases="diagnosisStore.initialRelatedDiseases" />
+                            </div>
+                        </template>
+
+                        <!-- Hiển thị kết quả lần 2 -->
+                        <template v-else>
+                            <div class="diseases-box">
+                                <div class="diseases-list">
+                                    <DiseaseList :diseases="diagnosisStore.diagnosedDiseases" />
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Danh sách bệnh liên quan -->
-                        <div v-if="diagnosisStore.relatedDiseases.length" class="diseases-box">
-                            <h5 class="diseases-title">
-                                <i class="bi bi-link-45deg me-2"></i>
-                                Bệnh liên quan
-                            </h5>
-                            <div class="diseases-list">
-                                <div v-for="disease in diagnosisStore.relatedDiseases" :key="disease.id"
-                                    class="disease-item mb-4">
-                                    <div class="disease-header">
-                                        <h6 class="disease-name mb-3">
-                                            <i class="bi bi-journal-medical me-2"></i>
-                                            {{ disease.name }}
-                                        </h6>
-                                        <router-link :to="{ name: 'disease.detail', params: { id: disease.id } }"
-                                            class="view-detail-btn">
-                                            <span>Xem chi tiết</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </router-link>
-                                    </div>
-                                    <div class="treatment-content" v-if="disease.treatment" v-html="disease.treatment">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                        </template>
                     </div>
                 </FormCard>
-                <div v-if="diagnosisResult" class="d-none">
-                    <DiagnosisPrintForm ref="printFormRef" :diagnosis-result="diagnosisResult" />
+
+                <div class="d-none">
+                    <div class="d-none">
+                        <DiagnosisPrintForm ref="printFormRef" :patient-info="diagnosisResult?.data"
+                            :diagnosis-result="diagnosisResult?.data.result"
+                            :diseases="diagnosisStore.diagnosedDiseases" />
+                    </div>
                 </div>
             </div>
+
+            <QuestionModal :show="showQuestionModal" :questions="additionalQuestions" @close="showQuestionModal = false"
+                @submit="handleQuestionSubmit" />
         </div>
     </div>
 </template>
@@ -195,13 +181,15 @@ import type { RequestResponse, } from '@/types/request';
 import DiagnosisPrintForm from './DiagnosisPrintForm.vue';
 import LoadingOverlay from './LoadingOverlay.vue';
 import QuestionModal from './QuestionModal.vue';
+import type { AdditionalDiagnosisResponse } from '@/types/diagnosis';
+import DiseaseList from './DiseaseList.vue';
 const isProcessing = ref(false);
 const diagnosisResult = ref<RequestResponse | null>(null);
 
 const toast = useToast();
 const printFormRef = ref<InstanceType<typeof DiagnosisPrintForm> | null>(null);
 const diagnosisStore = useDiagnosisStore();
-
+const isSecondDiagnosis = ref(false);
 const initialFormData: DermatologyRequestForm = {
     id: 0,
     name: '',
@@ -263,35 +251,63 @@ const additionalQuestions = [
         ]
     },
     {
-        text: "Triệu chứng có xuất hiện đột ngột không?",
+        text: "Vùng da của bạn có bị đỏ lên so với vùng da bình thường không?",
         answers: [
             { id: 1, text: "Có" },
             { id: 2, text: "Không" }
         ]
     },
     {
-        text: "Bạn có tiền sử dị ứng không?",
+        text: "Bạn có thấy vùng da bị tổn thương có dấu hiệu sưng nề không?",
         answers: [
             { id: 1, text: "Có" },
             { id: 2, text: "Không" }
         ]
     },
     {
-        text: "Vùng da bị tổn thương có đau không?",
+        text: "Bạn có nhận thấy xuất hiện các nốt hoặc mảng phát ban trên da không?",
         answers: [
             { id: 1, text: "Có" },
             { id: 2, text: "Không" }
         ]
     },
     {
-        text: "Triệu chứng có lan rộng ra các vùng khác không?",
+        text: "Có mụn nước nhỏ chứa dịch trong nổi lên trên vùng da bị tổn thương không?",
         answers: [
             { id: 1, text: "Có" },
             { id: 2, text: "Không" }
         ]
     },
     {
-        text: "Trong gia đình có ai mắc bệnh da liễu tương tự không?",
+        text: "Vùng da của bạn có bị loét hoặc có vết thương hở không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Bạn có thấy vùng da bị tổn thương có dấu hiệu tróc vảy hoặc bong vảy không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Vùng da bị tổn thương có cảm giác đau hoặc rát không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Bạn có thấy vùng tổn thương bị chảy mủ, có mùi hôi hoặc xuất hiện các dấu hiệu nhiễm trùng không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Các tổn thương trên da có xuất hiện đều và đối xứng ở cả hai bên cơ thể không (ví dụ như hai tay, hai chân)?",
         answers: [
             { id: 1, text: "Có" },
             { id: 2, text: "Không" }
@@ -299,11 +315,6 @@ const additionalQuestions = [
     }
 ];
 
-const handleAnswersSubmit = (answers: Record<number, number>) => {
-    // Xử lý câu trả lời ở đây
-    console.log('Câu trả lời:', answers);
-    // Có thể gửi lên server hoặc xử lý logic khác
-};
 // Xóa interval khi component unmount
 onUnmounted(() => {
     if (timerInterval) {
@@ -319,35 +330,61 @@ const handleSubmit = async () => {
         isProcessing.value = true;
         const response = await diagnosisStore.submitDiagnosis(form.value);
         diagnosisResult.value = response;
+        diagnosisStore.setCurrentDiagnosisId(response.data.id);
         toast.success(response.message);
-        startCooldownTimer(); // Bắt đầu đếm ngược sau khi có kết quả
+        startCooldownTimer();
     } catch (error) {
         console.error(error);
         toast.error('Gửi yêu cầu thất bại. Vui lòng thử lại.');
     } finally {
         isProcessing.value = false;
     }
-}
+};
 
+const handleQuestionSubmit = (response) => {
+    isSecondDiagnosis.value = true;
+    if (diagnosisResult.value) {
+        diagnosisResult.value = {
+            ...diagnosisResult.value,
+            data: {
+                ...diagnosisResult.value.data,
+                result: response.result,
+            }
+        };
+    }
+};
 const handleImageChanged = (file: File | null) => {
     form.value.image = file;
     handleInput('image', file);
 };
 const handlePrint = () => {
-    const content = printFormRef.value?.$el.outerHTML;
+    if (!diagnosisResult.value || !isSecondDiagnosis.value) return;
 
-    if (!content) return;
+    const printFormContent = {
+        patientInfo: {
+            id: diagnosisResult.value.data.id,
+            name: diagnosisResult.value.data.name,
+            age: diagnosisResult.value.data.age,
+            gender: diagnosisResult.value.data.gender,
+            phone: diagnosisResult.value.data.phone,
+            address: diagnosisResult.value.data.address,
+            symptom: diagnosisResult.value.data.symptom,
+            image: diagnosisResult.value.data.image,
+            created_at: diagnosisResult.value.data.created_at
+        },
+        diagnosisResult: diagnosisResult.value.data.result,
+        diseases: diagnosisStore.diagnosedDiseases
+    };
 
-    // Tạo cửa sổ in mới
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // Thiết lập nội dung
+    // Tạo nội dung in
     printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Kết quả chẩn đoán</title>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Kết quả chẩn đoán</title>
             <!-- Bootstrap CSS -->
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
             <!-- Bootstrap Icons -->
@@ -585,7 +622,7 @@ const handlePrint = () => {
             </style>
         </head>
         <body>
-            ${content}
+           ${printFormRef.value?.$el.outerHTML}
             <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js">
 </body>

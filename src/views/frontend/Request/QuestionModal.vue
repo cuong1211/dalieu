@@ -43,7 +43,7 @@
                     <i class="bi bi-x-circle me-1"></i>
                     Hủy bỏ
                 </button>
-                <button class="submit-button" @click="submitAnswers" :disabled="!isAllAnswered">
+                <button class="submit-button" @click="handleSubmit" :disabled="!isAllAnswered">
                     <i class="bi bi-check-circle me-1" style="color: white;"></i>
                     Hoàn thành
                 </button>
@@ -54,22 +54,19 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-
-interface Question {
-    text: string;
-    answers: Array<{
-        id: number;
-        text: string;
-    }>;
-}
+import { useDiagnosisStore } from '@/stores/diagnosisStore';
+import { useToast } from 'vue-toastification';
+import type { SymptomQuestion } from '@/types/diagnosis';
 
 interface Props {
     show: boolean;
-    questions: Question[];
+    questions: SymptomQuestion[];
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['close', 'submit']);
+const toast = useToast();
+const diagnosisStore = useDiagnosisStore();
 
 const selectedAnswers = ref<Record<number, number>>({});
 
@@ -77,17 +74,37 @@ const isAllAnswered = computed(() => {
     return props.questions.every((_, index) => selectedAnswers.value[index] !== undefined);
 });
 
+const formatAnswers = () => {
+    return Object.entries(selectedAnswers.value).map(([index, answerId]) => ({
+        id: Number(index) + 1,
+        answer: answerId === 1
+    }));
+};
+
+const handleSubmit = async () => {
+    if (!isAllAnswered.value) {
+        toast.warning('Vui lòng trả lời tất cả các câu hỏi');
+        return;
+    }
+
+    try {
+        const payload = {
+            diseases: diagnosisStore.allDiseaseIds,
+            symptoms: formatAnswers()
+        };
+
+        const response = await diagnosisStore.submitAdditionalDiagnosis(payload);
+        toast.success('Cập nhật chẩn đoán thành công');
+        emit('submit', response);
+        emit('close');
+    } catch (error) {
+        console.error('Lỗi khi gửi câu trả lời:', error);
+        toast.error('Có lỗi xảy ra khi cập nhật chẩn đoán');
+    }
+};
 const selectAnswer = (questionIndex: number, answerId: number) => {
     selectedAnswers.value[questionIndex] = answerId;
 };
-
-const submitAnswers = () => {
-    if (isAllAnswered.value) {
-        emit('submit', selectedAnswers.value);
-        close();
-    }
-};
-
 const close = () => {
     emit('close');
     selectedAnswers.value = {};
@@ -114,9 +131,11 @@ const close = () => {
     border-radius: 16px;
     width: 90%;
     max-width: 600px;
-    height: 90vh; /* Chiều cao cố định */
+    height: 90vh;
+    /* Chiều cao cố định */
     display: flex;
-    flex-direction: column; /* Sắp xếp các phần tử theo chiều dọc */
+    flex-direction: column;
+    /* Sắp xếp các phần tử theo chiều dọc */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -128,13 +147,16 @@ const close = () => {
     align-items: center;
     background-color: #f8fafc;
     border-radius: 16px 16px 0 0;
-    flex-shrink: 0; /* Không co lại */
+    flex-shrink: 0;
+    /* Không co lại */
 }
 
 .modal-body {
     padding: 1.5rem;
-    overflow-y: auto; /* Chỉ phần content có scroll */
-    flex-grow: 1; /* Chiếm phần không gian còn lại */
+    overflow-y: auto;
+    /* Chỉ phần content có scroll */
+    flex-grow: 1;
+    /* Chiếm phần không gian còn lại */
 }
 
 .modal-footer {
@@ -145,7 +167,8 @@ const close = () => {
     gap: 1rem;
     background-color: #f8fafc;
     border-radius: 0 0 16px 16px;
-    flex-shrink: 0; /* Không co lại */
+    flex-shrink: 0;
+    /* Không co lại */
 }
 
 .modal-title {
