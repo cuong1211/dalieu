@@ -94,11 +94,20 @@
             <div v-if="diagnosisResult" class="diagnosis-section">
                 <FormCard title="Kết quả chẩn đoán">
                     <div class="action-buttons mb-4">
-                        <button @click="handlePrint" class="print-button">
-                            <i class="bi bi-printer"></i>
-                            In kết quả
+                        <div class="note-box">
+                            <p class="note-text">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Để có kết quả chính xác hơn, bạn có thể trả lời thêm một số câu hỏi
+                            </p>
+                        </div>
+                        <button @click="showQuestionModal = true" class="answer-more-btn">
+                            <i class="bi bi-question-circle"></i>
+                            Trả lời thêm câu hỏi
                         </button>
                     </div>
+
+                    <QuestionModal :show="showQuestionModal" :questions="additionalQuestions"
+                        @close="showQuestionModal = false" @submit="handleAnswersSubmit" />
                     <div class="diagnosis-content">
                         <!-- Kết quả chẩn đoán -->
                         <div class="result-box mb-4">
@@ -185,6 +194,7 @@ import { useDiagnosisStore } from '@/stores/diagnosisStore';
 import type { RequestResponse, } from '@/types/request';
 import DiagnosisPrintForm from './DiagnosisPrintForm.vue';
 import LoadingOverlay from './LoadingOverlay.vue';
+import QuestionModal from './QuestionModal.vue';
 const isProcessing = ref(false);
 const diagnosisResult = ref<RequestResponse | null>(null);
 
@@ -240,6 +250,60 @@ const startCooldownTimer = () => {
     }, 1000);
 };
 
+
+// Thêm vào phần script setup
+const showQuestionModal = ref(false);
+
+const additionalQuestions = [
+    {
+        text: "Vùng da bị tổn thương có ngứa không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Triệu chứng có xuất hiện đột ngột không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Bạn có tiền sử dị ứng không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Vùng da bị tổn thương có đau không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Triệu chứng có lan rộng ra các vùng khác không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    },
+    {
+        text: "Trong gia đình có ai mắc bệnh da liễu tương tự không?",
+        answers: [
+            { id: 1, text: "Có" },
+            { id: 2, text: "Không" }
+        ]
+    }
+];
+
+const handleAnswersSubmit = (answers: Record<number, number>) => {
+    // Xử lý câu trả lời ở đây
+    console.log('Câu trả lời:', answers);
+    // Có thể gửi lên server hoặc xử lý logic khác
+};
 // Xóa interval khi component unmount
 onUnmounted(() => {
     if (timerInterval) {
@@ -772,8 +836,7 @@ const handlePrint = () => {
 
 .action-buttons {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+    gap: 8rem;
 }
 
 .print-button {
@@ -1039,5 +1102,44 @@ const handlePrint = () => {
 
 .submit-button:not(:disabled):active {
     transform: translateY(0px);
+}
+
+.note-box {
+    background-color: #f8fafc;
+    border-left: 4px solid #3b82f6;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.note-text {
+    color: #334155;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.answer-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: fit-content;
+}
+
+.answer-more-btn:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.answer-more-btn i {
+    font-size: 1.1rem;
 }
 </style>
