@@ -61,8 +61,8 @@
                     </div>
                 </FormCard>
 
-                <LoadingOverlay :show="isProcessing" title="Đang xử lý yêu cầu"
-                    description="Hệ thống đang phân tích triệu chứng của bạn..." />
+                <LoadingOverlay :show="isProcessing || isAudioLoading" :title="loadingTitle"
+                    :description="loadingDescription" />
 
                 <!-- Cập nhật nút submit -->
                 <div class="form-actions" v-if="!isSecondDiagnosis">
@@ -103,13 +103,13 @@
                                 </p>
                             </div>
                             <button @click="showQuestionModal = true" class="answer-more-btn">
-                                <i class="bi bi-question-circle"></i>
+                                <i class="bi bi-question-circle" style="color: white;"></i>
                                 Trả lời thêm câu hỏi
                             </button>
                         </template>
                         <template v-else>
                             <button @click="handlePrint" class="print-button ">
-                                <i class="bi bi-printer"></i>
+                                <i class="bi bi-printer" style="color: white;"></i>
                                 In kết quả
                             </button>
                         </template>
@@ -118,6 +118,15 @@
                     <div class="diagnosis-content">
                         <!-- Kết quả chẩn đoán -->
                         <div class="result-box mb-4">
+                            <div class="result-header">
+                                <h5 class="result-title">
+                                    <i class="bi bi-clipboard2-pulse me-2"></i>
+                                    Kết luận
+                                </h5>
+                                <AudioPlayer v-if="diagnosisResult?.data.result" :key="audioKey"
+                                    :text="diagnosisResult.data.result" voice="female" :speed="0" :autoplay="true"
+                                    @audioReady="handleAudioReady" @audioError="handleAudioError" />
+                            </div>
                             <p class="result-text">{{ diagnosisResult.data.result }}</p>
                         </div>
 
@@ -182,10 +191,13 @@ import DiagnosisPrintForm from './DiagnosisPrintForm.vue';
 import LoadingOverlay from './LoadingOverlay.vue';
 import QuestionModal from './QuestionModal.vue';
 import type { AdditionalDiagnosisResponse } from '@/types/diagnosis';
+import AudioPlayer from '@/components/AudioPlayer/AudioPlayer.vue';
 import DiseaseList from './DiseaseList.vue';
 const isProcessing = ref(false);
-const diagnosisResult = ref<RequestResponse | null>(null);
+const isAudioLoading = ref(false);
 
+const diagnosisResult = ref<RequestResponse | null>(null);
+const audioKey = ref(0);
 const toast = useToast();
 const printFormRef = ref<InstanceType<typeof DiagnosisPrintForm> | null>(null);
 const diagnosisStore = useDiagnosisStore();
@@ -321,39 +333,73 @@ onUnmounted(() => {
         clearInterval(timerInterval);
     }
 });
+const loadingTitle = computed(() => {
+    if (isAudioLoading.value) return 'Đang tạo giọng đọc';
+    return 'Đang xử lý';
+});
 
+const loadingDescription = computed(() => {
+    if (isAudioLoading.value) return 'Vui lòng đợi trong khi chúng tôi chuẩn bị giọng đọc...';
+    return 'Hệ thống đang phân tích triệu chứng của bạn...';
+});
 // Cập nhật hàm handleSubmit
 const handleSubmit = async () => {
-    if (!validateForm()) return;
-
+    if (!validateForm()) {
+        toast.error('Vui lòng kiểm tra lại thông tin đã nhập');
+        return;
+    }
     try {
         isProcessing.value = true;
+        isAudioLoading.value = true; // Thêm flag audio loading
         const response = await diagnosisStore.submitDiagnosis(form.value);
         diagnosisResult.value = response;
+        audioKey.value++; // Tăng key để reset AudioPlayer
         diagnosisStore.setCurrentDiagnosisId(response.data.id);
-        console.log(response);
-        
         toast.success(response.message);
         startCooldownTimer();
     } catch (error) {
         console.error(error);
         toast.error('Gửi yêu cầu thất bại. Vui lòng thử lại.');
+        isAudioLoading.value = false; // Reset flag nếu có lỗi
     } finally {
         isProcessing.value = false;
     }
 };
 
-const handleQuestionSubmit = (response) => {
-    isSecondDiagnosis.value = true;
-    if (diagnosisResult.value) {
-        diagnosisResult.value = {
-            ...diagnosisResult.value,
-            data: {
-                ...diagnosisResult.value.data,
-                result: response.result,
-            }
-        };
+const handleQuestionSubmit = async (response: any) => {
+    try {
+        // Cập nhật trạng thái
+        isSecondDiagnosis.value = true;
+        isAudioLoading.value = true; // Thêm flag audio loading
+
+        // Cập nhật kết quả chẩn đoán
+        if (diagnosisResult.value) {
+            diagnosisResult.value = {
+                ...diagnosisResult.value,
+                data: {
+                    ...diagnosisResult.value.data,
+                    result: response.result,
+                }
+            };
+
+            // Tăng audioKey để reset audio player
+            audioKey.value++;
+
+            // Đóng modal
+            showQuestionModal.value = false;
+        }
+    } catch (error) {
+        console.error('Lỗi khi cập nhật kết quả:', error);
+        toast.error('Có lỗi xảy ra khi cập nhật kết quả');
+        isAudioLoading.value = false; // Reset flag nếu có lỗi
     }
+};
+const handleAudioReady = () => {
+    isAudioLoading.value = false;
+};
+
+const handleAudioError = () => {
+    isAudioLoading.value = false;
 };
 const handleImageChanged = (file: File | null) => {
     form.value.image = file;
@@ -1180,5 +1226,12 @@ const handlePrint = () => {
 
 .answer-more-btn i {
     font-size: 1.1rem;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 </style>

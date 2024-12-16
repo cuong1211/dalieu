@@ -65,7 +65,7 @@
                         </div>
                         <div class="timeline-content">
                             <div class="timeline-icon">
-                                <i :class="getTimelineIcon(index)"></i>
+                                <i :class="getTimelineIcon(index)" style="color: black;"></i>
                             </div>
                             <div class="timeline-body">
                                 <h3 class="timeline-title">{{ milestone.title }}</h3>
@@ -278,6 +278,7 @@ const developmentTimeline = ref<Milestone[]>([
     color: #fff;
     padding: 0.5rem 1rem;
     border-radius: 2rem;
+    right: 0 !important;
 }
 
 @media (max-width: 768px) {

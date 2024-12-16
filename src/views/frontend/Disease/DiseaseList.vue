@@ -2,7 +2,7 @@
   <div class="container my-8">
     <div class="row">
       <div class="col-lg-12">
-        <!-- Search and filters -->
+        <!-- Search -->
         <div class="card mb-6">
           <div class="card-body">
             <div class="d-flex align-items-center">
@@ -17,14 +17,16 @@
           </div>
         </div>
 
-        <!-- Disease list -->
-        <div v-if="loading" class="text-center py-8">
+        <!-- Loading -->
+        <div v-if="loading" class="d-flex justify-content-center align-items-center" style="height: 400px;">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Đang tải...</span>
           </div>
         </div>
+
+        <!-- Disease list -->
         <div v-else class="row g-6">
-          <div v-for="disease in filteredDiseases" :key="disease.id" class="col-md-6">
+          <div v-for="disease in diseases" :key="disease.id" class="col-md-6">
             <div class="card h-100">
               <div class="card-body d-flex flex-column">
                 <div class="mb-5">
@@ -64,72 +66,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDiseasesStore } from '@/stores/DiseasesStore';
 import PaginationPage from '@/components/Pagination/PaginationPage.vue';
-// Store
+import { useToast } from 'vue-toastification';
+import { api } from '@/utils/api';
+import type { PaginatedResponse } from '@/types/common';
+import type { Disease } from '@/types/disease';
+
+// Store & Refs
+const toast = useToast();
 const diseasesStore = useDiseasesStore();
 const { diseases, pagination, loading } = storeToRefs(diseasesStore);
-
-// State
 const searchQuery = ref('');
-const selectedCategory = ref<number | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
 
-// Mock categories (thay thế bằng API thực tế sau)
-const categories = ref([
-  { id: '', name: 'Tất cả', count: 20 },
-]);
-
-// Computed
-const filteredDiseases = computed(() => {
-  let result = diseases.value;
-
-  if (selectedCategory.value) {
-    // Thêm logic lọc theo category khi có API thực tế
-  }
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    result = result.filter(disease =>
-      disease.name.toLowerCase().includes(query) ||
-      disease.symptom.toLowerCase().includes(query)
-    );
-  }
-
-  return result;
-});
-
-const totalPages = computed(() => {
-  if (!pagination.value) return 1;
-  return Math.ceil(pagination.value.total / pageSize.value);
-});
-
-// Methods
-const filterByCategory = (categoryId: number) => {
-  selectedCategory.value = selectedCategory.value === categoryId ? null : categoryId;
-  currentPage.value = 1;
-  fetchData();
-};
-
-const handleSearch = () => {
-  currentPage.value = 1;
-  fetchData();
-};
-
-const changePage = async (page: number) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-  await fetchData();
-};
-
+// API Methods
 const fetchData = async () => {
   try {
     await diseasesStore.fetchDiseases(currentPage.value, pageSize.value);
   } catch (error) {
-    console.error('Error fetching diseases:', error);
+    console.error('Lỗi khi tải dữ liệu:', error);
+    toast.error('Không thể tải dữ liệu. Vui lòng thử lại.');
+  }
+};
+
+const handleSearch = async () => {
+  try {
+    if (!searchQuery.value || searchQuery.value === '0') {
+      await fetchData();
+      return;
+    }
+
+    currentPage.value = 1;
+    const response = await api.get<PaginatedResponse<Disease>>('/diseases', {
+      params: {
+        search: searchQuery.value,
+        'page-no': currentPage.value,
+        'page-size': pageSize.value
+      }
+    });
+
+    diseases.value = response.data;
+    pagination.value = response.pagination;
+  } catch (error) {
+    console.error('Lỗi khi tìm kiếm:', error);
+    toast.error('Tìm kiếm thất bại. Vui lòng thử lại.');
+  }
+};
+
+const changePage = async (page: number) => {
+  currentPage.value = page;
+  if (searchQuery.value) {
+    await handleSearch();
+  } else {
+    await fetchData();
   }
 };
 

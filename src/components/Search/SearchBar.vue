@@ -1,6 +1,5 @@
 <template>
     <div class="d-flex align-items-center position-relative my-1">
-        <!--begin::Svg Icon | path: icons/duotune/general/gen021.svg-->
         <span class="svg-icon svg-icon-1 position-absolute ms-6">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1"
@@ -10,20 +9,74 @@
                     fill="black" />
             </svg>
         </span>
-        <!--end::Svg Icon-->
-        <input type="text" data-kt-user-table-filter="search" class="form-control form-control-solid w-250px ps-14"
-            placeholder="Tìm kiếm" />
+        <input 
+            type="text" 
+            v-model="searchValue"
+            class="form-control form-control-solid w-250px ps-14"
+            placeholder="Tìm kiếm..."
+            @input="handleSearchInput"
+            @keyup.enter="handleSearch"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
+import { debounce } from 'lodash';
 
-const searchQuery = ref('');
+interface SearchEmits {
+  (event: 'search', value: string): void;
+}
 
-const emits = defineEmits(['search']);
+const emit = defineEmits<SearchEmits>();
 
-const handleSearch = () => {
-    emits('search', searchQuery.value);
+const searchValue = ref<string>('');
+
+// Debounce search để tránh gọi API quá nhiều
+const debouncedSearch = debounce((value: string) => {
+    emit('search', value);
+}, 500);
+
+// Xử lý input
+const handleSearchInput = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    searchValue.value = input.value;
+    debouncedSearch(searchValue.value);
 };
+
+// Xử lý khi nhấn Enter
+const handleSearch = (): void => {
+    emit('search', searchValue.value);
+};
+
+// Hủy debounce khi component unmount
+onUnmounted(() => {
+    debouncedSearch.cancel();
+});
 </script>
+
+<style scoped>
+.svg-icon {
+    line-height: 1;
+}
+
+.form-control-solid {
+    background-color: #f5f8fa;
+    border-color: #f5f8fa;
+    color: #5e6278;
+    transition: color 0.2s ease;
+}
+
+.form-control-solid:focus {
+    background-color: #eef3f7;
+    border-color: #eef3f7;
+}
+
+.ps-14 {
+    padding-left: 3.5rem !important;
+}
+
+.w-250px {
+    width: 250px !important;
+}
+</style>

@@ -32,6 +32,9 @@ import { useToast } from 'vue-toastification';
 import { useDiseasesStore } from '@/stores/DiseasesStore';
 import DiseasesTable from '@/components/Pages/Diseases/DiseasesTable.vue';
 import SearchBar from '@/components/Search/SearchBar.vue';
+import { api } from '@/utils/api';
+import type { PaginatedResponse } from '@/types/common';
+import type { Disease } from '@/types/disease';
 
 const toast = useToast();
 const router = useRouter();
@@ -42,8 +45,11 @@ const pageSize = ref(10);
 
 const fetchData = async () => {
     try {
-        await diseasesStore.fetchDiseases(currentPage.value, pageSize.value);
+        await Promise.all([
+            diseasesStore.fetchDiseases(currentPage.value, pageSize.value),
+        ]);
     } catch (error) {
+        console.error('Lỗi khi tải dữ liệu:', error);
         toast.error('Không thể tải dữ liệu. Vui lòng thử lại.');
     }
 };
@@ -53,8 +59,25 @@ onMounted(() => {
 });
 
 const handleSearch = async (query: string) => {
-    // Implement search logic here
-    await fetchData();
+    try {
+        if (!query || query === '0') {
+            await fetchData();
+            return;
+        }
+        const response = await api.get<PaginatedResponse<Disease>>('/diseases', {
+            params: {
+                search: query,
+                'page-no': currentPage.value,
+                'page-size': pageSize.value
+            }
+        });
+        // Cập nhật diseases và pagination từ response
+        diseases.value = response.data;
+        pagination.value = response.pagination;
+    } catch (error) {
+        console.error('Lỗi khi tìm kiếm:', error);
+        toast.error('Tìm kiếm thất bại. Vui lòng thử lại.');
+    }
 };
 
 const handleAdd = () => {

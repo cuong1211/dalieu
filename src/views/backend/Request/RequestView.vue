@@ -4,7 +4,7 @@
             <div class="card-title">
                 <SearchBar @search="handleSearch" />
             </div>
-            
+
         </div>
         <div class="card-body pt-0">
             <div v-if="loading" class="d-flex justify-content-center align-items-center" style="height: 400px;">
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useRequestStore } from '@/stores/requestStore';
@@ -27,6 +27,10 @@ import { useToast } from 'vue-toastification';
 import SearchBar from '@/components/Search/SearchBar.vue';
 import AddButton from '@/components/Button/AddButton.vue';
 import RequestTable from '@/components/Pages/Request/RequestTable.vue';
+import { api } from '@/utils/api';
+import type { PaginatedResponse } from '@/types/common';
+import type { Request } from '@/types/request';
+
 const toast = useToast();
 const router = useRouter();
 const requestStore = useRequestStore();
@@ -34,15 +38,15 @@ const { requests, pagination, loading } = storeToRefs(requestStore);
 const currentPage = ref(1);
 const pageSize = ref(10);
 
-
+// Hàm fetch data ban đầu 
 const fetchData = async () => {
     try {
         await Promise.all([
             requestStore.fetchRequest(currentPage.value, pageSize.value),
         ]);
     } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load data. Please try again.');
+        console.error('Lỗi khi tải dữ liệu:', error);
+        toast.error('Không thể tải dữ liệu. Vui lòng thử lại.');
     }
 };
 
@@ -50,11 +54,33 @@ onMounted(() => {
     fetchData();
 });
 
+// Sửa lại hàm handleSearch
 const handleSearch = async (query: string) => {
-    // Implement search logic here
-    await fetchData();
+    try {
+        if (!query || query === '0') {
+            await fetchData();
+            return;
+        }
+
+        const response = await api.get<PaginatedResponse<Request>>('/patients', {
+            params: {
+                search: query,
+                'page-no': currentPage.value,
+                'page-size': pageSize.value
+            }
+        });
+
+        // Cập nhật requests và pagination từ response
+        requests.value = response.data;
+        pagination.value = response.pagination;
+
+    } catch (error) {
+        console.error('Lỗi khi tìm kiếm:', error);
+        toast.error('Tìm kiếm thất bại. Vui lòng thử lại.');
+    }
 };
 
+// Các hàm khác giữ nguyên
 const handleAdd = () => {
     router.push({ name: 'request.create' });
 };
