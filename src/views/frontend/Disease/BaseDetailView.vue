@@ -1,71 +1,68 @@
 <template>
     <div class="container my-8">
+        <!-- Loading & Error states -->
         <div v-if="loading" class="text-center py-8">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Đang tải...</span>
             </div>
         </div>
+
         <template v-else-if="disease">
             <div class="row">
-                <!-- Main content -->
+                <!-- Main Content -->
                 <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-body p-lg-8">
-                            <!-- Disease header -->
-                            <div class="d-flex flex-column flex-md-row align-items-md-center mb-8">
-                                <div class="d-flex align-items-center mb-4 mb-md-0">
-                                    <div class="symbol symbol-100px me-4">
-                                        <div class="symbol-label bg-light">
-                                            <i class="bi bi-clipboard-data fs-2x text-primary"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h1 class="fs-2 fw-bolder mb-1">{{ disease.name }}</h1>
-                                        <div class="text-gray-600">Mã bệnh: {{ disease.code }}</div>
+                    <div class="content-card">
+                        <!-- Header Section -->
+                        <div class="disease-header">
+                            <div class="d-flex align-items-center">
+                                <div class="disease-icon">
+                                    <div class="icon-wrapper">
+                                        <i class="bi bi-clipboard-data fs-2x" style="color: #5891d1;"></i>
                                     </div>
                                 </div>
+                                <div>
+                                    <h1 class="disease-title">{{ disease.name }}</h1>
+                                    <div class="disease-code">Mã bệnh: {{ disease.code }}</div>
+                                </div>
                             </div>
+                        </div>
 
-                            <!-- Disease sections -->
-                            <div class="mb-8">
-                                <h2 class="fs-3 fw-bold mb-4">Triệu chứng</h2>
-                                <div class="text-gray-700" v-html="disease.symptom"></div>
-                            </div>
+                        <!-- Content Sections -->
+                        <div id="symptoms" class="content-section">
+                            <h2 class="section-title">
+                                <i class="bi bi-activity me-2"></i>
+                                Triệu chứng
+                            </h2>
+                            <div class="content-text" v-html="disease.symptom"></div>
+                        </div>
 
-                            <div class="mb-8">
-                                <h2 class="fs-3 fw-bold mb-4">Phương pháp điều trị</h2>
-                                <div class="text-gray-700" v-html="disease.treatment"></div>
-                            </div>
+                        <div id="treatment" class="content-section">
+                            <h2 class="section-title">
+                                <i class="bi bi-bandaid me-2"></i>
+                                Phương pháp điều trị
+                            </h2>
+                            <div class="content-text" v-html="disease.treatment"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sidebar -->
                 <div class="col-lg-4">
-                    <!-- Table of contents -->
-                    <div class="card mb-6">
-                        <div class="card-header">
-                            <h3 class="card-title">Mục lục</h3>
+                    <div class="sidebar-card">
+                        <div class="sidebar-header">
+                            <i class="bi bi-list-ul me-2"></i>
+                            Mục lục
                         </div>
-                        <div class="card-body">
-                            <div class="menu menu-column menu-rounded menu-sub-indention">
-                                <div class="menu-item">
-                                    <a href="#symptoms" class="menu-link" @click="scrollToSection($event, 'symptoms')">
-                                        <span class="menu-bullet">
-                                            <span class="bullet bullet-dot"></span>
-                                        </span>
-                                        <span class="menu-title">Triệu chứng</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="#treatment" class="menu-link"
-                                        @click="scrollToSection($event, 'treatment')">
-                                        <span class="menu-bullet">
-                                            <span class="bullet bullet-dot"></span>
-                                        </span>
-                                        <span class="menu-title">Phương pháp điều trị</span>
-                                    </a>
-                                </div>
+                        <div class="sidebar-content">
+                            <div class="menu-list">
+                                <button class="menu-item" @click="scrollTo('symptoms')">
+                                    <i class="bi bi-journal-bookmark"></i>
+                                    <span>Triệu chứng</span>
+                                </button>
+                                <button class="menu-item" @click="scrollTo('treatment')">
+                                    <i class="bi bi-journal-bookmark"></i>
+                                    <span>Phương pháp điều trị</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -82,7 +79,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDiseasesStore } from '@/stores/DiseasesStore';
-import type { Disease } from '@/types/diseases';
+import type { Disease } from '@/types/disease';
 
 const route = useRoute();
 const diseasesStore = useDiseasesStore();
@@ -90,23 +87,22 @@ const loading = ref(true);
 const disease = ref<Disease | null>(null);
 
 const fetchDiseaseDetail = async () => {
-    const id = parseInt(route.params.id as string, 10);
+    const id = parseInt(route.params.id as string);
     if (isNaN(id)) return;
 
     loading.value = true;
     try {
-        const data = await diseasesStore.fetchDiseaseById(id);
-        disease.value = data;
+        const response = await diseasesStore.fetchDiseaseById(id);
+        disease.value = response;
     } catch (error) {
-        console.error('Error fetching disease detail:', error);
+        console.error('Error fetching disease:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const scrollToSection = (event: Event, sectionId: string) => {
-    event.preventDefault();
-    const element = document.getElementById(sectionId);
+const scrollTo = (elementId: string) => {
+    const element = document.getElementById(elementId);
     if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -118,69 +114,148 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.menu-link {
+.content-card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+}
+
+.disease-header {
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.disease-icon {
+    width: 80px;
+    height: 80px;
+    margin-right: 1.5rem;
+}
+
+.icon-wrapper {
+    width: 100%;
+    height: 100%;
+    background: #f5f8fa;
+    border-radius: 5px;
     display: flex;
     align-items: center;
-    padding: 0.65rem 1rem;
-    color: #181C32;
-    text-decoration: none;
+    justify-content: center;
+    color: #1976d2;
+    border: 1px solid #f5f8fa;
 }
 
-.menu-link:hover {
-    background-color: #F5F8FA;
-    color: #009EF7;
-    transition: all 0.2s ease;
+.disease-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 0.5rem;
 }
 
-.bullet-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 100%;
-    background-color: #B5B5C3;
-    display: inline-block;
-    margin-right: 0.75rem;
+.disease-code {
+    color: #5c6bc0;
+    font-size: 1rem;
 }
 
-:deep(.text-gray-700) {
+.content-section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a237e;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e3f2fd;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #1976d2;
+}
+
+.content-text {
+    color: #37474f;
     line-height: 1.8;
+    font-size: 1.1rem;
 }
 
-:deep(h2) {
-    color: #181C32;
+.sidebar-card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a237e;
+    display: flex;
+    align-items: center;
+}
+
+.menu-list {
+    padding: 1rem;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #37474f;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.menu-item:hover {
+    background: #e3f2fd;
+    color: #1976d2;
+    transform: translateX(5px);
+}
+
+.menu-item i {
+    color: #1976d2;
+}
+
+:deep(.content-text h3) {
+    color: #1a237e;
+    font-size: 1.3rem;
+    margin: 1.5rem 0 1rem;
+}
+
+:deep(.content-text p) {
     margin-bottom: 1rem;
 }
 
-:deep(p) {
-    margin-bottom: 1rem;
-}
-
-:deep(ul) {
-    list-style-type: disc;
+:deep(.content-text ul) {
+    list-style-type: none;
     padding-left: 1.5rem;
     margin-bottom: 1rem;
 }
 
-:deep(li) {
-    margin-bottom: 0.5rem;
-}
-
-.symbol {
-    display: inline-block;
-    flex-shrink: 0;
+:deep(.content-text li) {
     position: relative;
-    border-radius: 0.475rem;
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
 }
 
-.symbol-label {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.475rem;
-}
-
-.menu-item {
-    margin-bottom: 0.15rem;
+:deep(.content-text li::before) {
+    content: "•";
+    color: #1976d2;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
 }
 </style>
