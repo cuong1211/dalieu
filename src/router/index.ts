@@ -61,6 +61,7 @@ const routes = [
           }
         ]
       },
+      { path: 'contact', name: 'contact', component: () => import('@/views/frontend/Contact/ContactView.vue'),meta: { hideFooter: true } },
     ],
   },
   {
