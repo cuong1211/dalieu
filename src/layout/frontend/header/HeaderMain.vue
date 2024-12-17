@@ -52,7 +52,7 @@ const menuItems = ref<MenuItem[]>([
     { name: 'request', to: { name: 'request' }, label: 'Tạo yêu cầu' },
     { name: 'search', to: { name: 'search' }, label: 'Tìm kiếm' },
     { name: 'diseases', to: { name: 'diseases' }, label: 'Từ điển bệnh' },
-    { name: 'contact', to: { name: 'contact' }, label: 'Liên hệ' }
+    { name: 'contact', to: { name: 'contact' }, label: 'Khám bệnh cùng chuyên gia' }
 ]);
 const isActive = (name: string): boolean => {
     return route.name === name;

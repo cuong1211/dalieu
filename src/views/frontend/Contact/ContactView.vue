@@ -4,7 +4,7 @@
             <!-- Form Section -->
             <div class="contact-form-section">
                 <div class="form-header">
-                    <h2>Liên Hệ Với Chúng Tôi</h2>
+                    <h2>Khám Bệnh Cùng Chuyên Gia</h2>
                     <p>Hãy để lại thông tin, chúng tôi sẽ liên hệ với bạn sớm nhất</p>
                 </div>
 
