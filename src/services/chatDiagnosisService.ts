@@ -6,7 +6,10 @@ import type {
     DiagnosisRespondResponse
 } from '@/types/chatDiagnosis';
 
-const API_BASE_URL = 'http://14.225.211.5:8080';
+// Sử dụng proxy path để bypass CORS
+// Development: /api/diagnosis sẽ được proxy tới http://14.225.211.5:8080/diagnosis
+// Production: Cần cấu hình nginx/server để proxy hoặc backend phải enable CORS
+const API_BASE_URL = import.meta.env.DEV ? '/api/diagnosis' : 'http://14.225.211.5:8080/diagnosis';
 
 /**
  * Service để xử lý API chat diagnosis
@@ -32,7 +35,7 @@ class ChatDiagnosisService {
             };
 
             const response = await axios.post<DiagnosisStartResponse>(
-                `${API_BASE_URL}/diagnosis/start`,
+                `${API_BASE_URL}/start`,
                 payload,
                 {
                     headers: {
@@ -68,7 +71,7 @@ class ChatDiagnosisService {
             };
 
             const response = await axios.post<DiagnosisRespondResponse>(
-                `${API_BASE_URL}/diagnosis/respond`,
+                `${API_BASE_URL}/respond`,
                 payload,
                 {
                     headers: {
