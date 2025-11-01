@@ -124,6 +124,7 @@ import DiagnosisReportPrint from '@/components/DiagnosisReport/DiagnosisReportPr
 import { useRequestValidation } from '@/utils/validations/requestValidation';
 import { useToast } from 'vue-toastification';
 import chatDiagnosisService from '@/services/chatDiagnosisService';
+import diseasesService from '@/services/diseasesService';
 
 const isProcessing = ref(false);
 const toast = useToast();
@@ -448,24 +449,30 @@ const handleReset = () => {
 };
 
 // Handle print report
-const handlePrintReport = () => {
+const handlePrintReport = async () => {
     // Create a new window to display the report print component
     const printWindow = window.open('', '', 'height=800,width=1000');
     if (printWindow) {
-        // Get the HTML content for the report
-        const reportHTML = generateReportHTML();
-        printWindow.document.write(reportHTML);
-        printWindow.document.close();
+        try {
+            // Get the HTML content for the report (now async)
+            const reportHTML = await generateReportHTML();
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
 
-        // Wait for content to load, then print
-        setTimeout(() => {
-            printWindow.print();
-        }, 250);
+            // Wait for content to load, then print
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        } catch (error) {
+            console.error('Error generating report:', error);
+            toast.error('Lỗi khi tạo báo cáo');
+            printWindow.close();
+        }
     }
 };
 
 // Generate report HTML matching Word template exactly
-const generateReportHTML = () => {
+const generateReportHTML = async () => {
     const top5Diseases = diagnosisSession.value.top5Diseases || [];
     const primaryDisease = top5Diseases[0];
     const otherDiseases = top5Diseases.slice(1);
@@ -502,6 +509,45 @@ const generateReportHTML = () => {
     const otherDiseasesList = otherDiseases.map(disease =>
         `- ${disease.disease || ''} (${(disease.probability * 100).toFixed(1)}%)`
     ).join('<br/>');
+
+    // Fetch disease details for treatment and prevention
+    let treatmentContent = '';
+    let preventionContent = '';
+
+    if (primaryDisease && (primaryDisease as any).id) {
+        try {
+            const diseaseDetail = await diseasesService.getDiseaseByCode((primaryDisease as any).id);
+            if (diseaseDetail) {
+                if (diseaseDetail.treatment) {
+                    treatmentContent = diseasesService.extractTreatmentContent(diseaseDetail.treatment);
+                }
+                // Note: prevention field is added in the API response based on your spec
+                if ((diseaseDetail as any).prevention) {
+                    preventionContent = diseasesService.extractPreventionContent((diseaseDetail as any).prevention);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching disease details:', error);
+        }
+    }
+
+    // Format treatment content to HTML
+    const treatmentHTML = treatmentContent
+        ? treatmentContent
+            .split('\n')
+            .filter(line => line.trim().length > 0)
+            .map(line => `<div class="info-row" style="margin-left: 20px;">${line.trim()}</div>`)
+            .join('')
+        : '<div class="info-row" style="margin-left: 20px;">Chưa có dữ liệu</div>';
+
+    // Format prevention content to HTML
+    const preventionHTML = preventionContent
+        ? preventionContent
+            .split('\n')
+            .filter(line => line.trim().length > 0)
+            .map(line => `<div class="info-row" style="margin-left: 20px;">${line.trim()}</div>`)
+            .join('')
+        : '<div class="info-row" style="margin-left: 20px;">Chưa có dữ liệu</div>';
 
     return `
         <!DOCTYPE html>
@@ -665,7 +711,6 @@ const generateReportHTML = () => {
                 <div class="info-row" style="margin-left: 20px;">
                     <strong>Bệnh:</strong> ${primaryDisease.disease || ''}<br/>
                     <strong>Xác suất:</strong> ${(primaryDisease.probability * 100).toFixed(1)}%<br/>
-                    <strong>Mô tả:</strong> ${primaryDisease.rationale || ''}
                 </div>
                 ` : `
                 <div class="info-row" style="margin-left: 20px;">
@@ -690,25 +735,14 @@ const generateReportHTML = () => {
                 <div class="section-title">PHẦN 3: ĐỀ XUẤT PHƯƠNG PHÁP ĐIỀU TRỊ</div>
 
                 <div class="info-row">
-                    <strong>3.1. Nguyên tắc điều trị</strong>
+                    <strong>3.1. Đề xuất điều trị cụ thể</strong>
                 </div>
-                <div class="info-row" style="margin-left: 20px;">
-                    <p class="dotted-line">............</p>
-                </div>
+                ${treatmentHTML || '<div class="info-row" style="margin-left: 20px;">Chưa có dữ liệu</div>'}
 
                 <div class="info-row">
-                    <strong>3.2. Đề xuất điều trị cụ thể</strong>
+                    <strong>3.2. Phòng bệnh</strong>
                 </div>
-                <div class="info-row" style="margin-left: 20px;">
-                    <p class="dotted-line">............</p>
-                </div>
-
-                <div class="info-row">
-                    <strong>3.3. Phòng bệnh.</strong>
-                </div>
-                <div class="info-row" style="margin-left: 20px;">
-                    <p class="dotted-line">............</p>
-                </div>
+                ${preventionHTML || '<div class="info-row" style="margin-left: 20px;">Chưa có dữ liệu</div>'}
 
                 <!-- Footer Note -->
                 <div class="footer-note">

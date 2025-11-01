@@ -9,7 +9,7 @@ import type {
 // Sử dụng proxy path để bypass CORS
 // Development: /api/diagnosis sẽ được proxy tới http://14.225.211.5:8080/diagnosis
 // Production: Cần cấu hình nginx/server để proxy hoặc backend phải enable CORS
-const API_BASE_URL = import.meta.env.DEV ? '/api/diagnosis' : 'http://14.225.211.5:8080/diagnosis';
+const API_BASE_URL = import.meta.env.VITE_API_CHAT ? '/api/diagnosis' : 'http://14.225.211.5:8080/diagnosis';
 
 /**
  * Service để xử lý API chat diagnosis

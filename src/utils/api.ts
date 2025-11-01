@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores/auth'; // Import the auth store
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL
+export const API_BASE_URL = import.meta.env.VITE_API_DF
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

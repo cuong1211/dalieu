@@ -8,6 +8,12 @@ interface ValidationRule {
     errorMessage: string;
 }
 
+interface SymptomValidationResult {
+    isValid: boolean;
+    reason: string;
+    suggestion: string;
+}
+
 // Các rules validate riêng cho từng trường
 const identificationRules: ValidationRule = {
     validate: (value: string): boolean => {
@@ -17,8 +23,119 @@ const identificationRules: ValidationRule = {
     errorMessage: 'Số CCCD phải đủ 12 số'
 };
 
+// Danh sách từ khóa liên quan đến da/bệnh da
+const dermaKeywords = [
+    'da', 'skin', 'ngứa', 'đau', 'nóng', 'rát', 'sưng', 'đỏ', 'mụn', 'vết',
+    'ban', 'vảy', 'phát', 'nổi', 'mủ', 'nước', 'khô', 'ẩm', 'bong', 'tróc',
+    'sẩn', 'mảng', 'chấm', 'điểm', 'vòng', 'dải', 'hình', 'màu', 'trắng', 'vàng',
+    'nâu', 'đen', 'hồng', 'tím', 'bọng', 'chai', 'dày', 'mỏng', 'nứt', 'loét',
+    'viêm', 'nhiễm', 'dị ứng', 'ngứa', 'bệnh', 'triệu chứng', 'tổn thương',
+    'mặt', 'tay', 'chân', 'lưng', 'bụng', 'cánh tay', 'cẳng', 'bàn', 'móng',
+    'tóc', 'đầu', 'cổ', 'vai', 'ngực', 'mông', 'háng', 'nách'
+];
+
+// Danh sách từ khóa ngoài phạm vi
+const outOfScopeKeywords = [
+    'giá', 'bao nhiêu tiền', 'chi phí', 'phí', 'bảo hiểm',
+    'địa chỉ', 'phòng khám', 'bệnh viện', 'bác sĩ nào',
+    'mua thuốc', 'bán thuốc', 'đặt lịch', 'hẹn'
+];
+
 export const useRequestValidation = (form: Ref<DermatologyRequestForm>) => {
     const errors = ref<Partial<Record<keyof DermatologyRequestForm, string>>>({});
+
+    /**
+     * Validate symptom description with comprehensive checks
+     * Matches backend validation logic
+     */
+    const validateSymptom = (text: string): SymptomValidationResult => {
+        const textClean = text.trim();
+
+        // 1. Check minimum length
+        if (textClean.length < 10) {
+            return {
+                isValid: false,
+                reason: 'Mô tả quá ngắn',
+                suggestion: 'Vui lòng mô tả chi tiết hơn về triệu chứng của bạn. Ví dụ: vị trí, hình dạng, màu sắc, cảm giác (ngứa, đau, nóng), thời gian xuất hiện, v.v.'
+            };
+        }
+
+        // 2. Check if only special characters or numbers
+        const hasOnlySpecialChars = /^[\d\s\W]+$/.test(textClean);
+        if (hasOnlySpecialChars) {
+            return {
+                isValid: false,
+                reason: 'Nội dung không hợp lệ',
+                suggestion: 'Vui lòng mô tả bằng câu văn có nghĩa về tình trạng da của bạn.'
+            };
+        }
+
+        // 3. Check for dermatology keywords
+        const textLower = textClean.toLowerCase();
+        const hasDermaKeyword = dermaKeywords.some(keyword => textLower.includes(keyword));
+        if (!hasDermaKeyword) {
+            return {
+                isValid: false,
+                reason: 'Nội dung không liên quan đến bệnh da',
+                suggestion: 'Tôi là trợ lý y tế chuyên về bệnh da. Vui lòng mô tả các triệu chứng về da như: vị trí tổn thương, hình dạng, màu sắc, cảm giác (ngứa/đau/nóng), thời gian xuất hiện.'
+            };
+        }
+
+        // 4. Check for vague questions
+        const vaguePatterns = [
+            /^(xin chào|hello|hi|chào)\s*$/i,
+            /^(có ai|có người|ai đó)\s*$/i,
+            /^(giúp|help|trợ giúp)\s*$/i,
+            /^(bạn là ai|you are|what)\s*$/i
+        ];
+
+        for (const pattern of vaguePatterns) {
+            if (pattern.test(textLower)) {
+                return {
+                    isValid: false,
+                    reason: 'Câu hỏi quá chung chung',
+                    suggestion: 'Vui lòng mô tả cụ thể triệu chứng về da của bạn. Ví dụ: "Da tôi bị ngứa và đỏ ở cánh tay, xuất hiện từ 3 ngày trước"'
+                };
+            }
+        }
+
+        // 5. Check word count
+        const words = textClean.split(/\s+/);
+        if (words.length < 5) {
+            return {
+                isValid: false,
+                reason: 'Thông tin chưa đủ chi tiết',
+                suggestion: 'Vui lòng cung cấp thêm thông tin: Vị trí bị ảnh hưởng? Triệu chứng cụ thể? Đã bao lâu? Có ngứa/đau không?'
+            };
+        }
+
+        // 6. Check for spam or repetitive text
+        const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+        const repetitionRatio = uniqueWords.size / words.length;
+        if (words.length > 10 && repetitionRatio < 0.3) {
+            return {
+                isValid: false,
+                reason: 'Nội dung không hợp lệ hoặc spam',
+                suggestion: 'Vui lòng mô tả triệu chứng một cách rõ ràng, không lặp lại từ ngữ.'
+            };
+        }
+
+        // 7. Check for out-of-scope keywords
+        if (outOfScopeKeywords.some(keyword => textLower.includes(keyword))) {
+            return {
+                isValid: false,
+                reason: 'Câu hỏi ngoài phạm vi tư vấn',
+                suggestion: 'Tôi chỉ có thể hỗ trợ chẩn đoán sơ bộ dựa trên triệu chứng. Để biết thông tin về phòng khám, giá cả, vui lòng liên hệ trực tiếp với cơ sở y tế.'
+            };
+        }
+
+        // All checks passed
+        return {
+            isValid: true,
+            reason: 'Input hợp lệ',
+            suggestion: ''
+        };
+    };
 
     // Hàm xử lý validate CCCD
     const validateIdentification = (value: string): string => {
@@ -94,9 +211,18 @@ export const useRequestValidation = (form: Ref<DermatologyRequestForm>) => {
         }
 
         // Validate symptom
-        if (!form.value.symptom?.trim() && !form.value.image) {
+        const symptomTrimmed = form.value.symptom?.trim() || '';
+
+        if (!symptomTrimmed && !form.value.image) {
             errors.value.symptom = 'Vui lòng nhập mô tả triệu chứng hoặc chụp ảnh';
             isValid = false;
+        } else if (symptomTrimmed) {
+            const validationResult = validateSymptom(symptomTrimmed);
+            if (!validationResult.isValid) {
+                // Use suggestion if available, otherwise use reason
+                errors.value.symptom = validationResult.suggestion || validationResult.reason;
+                isValid = false;
+            }
         }
 
         return isValid;
