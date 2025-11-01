@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { Disease } from '@/types/diseases';
 
 // API endpoint for diseases database
-const API_BASE_URL = import.meta.env.VITE_API_DF || 'http://14.225.211.5:8083/api';
+const API_BASE_URL = import.meta.env.VITE_API_DF;
 
 /**
  * Service để xử lý API diseases
@@ -61,7 +61,7 @@ class DiseasesService {
         if (!treatmentHTML) return '';
 
         // Convert HTML to plain text
-        let text = treatmentHTML
+        const text = treatmentHTML
             .replace(/<[^>]*>/g, '') // Remove HTML tags
             .replace(/&nbsp;/g, ' ')
             .replace(/&lt;/g, '<')
