@@ -1,91 +1,102 @@
 <template>
     <!-- Show Form or Chat based on state -->
-    <div v-if="!showChat" class="paper-container">
-        <div class="paper-content">
-            <!-- Header -->
-            <div class="form-header">
-                <h2 class="form-title">
-                    <i class="bi bi-file-medical"></i>
-                    Đăng ký khám bệnh
-                </h2>
-                <p class="form-description">Vui lòng điền đầy đủ thông tin để được tư vấn</p>
+    <div v-if="!showChat" class="request-container">
+
+        <!-- Form Content -->
+        <form class="request-form" @submit.prevent="handleSubmit" novalidate>
+            <div class="form-grid">
+                <!-- Left Column: Personal Information -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Thông tin cá nhân</h3>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <FormInput v-model="form.name" label="Họ và tên" placeholder="Nhập họ và tên"
+                                    :error="errors.name" required @input="(value) => handleInput('name', value)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-half">
+                                <FormInput v-model="form.age" label="Tuổi" placeholder="Nhập tuổi" type="tel"
+                                    :error="errors.age" required @input="(value) => handleInput('age', value)" />
+                            </div>
+                            <div class="form-col-half">
+                                <FormSelect v-model="form.gender" label="Giới tính" placeholder="Chọn giới tính"
+                                    :options="genderOptions" :error="errors.gender" required
+                                    @change="(value) => handleInput('gender', value)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <FormInput v-model="form.identification" label="Số CCCD" placeholder="Nhập số CCCD"
+                                    type="text" maxlength="12" :error="errors.identification" required
+                                    @input="handleIdNumberChange" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <FormInput v-model="form.phone" label="Số điện thoại" placeholder="Nhập số điện thoại"
+                                    type="tel" :error="errors.phone" required
+                                    @input="(value) => handleInput('phone', value)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <FormInput v-model="form.email" label="Email" placeholder="Nhập địa chỉ email" type="email"
+                                    :error="errors.email" @input="(value) => handleInput('email', value)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <FormInput v-model="form.address" label="Địa chỉ" placeholder="Nhập địa chỉ hiện tại"
+                                    :error="errors.address" required @input="(value) => handleInput('address', value)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Symptoms & Image -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Thông tin triệu chứng</h3>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <FormTextarea v-model="form.symptom" label="Mô tả triệu chứng"
+                                    placeholder="Mô tả chi tiết các triệu chứng bạn đang gặp phải" :error="errors.symptom"
+                                    :rows="4" required @input="(value) => handleInput('symptom', value)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-full">
+                                <ImageUploader v-model="form.image" label="Hình ảnh triệu chứng" :error="errors.image"
+                                    required @file-changed="handleImageChanged" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <form class="appointment-form" @submit.prevent="handleSubmit" novalidate>
-                <!-- Thông tin cá nhân -->
-                <FormCard title="Thông tin cá nhân">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <FormInput v-model="form.name" label="Họ và tên" placeholder="Nhập họ và tên"
-                                :error="errors.name" required @input="(value) => handleInput('name', value)" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <FormInput v-model="form.age" label="Tuổi" placeholder="Nhập tuổi" type="tel"
-                                :error="errors.age" required @input="(value) => handleInput('age', value)" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <FormSelect v-model="form.gender" label="Giới tính" placeholder="Chọn giới tính"
-                                :options="genderOptions" :error="errors.gender" required
-                                @change="(value) => handleInput('gender', value)" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <FormInput v-model="form.identification" label="Số CCCD" placeholder="Nhập số CCCD"
-                                type="text" maxlength="12" :error="errors.identification" required
-                                @input="handleIdNumberChange" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <FormInput v-model="form.phone" label="Số điện thoại" placeholder="Nhập số điện thoại"
-                                type="tel" :error="errors.phone" required
-                                @input="(value) => handleInput('phone', value)" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <FormInput v-model="form.email" label="Email" placeholder="Nhập địa chỉ email" type="email"
-                                :error="errors.email" @input="(value) => handleInput('email', value)" />
-                        </div>
-
-                        <div class="col-12">
-                            <FormInput v-model="form.address" label="Địa chỉ" placeholder="Nhập địa chỉ hiện tại"
-                                :error="errors.address" required @input="(value) => handleInput('address', value)" />
-                        </div>
-                    </div>
-                </FormCard>
-
-                <!-- Thông tin triệu chứng -->
-                <FormCard title="Thông tin triệu chứng" class="mt-4">
-                    <div class="row g-4">
-                        <div class="col-12">
-                            <FormTextarea v-model="form.symptom" label="Mô tả triệu chứng"
-                                placeholder="Mô tả chi tiết các triệu chứng bạn đang gặp phải" :error="errors.symptom"
-                                :rows="5" required @input="(value) => handleInput('symptom', value)" />
-                        </div>
-
-                        <div class="col-12">
-                            <ImageUploader v-model="form.image" label="Hình ảnh triệu chứng" :error="errors.image"
-                                required @file-changed="handleImageChanged" />
-                        </div>
-                    </div>
-                </FormCard>
-
-                <!-- Nút submit -->
-                <div class="form-actions">
-                    <button type="submit" class="submit-button" :disabled="isProcessing">
-                        <template v-if="isProcessing">
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                            Đang xử lý...
-                        </template>
-                        <template v-else>
-                            <i class="bi bi-send-fill me-2"></i>
-                            Gửi yêu cầu khám
-                        </template>
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Submit Button -->
+            <div class="form-footer">
+                <button type="submit" class="submit-button" :disabled="isProcessing">
+                    <template v-if="isProcessing">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Đang xử lý...
+                    </template>
+                    <template v-else>
+                        Gửi yêu cầu khám
+                    </template>
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Chat Diagnosis -->
@@ -93,27 +104,34 @@
         v-else
         :session="diagnosisSession"
         :is-loading="isChatLoading"
+        :patient-info="form"
         @send-message="handleSendMessage"
         @reset="handleReset"
+        @print-report="handlePrintReport"
     />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import type { DermatologyRequestForm } from '@/types/request';
 import type { DiagnosisSession, ChatMessage } from '@/types/chatDiagnosis';
 import ImageUploader from '@/components/ImageUploader/ImageUploader.vue';
-import FormCard from '@/components/Form/FormCard.vue';
 import FormInput from '@/components/Form/FormInput.vue';
 import FormTextarea from '@/components/Form/FormTextarea.vue';
 import FormSelect from '@/components/Form/FormSelect.vue';
 import ChatDiagnosis from './ChatDiagnosis.vue';
+import DiagnosisReportPrint from '@/components/DiagnosisReport/DiagnosisReportPrint.vue';
 import { useRequestValidation } from '@/utils/validations/requestValidation';
 import { useToast } from 'vue-toastification';
 import chatDiagnosisService from '@/services/chatDiagnosisService';
 
 const isProcessing = ref(false);
 const toast = useToast();
+
+// LocalStorage keys
+const CHAT_STATE_KEY = 'diagnosis_chat_state';
+const SHOW_CHAT_KEY = 'show_diagnosis_chat';
+const FORM_DATA_KEY = 'diagnosis_form_data';
 
 // Chat states
 const showChat = ref(false);
@@ -126,6 +144,103 @@ const diagnosisSession = ref<DiagnosisSession>({
     top5Diseases: [],
     questionsAsked: 0,
     maxQuestions: 10
+});
+
+// Save chat state to localStorage
+const saveChatState = () => {
+    try {
+        const state = {
+            showChat: showChat.value,
+            diagnosisSession: diagnosisSession.value
+        };
+        localStorage.setItem(CHAT_STATE_KEY, JSON.stringify(state));
+        localStorage.setItem(SHOW_CHAT_KEY, showChat.value.toString());
+    } catch (error) {
+        console.error('Error saving chat state:', error);
+    }
+};
+
+// Load chat state from localStorage
+const loadChatState = () => {
+    try {
+        const savedShowChat = localStorage.getItem(SHOW_CHAT_KEY);
+        if (savedShowChat === 'true') {
+            const savedState = localStorage.getItem(CHAT_STATE_KEY);
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                // Convert timestamp strings back to Date objects
+                if (state.diagnosisSession.messages) {
+                    state.diagnosisSession.messages = state.diagnosisSession.messages.map((msg: ChatMessage) => ({
+                        ...msg,
+                        timestamp: new Date(msg.timestamp)
+                    }));
+                }
+                diagnosisSession.value = state.diagnosisSession;
+                showChat.value = true;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading chat state:', error);
+    }
+};
+
+// Clear chat state from localStorage
+const clearChatState = () => {
+    try {
+        localStorage.removeItem(CHAT_STATE_KEY);
+        localStorage.removeItem(SHOW_CHAT_KEY);
+    } catch (error) {
+        console.error('Error clearing chat state:', error);
+    }
+};
+
+// Save form data to localStorage (exclude image file)
+const saveFormData = () => {
+    try {
+        const formDataToSave = {
+            name: form.value.name,
+            age: form.value.age,
+            gender: form.value.gender,
+            identification: form.value.identification,
+            phone: form.value.phone,
+            email: form.value.email,
+            address: form.value.address,
+            symptom: form.value.symptom
+        };
+        localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formDataToSave));
+    } catch (error) {
+        console.error('Error saving form data:', error);
+    }
+};
+
+// Load form data from localStorage
+const loadFormData = () => {
+    try {
+        const savedFormData = localStorage.getItem(FORM_DATA_KEY);
+        if (savedFormData) {
+            const formData = JSON.parse(savedFormData);
+            form.value = { ...form.value, ...formData };
+        }
+    } catch (error) {
+        console.error('Error loading form data:', error);
+    }
+};
+
+// Watch for changes and save to localStorage
+watch(
+    [showChat, diagnosisSession],
+    () => {
+        if (showChat.value) {
+            saveChatState();
+        }
+    },
+    { deep: true }
+);
+
+// Initialize on component mount
+onMounted(() => {
+    loadChatState();
+    loadFormData();
 });
 
 const initialFormData: DermatologyRequestForm = {
@@ -142,6 +257,15 @@ const initialFormData: DermatologyRequestForm = {
 };
 
 const form = ref<DermatologyRequestForm>(initialFormData);
+
+// Watch form changes and save to localStorage
+watch(
+    form,
+    () => {
+        saveFormData();
+    },
+    { deep: true }
+);
 
 const genderOptions = [
     { value: 'Nam', label: 'Nam' },
@@ -177,10 +301,19 @@ const handleSubmit = async () => {
     try {
         isProcessing.value = true;
 
-        // Call API start diagnosis
+        // Call API start diagnosis with patient info
         const response = await chatDiagnosisService.startDiagnosis(
             form.value.symptom,
-            form.value.image
+            form.value.image,
+            {
+                name: form.value.name,
+                age: form.value.age,
+                gender: form.value.gender,
+                identification: form.value.identification,
+                phone: form.value.phone,
+                email: form.value.email,
+                address: form.value.address
+            }
         );
 
         // Initialize session
@@ -304,194 +437,617 @@ const handleReset = () => {
         questionsAsked: 0,
         maxQuestions: 10
     };
+    clearChatState();
+    // Clear form data from localStorage
+    try {
+        localStorage.removeItem(FORM_DATA_KEY);
+    } catch (error) {
+        console.error('Error clearing form data:', error);
+    }
     toast.info('Đã đặt lại form');
+};
+
+// Handle print report
+const handlePrintReport = () => {
+    // Create a new window to display the report print component
+    const printWindow = window.open('', '', 'height=800,width=1000');
+    if (printWindow) {
+        // Get the HTML content for the report
+        const reportHTML = generateReportHTML();
+        printWindow.document.write(reportHTML);
+        printWindow.document.close();
+
+        // Wait for content to load, then print
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    }
+};
+
+// Generate report HTML matching Word template exactly
+const generateReportHTML = () => {
+    const top5Diseases = diagnosisSession.value.top5Diseases || [];
+    const primaryDisease = top5Diseases[0];
+    const otherDiseases = top5Diseases.slice(1);
+
+    // Safe value getter - returns value or empty string
+    const safeValue = (value: any) => {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+        return String(value).trim();
+    };
+
+    // Get patient data from form
+    const patientName = form.value.name ? safeValue(form.value.name) : '';
+    const patientAge = form.value.age ? safeValue(form.value.age) : '';
+    const patientGender = form.value.gender ? safeValue(form.value.gender) : '';
+    const patientId = form.value.identification ? safeValue(form.value.identification) : '';
+    const symptomDescription = form.value.symptom ? safeValue(form.value.symptom) : '';
+
+    // Generate Mã Phiếu from sessionId
+    const maPhieu = `AI-[${safeValue(diagnosisSession.value.sessionId).substring(0, 8)}]`;
+    const today = new Date();
+    const ngayThuTuc = today.toLocaleDateString('vi-VN').replace(/\//g, '/');
+
+    // Generate other diseases list (name + percentage only)
+    const otherDiseasesList = otherDiseases.map(disease =>
+        `- ${disease.disease || ''} (${(disease.probability * 100).toFixed(1)}%)`
+    ).join('<br/>');
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Phiếu Kết Quả Chẩn Đoán & Đề Xuất Điều Trị</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: 'Times New Roman', Times, serif;
+                    line-height: 1.4;
+                    color: #000;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 900px;
+                    margin: 0 auto;
+                }
+                .header-info {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 15px;
+                    margin-bottom: 15px;
+                    font-size: 11px;
+                }
+                .header-logo {
+                    flex-shrink: 0;
+                }
+                .header-logo img {
+                    width: 60px;
+                    height: 60px;
+                    object-fit: contain;
+                }
+                .header-text {
+                    flex: 1;
+                    text-align: center;
+                }
+                .header-info p {
+                    margin: 3px 0;
+                }
+                .title {
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 13px;
+                    margin-bottom: 15px;
+                }
+                .meta-row {
+                    margin-bottom: 10px;
+                    font-size: 11px;
+                }
+                .section-title {
+                    font-weight: bold;
+                    font-size: 12px;
+                    margin-top: 15px;
+                    margin-bottom: 10px;
+                    text-decoration: underline;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 11px;
+                    margin: 10px 0;
+                }
+                table td {
+                    border: 1px solid #000;
+                    padding: 6px;
+                    vertical-align: top;
+                }
+                table th {
+                    border: 1px solid #000;
+                    padding: 6px;
+                    text-align: left;
+                    font-weight: bold;
+                    background: #f0f0f0;
+                }
+                .info-row {
+                    margin-bottom: 5px;
+                    font-size: 11px;
+                }
+                .dotted-line {
+                    border-bottom: 1px dotted #000;
+                    margin: 0;
+                }
+                .footer-note {
+                    margin-top: 20px;
+                    padding: 10px;
+                    background: #ffffcc;
+                    border: 1px solid #cccccc;
+                    font-size: 10px;
+                    line-height: 1.4;
+                }
+                @media print {
+                    body { margin: 0; padding: 20px; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <!-- Header -->
+                <div class="header-info">
+                    <div class="header-logo">
+                        <img src="/media/logos/logo.png" alt="Logo" />
+                    </div>
+                    <div class="header-text">
+                        <p>HỆ THỐNG TRUY XUẤT VÀ TẠO SINH</p>
+                        <p>CHO CHUẨN ĐOÁN BỆNH LÝ VỀ DA</p>
+                    </div>
+                </div>
+
+                <div class="title">
+                    PHIẾU KẾT QUẢ CHẨN ĐOÁN & ĐỀ XUẤT ĐIỀU TRỊ
+                </div>
+
+                <div class="meta-row">
+                    <strong>Mã Phiếu:</strong> ${maPhieu} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong>Ngày Chẩn Đoán:</strong> ${ngayThuTuc}
+                </div>
+
+                <!-- PHẦN 1: THÔNG TIN BỆNH NHÂN -->
+                <div class="section-title">PHẦN 1: THÔNG TIN BỆNH NHÂN</div>
+
+                <table>
+                    <tr>
+                        <td style="width: 30%;"><strong>Mục</strong></td>
+                        <td style="width: 70%;"><strong>Thông tin</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Họ và Tên:</td>
+                        <td>${patientName ? patientName : '[Điền Họ và Tên bệnh nhân]'}</td>
+                    </tr>
+                    <tr>
+                        <td>Ngày Sinh/Tuổi:</td>
+                        <td>${patientAge ? patientAge : '[Điền Ngày sinh/Tuổi]'}</td>
+                    </tr>
+                    <tr>
+                        <td>Giới tính:</td>
+                        <td>${patientGender ? patientGender : '[Nam/Nữ/Khác]'}</td>
+                    </tr>
+                    <tr>
+                        <td>Số CCCD</td>
+                        <td>${patientId ?patientId : '[Mã số bệnh nhân (nếu có)] - Số CCCD'}</td>
+                    </tr>
+                    <tr>
+                        <td>Tính trạng bệnh sư tóm tắt hiện tại:</td>
+                        <td>${symptomDescription ? symptomDescription : '[Các triệu chứng/vấn đề chính mà bệnh nhân khai báo]'}</td>
+                    </tr>
+                </table>
+
+                <!-- PHẦN 2: KẾT QUẢ PHÂN TÍCH VÀ CHẨN ĐOÁN BỆNH LÝ -->
+                <div class="section-title">PHẦN 2: KẾT QUẢ PHÂN TÍCH VÀ CHẨN ĐOÁN BỆNH LÝ</div>
+
+                <div class="info-row">
+                    <strong>2.1. Kết quả chẩn đoán Chính (Primary Diagnosis):</strong>
+                </div>
+                ${primaryDisease ? `
+                <div class="info-row" style="margin-left: 20px;">
+                    <strong>Bệnh:</strong> ${primaryDisease.disease || ''}<br/>
+                    <strong>Xác suất:</strong> ${(primaryDisease.probability * 100).toFixed(1)}%<br/>
+                    <strong>Mô tả:</strong> ${primaryDisease.rationale || ''}
+                </div>
+                ` : `
+                <div class="info-row" style="margin-left: 20px;">
+                    [Tên bệnh da chỉ tiết nhất theo AI - Vi dụ: Viêm da cơ địa, Mụn trứng cá pops độ III, Vay nến màng.]
+                </div>
+                `}
+
+                <div class="info-row" style="margin-top: 10px;">
+                    <strong>2.2. Xác suất các bệnh khác có thể (Differential Diagnosis):</strong>
+                </div>
+                ${otherDiseases.length > 0 ? `
+                <div class="info-row" style="margin-left: 20px;">
+                    ${otherDiseasesList}
+                </div>
+                ` : `
+                <div class="info-row" style="margin-left: 20px;">
+                    [Các bệnh khác có triệu chứng tương tự, được AI liệt kê theo xác suất thấp hơn.] (Ví dụ: Nấm da (15%), Viêm nang lông (5%))
+                </div>
+                `}
+
+                <!-- PHẦN 3: ĐỀ XUẤT PHƯƠNG PHÁP ĐIỀU TRỊ -->
+                <div class="section-title">PHẦN 3: ĐỀ XUẤT PHƯƠNG PHÁP ĐIỀU TRỊ</div>
+
+                <div class="info-row">
+                    <strong>3.1. Nguyên tắc điều trị</strong>
+                </div>
+                <div class="info-row" style="margin-left: 20px;">
+                    <p class="dotted-line">............</p>
+                </div>
+
+                <div class="info-row">
+                    <strong>3.2. Đề xuất điều trị cụ thể</strong>
+                </div>
+                <div class="info-row" style="margin-left: 20px;">
+                    <p class="dotted-line">............</p>
+                </div>
+
+                <div class="info-row">
+                    <strong>3.3. Phòng bệnh.</strong>
+                </div>
+                <div class="info-row" style="margin-left: 20px;">
+                    <p class="dotted-line">............</p>
+                </div>
+
+                <!-- Footer Note -->
+                <div class="footer-note">
+                    <strong>Trên đây là kết quả chẩn đoán và đề xuất phương pháp điều trị về bệnh  ${primaryDisease.disease} mà chúng tôi đã chuẩn đoán và đề xuất gửi tới bạn tham khảo. Bạn cần tham vấn và thăm khám thêm từ các Bác sỹ về Da liễu.</strong>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px; font-size: 11px;">
+                    <p>═══════════════════════════════════════</p>
+                    <p>Ngày In: ${today.toLocaleDateString('vi-VN')} - Hệ Thống Truy Xuất và Tạo Sinh cho Chuẩn Đoán Bệnh Lý Về Da</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
 };
 </script>
 
 <style scoped>
-/* Container và Layout chính */
-.paper-container {
-    padding: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-}
-
-.paper-content {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 3rem;
-    animation: slideUp 0.6s ease-out;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Header của form */
-.form-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #f1f5f9;
-}
-
-.form-title {
-    color: #1e293b;
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+/* ============================================
+   CONTAINER & LAYOUT
+   ============================================ */
+.request-container {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
+    flex-direction: column;
+    min-height: calc(100vh - 280px);
+    background: #ffffff;
 }
 
-.form-title i {
-    color: #3b82f6;
-    font-size: 2.2rem;
+/* ============================================
+   HEADER
+   ============================================ */
+.request-header {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%);
+    border-bottom: 1px solid #e8eaed;
+    flex-shrink: 0;
 }
 
-.form-description {
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.header-description {
+    font-size: 0.95rem;
     color: #64748b;
-    font-size: 1rem;
     margin: 0;
 }
 
-/* Form chính */
-.appointment-form {
-    width: 100%;
+/* ============================================
+   FORM CONTENT
+   ============================================ */
+.request-form {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
 }
 
-/* Actions của form */
-.form-actions {
+.form-grid {
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ============================================
+   FORM SECTIONS
+   ============================================ */
+.form-section {
+    background: #ffffff;
+    border: 1px solid #e8eaed;
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: #5b9fd9;
+    box-shadow: 0 2px 8px rgba(91, 159, 217, 0.08);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1.25rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #5b9fd9;
+    display: inline-block;
+}
+
+/* ============================================
+   FORM ROWS & COLUMNS
+   ============================================ */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-col-half {
+    grid-column: span 1;
+}
+
+.form-col-full {
+    grid-column: 1 / -1;
+}
+
+/* ============================================
+   FORM FOOTER & BUTTONS
+   ============================================ */
+.form-footer {
+    padding: 2rem;
+    background: #f8f9fb;
+    border-top: 1px solid #e8eaed;
     display: flex;
     justify-content: center;
-    margin-top: 2.5rem;
-    padding-top: 2rem;
-    border-top: 2px solid #f1f5f9;
+    flex-shrink: 0;
+    margin-top: auto;
 }
 
-/* Nút submit */
 .submit-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    padding: 1rem 3rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 0.875rem 2.5rem;
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(91, 159, 217, 0.2);
     position: relative;
     overflow: hidden;
 }
 
-.submit-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
-}
-
-.submit-button:hover::before {
-    left: 100%;
-}
-
-.submit-button:hover {
+.submit-button:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 4px 12px rgba(91, 159, 217, 0.3);
+    background: linear-gradient(135deg, #4a8bc2 0%, #3a7bb0 100%);
 }
 
-.submit-button:active {
+.submit-button:active:not(:disabled) {
     transform: translateY(0);
 }
 
 .submit-button:disabled {
-    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    background: #cbd5e0;
     cursor: not-allowed;
     opacity: 0.7;
-    transform: none;
     box-shadow: none;
 }
 
 .submit-button i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
-/* Spinner animation */
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1199.98px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        max-width: 1000px;
+    }
+
+    .form-section {
+        padding: 1.25rem;
     }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .paper-container {
-        padding: 1rem;
+@media (max-width: 991.98px) {
+    .request-container {
+        min-height: calc(100vh - 220px);
     }
 
-    .paper-content {
-        padding: 2rem 1.5rem;
-        border-radius: 15px;
+    .request-header {
+        padding: 1.5rem;
     }
 
-    .form-header {
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
-    }
-
-    .form-title {
+    .header-title {
         font-size: 1.5rem;
     }
 
-    .form-title i {
-        font-size: 1.7rem;
-    }
-
-    .form-description {
+    .header-description {
         font-size: 0.9rem;
     }
 
-    .form-actions {
-        margin-top: 2rem;
+    .request-form {
+        padding: 1.5rem;
+    }
+
+    .form-grid {
+        gap: 1.5rem;
+    }
+
+    .form-section {
+        padding: 1.25rem;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-row {
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .form-footer {
+        padding: 1.5rem;
+    }
+
+    .submit-button {
+        padding: 0.75rem 2rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .request-container {
+        min-height: calc(100vh - 220px);
+    }
+
+    .request-header {
+        padding: 1.25rem;
+    }
+
+    .header-title {
+        font-size: 1.35rem;
+    }
+
+    .header-description {
+        font-size: 0.85rem;
+    }
+
+    .request-form {
+        padding: 1.25rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-col-half {
+        grid-column: 1 / -1;
+    }
+
+    .form-section {
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .section-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.875rem;
+    }
+
+    .form-footer {
+        padding: 1.25rem;
     }
 
     .submit-button {
         width: 100%;
-        padding: 0.875rem 2rem;
-        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
     }
 }
 
-@media (max-width: 480px) {
-    .paper-content {
-        padding: 1.5rem 1rem;
+@media (max-width: 575.98px) {
+    .request-container {
+        min-height: calc(100vh - 70px);
     }
 
-    .form-title {
-        font-size: 1.3rem;
-        flex-direction: column;
-        gap: 0.5rem;
+    .request-header {
+        padding: 1rem;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+
+    .header-description {
+        font-size: 0.8rem;
+    }
+
+    .request-form {
+        padding: 1rem;
+    }
+
+    .form-grid {
+        gap: 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+        margin-bottom: 0.875rem;
+    }
+
+    .form-section {
+        padding: 0.875rem;
+        border-radius: 6px;
+    }
+
+    .section-title {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-footer {
+        padding: 1rem;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .submit-button i {
+        font-size: 1rem;
     }
 }
 </style>

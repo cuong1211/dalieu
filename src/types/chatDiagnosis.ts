@@ -30,7 +30,17 @@ export interface BayesianInfo {
 
 export interface DiagnosisStartRequest {
     description: string;
-    image: string; // base64 string
+    image?: string; // base64 string
+    // Patient information (all optional)
+    patient_info?: {
+        name?: string;
+        age?: string;
+        gender?: string;
+        identification?: string;
+        phone?: string;
+        email?: string;
+        address?: string;
+    };
 }
 
 export interface DiagnosisStartResponse {

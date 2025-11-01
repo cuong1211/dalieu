@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="chat-header">
             <div class="header-content">
-                <i class="bi bi-robot"></i>
+                <img src="/media/logos/logo.png" alt="Logo" class="header-logo" />
                 <div>
                     <h3 class="header-title">Trợ lý chẩn đoán AI</h3>
                     <p class="header-subtitle">
@@ -12,6 +12,7 @@
                 </div>
             </div>
             <button @click="$emit('reset')" class="reset-btn" title="Bắt đầu lại">
+                <h4 style="color: white;">Chuẩn đoán lại</h4>
                 <i class="bi bi-arrow-counterclockwise"></i>
             </button>
         </div>
@@ -20,8 +21,8 @@
         <div class="chat-layout">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <i class="bi bi-heart-pulse-fill"></i>
-                    <h4>Top 5 bệnh khả năng</h4>
+                    <i class="bi bi-card-heading" style="color: white;"></i>
+                    <h4 style="color: white;">Các bệnh khả năng</h4>
                 </div>
                 <div class="disease-list">
                     <div v-for="(disease, index) in session.top5Diseases" :key="index" class="disease-item">
@@ -61,20 +62,19 @@
             <!-- Chat Messages Area -->
             <div class="chat-main">
                 <div ref="messagesContainer" class="messages-container">
-                    <div v-for="message in session.messages" :key="message.id"
-                         class="message-wrapper" :class="message.role">
+                    <div v-for="message in session.messages" :key="message.id" class="message-wrapper"
+                        :class="message.role">
 
                         <!-- Assistant Message -->
                         <div v-if="message.role === 'assistant'" class="message assistant-message">
-                            <div class="message-avatar">
-                                <i class="bi bi-robot"></i>
+                            <div class="message-avatar assistant-avatar">
+                                <img src="/media/logos/logo.png" alt="AI Assistant" class="avatar-logo" />
                             </div>
                             <div class="message-content">
                                 <div class="message-text" v-html="formatMessage(message.content)"></div>
 
                                 <!-- Show new symptoms detected if any -->
-                                <div v-if="message.metadata?.new_symptoms_detected?.length"
-                                     class="new-symptoms-alert">
+                                <div v-if="message.metadata?.new_symptoms_detected?.length" class="new-symptoms-alert">
                                     <i class="bi bi-exclamation-circle-fill"></i>
                                     <span>Phát hiện thêm triệu chứng:
                                         <strong>{{ message.metadata.new_symptoms_detected.join(', ') }}</strong>
@@ -85,11 +85,11 @@
 
                         <!-- User Message -->
                         <div v-if="message.role === 'user'" class="message user-message">
+                            <div class="message-avatar">
+                                <i class="bi bi-person-fill" style="color: white;"></i>
+                            </div>
                             <div class="message-content">
                                 <div class="message-text">{{ message.content }}</div>
-                            </div>
-                            <div class="message-avatar">
-                                <i class="bi bi-person-fill"></i>
                             </div>
                         </div>
                     </div>
@@ -97,8 +97,8 @@
                     <!-- Loading indicator -->
                     <div v-if="isLoading" class="message-wrapper assistant">
                         <div class="message assistant-message">
-                            <div class="message-avatar">
-                                <i class="bi bi-robot"></i>
+                            <div class="message-avatar assistant-avatar">
+                                <img src="/media/logos/logo.png" alt="AI Assistant" class="avatar-logo" />
                             </div>
                             <div class="message-content">
                                 <div class="typing-indicator">
@@ -121,33 +121,40 @@
                         </p>
                         <div class="final-diseases">
                             <div v-for="(disease, index) in session.top5Diseases" :key="index"
-                                 class="final-disease-card">
+                                class="final-disease-card">
                                 <div class="final-disease-rank">#{{ index + 1 }}</div>
                                 <div class="final-disease-content">
                                     <h4 class="final-disease-name">{{ disease.disease }}</h4>
                                     <div class="final-probability">
                                         <div class="final-probability-bar">
                                             <div class="final-probability-fill"
-                                                 :style="{ width: (disease.probability * 100) + '%' }">
+                                                :style="{ width: (disease.probability * 100) + '%' }">
                                             </div>
                                         </div>
                                         <span class="final-probability-text">
                                             {{ (disease.probability * 100).toFixed(1) }}%
                                         </span>
                                     </div>
-                                    <p class="final-rationale">{{ disease.rationale }}</p>
+                                    
                                 </div>
                             </div>
                         </div>
                         <div class="result-footer">
                             <p class="disclaimer">
                                 <i class="bi bi-info-circle"></i>
-                                Kết quả này chỉ mang tính chất tham khảo. Vui lòng đến gặp bác sĩ để được chẩn đoán và điều trị chính xác.
+                                Kết quả này chỉ mang tính chất tham khảo. Vui lòng đến gặp bác sĩ để được chẩn đoán và
+                                điều trị chính xác.
                             </p>
-                            <button @click="$emit('reset')" class="restart-btn">
-                                <i class="bi bi-arrow-clockwise"></i>
-                                Bắt đầu chẩn đoán mới
-                            </button>
+                            <div class="result-actions">
+                                <button @click="handlePrintReport" class="result-action-btn print">
+                                    <i class="bi bi-printer"></i>
+                                    In Phiếu Kết Quả
+                                </button>
+                                <button @click="$emit('reset')" class="result-action-btn restart">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    Bắt Đầu Chẩn Đoán Mới
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -155,20 +162,10 @@
                 <!-- Input Area -->
                 <div v-if="!session.finished" class="input-area">
                     <form @submit.prevent="handleSubmit" class="input-form">
-                        <input
-                            v-model="userInput"
-                            type="text"
-                            placeholder="Nhập câu trả lời của bạn..."
-                            class="message-input"
-                            :disabled="isLoading"
-                            ref="inputRef"
-                        />
-                        <button
-                            type="submit"
-                            class="send-btn"
-                            :disabled="isLoading || !userInput.trim()"
-                        >
-                            <i class="bi bi-send-fill"></i>
+                        <input v-model="userInput" type="text" placeholder="Nhập câu trả lời của bạn..."
+                            class="message-input" :disabled="isLoading" ref="inputRef" />
+                        <button type="submit" class="send-btn" :disabled="isLoading || !userInput.trim()">
+                            <i class="bi bi-arrow-up" style="color: white;"></i>
                         </button>
                     </form>
                 </div>
@@ -178,18 +175,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch } from 'vue';
+import { ref, nextTick, watch, defineProps, defineEmits, withDefaults } from 'vue';
 import type { DiagnosisSession } from '@/types/chatDiagnosis';
+import type { DermatologyRequestForm } from '@/types/request';
 
 interface Props {
     session: DiagnosisSession;
     isLoading: boolean;
+    patientInfo?: DermatologyRequestForm;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    patientInfo: () => ({
+        id: 0,
+        name: '',
+        age: '',
+        gender: '',
+        identification: '',
+        phone: '',
+        email: '',
+        address: '',
+        symptom: '',
+        image: null
+    })
+});
+
 const emit = defineEmits<{
     (e: 'sendMessage', message: string): void;
     (e: 'reset'): void;
+    (e: 'print-report'): void;
 }>();
 
 const userInput = ref('');
@@ -233,6 +247,11 @@ watch(() => props.isLoading, (newVal) => {
         });
     }
 });
+
+// Handle print report
+const handlePrintReport = () => {
+    emit('print-report');
+};
 </script>
 
 <style scoped>
@@ -262,7 +281,13 @@ watch(() => props.isLoading, (newVal) => {
 
 .header-content>i {
     font-size: 2rem;
-    color: #667eea;
+    color: #5b9fd9;
+}
+
+.header-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
 }
 
 .header-title {
@@ -279,21 +304,45 @@ watch(() => props.isLoading, (newVal) => {
 }
 
 .reset-btn {
-    background: #f1f5f9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    padding: 0.65rem 1.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(91, 159, 217, 0.2);
+    font-weight: 600;
+    color: white;
 }
 
 .reset-btn:hover {
-    background: #e2e8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(91, 159, 217, 0.35);
+}
+
+.reset-btn:active {
+    transform: translateY(0);
+}
+
+.reset-btn h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
 .reset-btn i {
-    font-size: 1.25rem;
-    color: #475569;
+    font-size: 1.1rem;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.reset-btn:hover i {
+    transform: rotate(180deg);
 }
 
 /* Layout */
@@ -319,7 +368,7 @@ watch(() => props.isLoading, (newVal) => {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
 }
 
@@ -352,15 +401,15 @@ watch(() => props.isLoading, (newVal) => {
 }
 
 .disease-item:hover {
-    border-color: #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    border-color: #5b9fd9;
+    box-shadow: 0 2px 8px rgba(91, 159, 217, 0.1);
 }
 
 .disease-rank {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
     border-radius: 8px;
     display: flex;
@@ -415,6 +464,7 @@ watch(() => props.isLoading, (newVal) => {
     font-size: 0.8125rem;
     color: #64748b;
     line-height: 1.4;
+    display: none;
 }
 
 /* Symptoms section */
@@ -432,7 +482,7 @@ watch(() => props.isLoading, (newVal) => {
 }
 
 .symptoms-header i {
-    color: #667eea;
+    color: #5b9fd9;
     font-size: 1.25rem;
 }
 
@@ -481,6 +531,14 @@ watch(() => props.isLoading, (newVal) => {
     animation: slideIn 0.3s ease-out;
 }
 
+.message-wrapper.assistant {
+    justify-content: flex-start;
+}
+
+.message-wrapper.user {
+    justify-content: flex-end;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -505,6 +563,7 @@ watch(() => props.isLoading, (newVal) => {
 
 .user-message {
     align-self: flex-end;
+    flex-direction: row-reverse;
 }
 
 .message-avatar {
@@ -519,17 +578,29 @@ watch(() => props.isLoading, (newVal) => {
 }
 
 .assistant-message .message-avatar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
 }
 
+.assistant-avatar.message-avatar {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+}
+
+.avatar-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
 .user-message .message-avatar {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
 }
 
 .message-content {
-    flex: 1;
+    flex: 0 1 auto;
+    max-width: 70%;
 }
 
 .assistant-message .message-content {
@@ -540,7 +611,7 @@ watch(() => props.isLoading, (newVal) => {
 }
 
 .user-message .message-content {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
     border-radius: 12px;
     padding: 1rem 1.25rem;
@@ -549,6 +620,8 @@ watch(() => props.isLoading, (newVal) => {
 .message-text {
     line-height: 1.6;
     word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .new-symptoms-alert {
@@ -610,7 +683,7 @@ watch(() => props.isLoading, (newVal) => {
 /* Final Result */
 .final-result {
     background: white;
-    border: 2px solid #667eea;
+    border: 2px solid #5b9fd9;
     border-radius: 16px;
     padding: 2rem;
     margin-top: 1rem;
@@ -661,7 +734,7 @@ watch(() => props.isLoading, (newVal) => {
     flex-shrink: 0;
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
     border-radius: 12px;
     display: flex;
@@ -698,7 +771,7 @@ watch(() => props.isLoading, (newVal) => {
 
 .final-probability-fill {
     height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     border-radius: 6px;
     transition: width 0.5s ease;
 }
@@ -747,7 +820,7 @@ watch(() => props.isLoading, (newVal) => {
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -758,7 +831,54 @@ watch(() => props.isLoading, (newVal) => {
 
 .restart-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(91, 159, 217, 0.4);
+}
+
+.result-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.result-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.result-action-btn i {
+    font-size: 1.1rem;
+}
+
+.result-action-btn.print {
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(91, 159, 217, 0.2);
+}
+
+.result-action-btn.print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(91, 159, 217, 0.3);
+}
+
+.result-action-btn.restart {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.result-action-btn.restart:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Input Area */
@@ -786,8 +906,8 @@ watch(() => props.isLoading, (newVal) => {
 }
 
 .message-input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #5b9fd9;
+    box-shadow: 0 0 0 3px rgba(91, 159, 217, 0.1);
 }
 
 .message-input:disabled {
@@ -799,7 +919,7 @@ watch(() => props.isLoading, (newVal) => {
     flex-shrink: 0;
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -812,7 +932,7 @@ watch(() => props.isLoading, (newVal) => {
 
 .send-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(91, 159, 217, 0.4);
 }
 
 .send-btn:disabled {
@@ -830,6 +950,10 @@ watch(() => props.isLoading, (newVal) => {
     .sidebar {
         width: 300px;
     }
+
+    .message-content {
+        max-width: 75%;
+    }
 }
 
 @media (max-width: 768px) {
@@ -846,6 +970,25 @@ watch(() => props.isLoading, (newVal) => {
 
     .message {
         max-width: 90%;
+    }
+
+    .message-content {
+        max-width: 85%;
+    }
+}
+
+@media (max-width: 576px) {
+    .message-content {
+        max-width: 90%;
+    }
+
+    .assistant-message .message-content,
+    .user-message .message-content {
+        padding: 0.875rem 1rem;
+    }
+
+    .message-text {
+        font-size: 0.95rem;
     }
 }
 </style>

@@ -19,9 +19,22 @@ class ChatDiagnosisService {
      * Bắt đầu phiên chẩn đoán mới
      * @param description - Mô tả triệu chứng từ form
      * @param imageFile - File ảnh từ form
+     * @param patientInfo - Thông tin bệnh nhân (tùy chọn)
      * @returns Response chứa session_id và câu hỏi đầu tiên
      */
-    async startDiagnosis(description: string, imageFile: File | null): Promise<DiagnosisStartResponse> {
+    async startDiagnosis(
+        description: string,
+        imageFile: File | null,
+        patientInfo?: {
+            name?: string;
+            age?: string;
+            gender?: string;
+            identification?: string;
+            phone?: string;
+            email?: string;
+            address?: string;
+        }
+    ): Promise<DiagnosisStartResponse> {
         try {
             // Convert image to base64
             let imageBase64 = '';
@@ -31,7 +44,18 @@ class ChatDiagnosisService {
 
             const payload: DiagnosisStartRequest = {
                 description,
-                image: imageBase64
+                ...(imageBase64 && { image: imageBase64 }),
+                ...(patientInfo && {
+                    patient_info: {
+                        name: patientInfo.name,
+                        age: patientInfo.age,
+                        gender: patientInfo.gender,
+                        identification: patientInfo.identification,
+                        phone: patientInfo.phone,
+                        email: patientInfo.email,
+                        address: patientInfo.address
+                    }
+                })
             };
 
             const response = await axios.post<DiagnosisStartResponse>(

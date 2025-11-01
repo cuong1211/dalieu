@@ -1,126 +1,64 @@
 <template>
-    <div class="banner-wrapper">
-        <!-- Background image overlay -->
-        <div class="banner-overlay"></div>
-
-        <!-- Main content -->
-        <div class="d-flex flex-column flex-center w-100 min-h-350px min-h-lg-500px px-9 position-relative">
-            <!-- Heading -->
-            <div class="text-center mb-5 mb-lg-10 py-10 py-lg-20">
-                <!-- Title -->
-                <h1 class="text-white lh-base fw-bolder fs-2x fs-lg-3x mb-15">
-                    Chẩn Đoán Bệnh Da Liễu
-                    <br />
-                    Với
-                    <span class="gradient-text">
-                        Công Nghệ AI Tiên Tiến
-                    </span>
-                </h1>
-
-                <!-- Subtitle -->
-                <p class="text-white fs-lg-lead mb-10 opacity-75">
-                    Giải pháp chẩn đoán nhanh chóng, chính xác với độ tin cậy cao
-                </p>
-
-                <!-- Action buttons -->
-                <div class="d-flex justify-content-center gap-3">
-                    <RouterLink :to="{ name: 'request' }" class="btn btn-primary btn-lg">
-                        <i class="bi bi-search me-2"></i>
-                        Chẩn Đoán Ngay
-                    </RouterLink>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="banner-wrapper"></div>
 </template>
 
 <style scoped>
 .banner-wrapper {
     position: relative;
-    background-image: url('/src/assets/media/banner/banner.jpg');
+    background-image: url('/media/banner/banner.jpg');
     background-size: cover;
-    background-position: center;
+    background-position: top;
     background-repeat: no-repeat;
+    /* background-attachment: fixed; */
     width: 100%;
+    min-height: 700px;
 }
 
-.banner-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
-    z-index: 1;
+/* FHD (1920px and above) */
+@media (min-width: 1920px) {
+    .banner-wrapper {
+        min-height: 900px;
+    }
 }
 
-.position-relative {
-    z-index: 2;
+/* HD (1280px - 1919px) */
+@media (min-width: 1280px) and (max-width: 1919px) {
+    .banner-wrapper {
+        min-height: 600px;
+    }
 }
 
-.gradient-text {
-    background: linear-gradient(to right, #4CAF50 0%, #2196F3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    padding: 0 5px;
+/* Laptop (1025px - 1279px) */
+@media (min-width: 1025px) and (max-width: 1279px) {
+    .banner-wrapper {
+        min-height: 550px;
+    }
 }
 
-/* Responsive adjustments */
-@media (max-width: 991.98px) {
-    .min-h-350px {
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .banner-wrapper {
+        min-height: 450px;
+    }
+}
+
+/* Mobile (576px - 767px) */
+@media (max-width: 767px) {
+    .banner-wrapper {
         min-height: 350px;
+        background-position: center top;
     }
 }
 
-@media (min-width: 992px) {
-    .min-h-lg-500px {
-        min-height: 500px;
+/* Small mobile (< 576px) */
+@media (max-width: 575px) {
+    .banner-wrapper {
+        min-height: 300px;
+        background-position: center top;
     }
-}
-
-.btn-lg {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(to right, #4CAF50, #2196F3);
-    border: none;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-}
-
-.btn-light {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
-}
-
-.btn-light:hover {
-    background: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
-}
-
-.gap-3 {
-    gap: 1rem;
-}
-
-.fs-lg-lead {
-    font-size: 1.25rem;
-    line-height: 1.8;
-}
-
-.opacity-75 {
-    opacity: 0.75;
 }
 </style>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
-
-// Có thể thêm các logic xử lý nếu cần
+// Component chỉ dùng background image
 </script>

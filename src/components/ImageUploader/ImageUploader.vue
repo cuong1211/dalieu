@@ -235,7 +235,7 @@ const handleEdit = (): void => {
 }
 
 .edit-button {
-  color: #009ef7;
+  color: #5b9fd9;
 }
 
 .remove-button {
@@ -248,7 +248,7 @@ const handleEdit = (): void => {
 }
 
 .edit-button:hover {
-  background: #009ef7;
+  background: #5b9fd9;
   color: white;
 }
 

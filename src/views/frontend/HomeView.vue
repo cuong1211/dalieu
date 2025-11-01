@@ -7,7 +7,7 @@
         <!-- Giới thiệu về hệ thống -->
         <section class="section system-intro">
             <div class="container">
-                <h2 class="section-title">Hệ Thống Chẩn Đoán Da Liễu Thông Minh</h2>
+                <h2 class="section-title">HỆ THỐNG TRUY XUẤT VÀ TẠO SINH<br>CHO CHUẨN ĐOÁN BỆNH LÝ VỀ DA</h2>
                 <div class="row align-items-center">
                     <div class="col-lg-6">
                         <div class="content-box">
@@ -47,36 +47,37 @@
 
         <!-- Giới thiệu chuyên gia -->
         <!-- Quá trình phát triển -->
-        <section class="section development-timeline bg-light">
-            <div class="container">
-                <div class="section-header text-center mb-5">
-                    <h2 class="section-title">Quá Trình Phát Triển</h2>
-                    <p class="section-subtitle">
-                        Hành trình xây dựng và phát triển hệ thống chẩn đoán da liễu thông minh
-                    </p>
-                </div>
+    </div>
+    <section class="section development-timeline bg-light">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2 class="section-title">Quá Trình Phát Triển</h2>
+                <p class="section-subtitle">
+                    Hành trình xây dựng và phát triển hệ thống truy xuất và tạo sinh cho chẩn đoán bệnh lý về da
+                </p>
+            </div>
 
-                <div class="timeline">
-                    <div v-for="(milestone, index) in developmentTimeline" :key="milestone.year" class="timeline-item"
-                        :class="{ 'timeline-item-left': index % 2 === 0 }">
-                        <div class="timeline-badge">
-                            <span class="badge-month">{{ milestone.month }}</span>
-                            <span class="badge-year">{{ milestone.year }}</span>
-                        </div>
-                        <div class="timeline-content">
+            <div class="timeline">
+                <div v-for="(milestone, index) in developmentTimeline" :key="milestone.year" class="timeline-item">
+                    <div class="timeline-left">
+                        <div class="timeline-icon-wrapper">
                             <div class="timeline-icon">
-                                <i :class="getTimelineIcon(index)" style="color: black;"></i>
+                                <i :class="getTimelineIcon(index)"></i>
                             </div>
-                            <div class="timeline-body">
-                                <h3 class="timeline-title">{{ milestone.title }}</h3>
-                                <p class="timeline-description">{{ milestone.description }}</p>
-                            </div>
+                        </div>
+                        <div class="timeline-connector" v-if="index < developmentTimeline.length - 1"></div>
+                    </div>
+                    <div class="timeline-right">
+                        <div class="timeline-content-box">
+                            <h3 class="timeline-title">{{ milestone.title }}</h3>
+                            <p class="timeline-description">{{ milestone.description }}</p>
+                            <span class="timeline-date">{{ milestone.month }}/{{ milestone.year }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
 </template>
 
 <script setup lang="ts">
@@ -103,7 +104,7 @@ interface Expert {
 
 interface Milestone {
     year: number;
-    month: number;
+    month: string | number;
     title: string;
     description: string;
 }
@@ -137,64 +138,34 @@ const getTimelineIcon = (index: number): string => {
 };
 const developmentTimeline = ref<Milestone[]>([
     {
-        year: 2024,
-        month: 1,
+        year: 2025,
+        month: '1-2',
         title: 'Khởi động dự án & Thu thập dữ liệu',
-        description: 'Bắt đầu quá trình thu thập và phân loại dữ liệu hình ảnh từ các bệnh viện da liễu. Xây dựng kế hoạch chi tiết và thành lập nhóm nghiên cứu.'
+        description: 'Bắt đầu quá trình thu thập và phân loại dữ liệu hình ảnh từ các bệnh viện da liễu. Xây dựng kế hoạch chi tiết và thành lập nhóm nghiên cứu. Tiến hành gán nhãn và phân loại hình ảnh bệnh da liễu. Xây dựng hệ thống cơ sở dữ liệu chuẩn hoá cho việc huấn luyện mô hình AI.'
     },
     {
-        year: 2024,
-        month: 2,
-        title: 'Xây dựng cơ sở dữ liệu',
-        description: 'Tiến hành gán nhãn và phân loại hình ảnh bệnh da liễu. Xây dựng hệ thống cơ sở dữ liệu chuẩn hoá cho việc huấn luyện mô hình AI.'
+        year: 2025,
+        month: '3-4',
+        title: 'Nghiên cứu & Huấn luyện mô hình',
+        description: 'Nghiên cứu và thử nghiệm các mô hình deep learning khác nhau (CNN, ResNet, VGG) để tìm ra mô hình phù hợp nhất cho việc nhận diện bệnh da liễu. Tiến hành huấn luyện mô hình AI với tập dữ liệu đã chuẩn bị. Thực hiện các điều chỉnh và tối ưu hoá ban đầu.'
     },
     {
-        year: 2024,
-        month: 3,
-        title: 'Nghiên cứu & Lựa chọn mô hình',
-        description: 'Nghiên cứu và thử nghiệm các mô hình deep learning khác nhau (CNN, ResNet, VGG) để tìm ra mô hình phù hợp nhất cho việc nhận diện bệnh da liễu.'
+        year: 2025,
+        month: '5-6',
+        title: 'Đánh giá & Phát triển Backend',
+        description: 'Đánh giá hiệu suất mô hình, xác định các điểm yếu và thực hiện các cải tiến cần thiết. Tối ưu hoá độ chính xác trong việc nhận diện bệnh. Xây dựng hệ thống API và backend để tích hợp mô hình AI. Thiết kế cơ sở dữ liệu và các endpoint cần thiết cho ứng dụng.'
     },
     {
-        year: 2024,
-        month: 4,
-        title: 'Huấn luyện mô hình ban đầu',
-        description: 'Tiến hành huấn luyện mô hình AI với tập dữ liệu đã chuẩn bị. Thực hiện các điều chỉnh và tối ưu hoá ban đầu.'
+        year: 2025,
+        month: '7-8',
+        title: 'Phát triển giao diện & Thử nghiệm',
+        description: 'Thiết kế và phát triển giao diện web/mobile thân thiện cho người dùng. Tích hợp các tính năng upload ảnh và hiển thị kết quả chẩn đoán. Tiến hành thử nghiệm hệ thống với dữ liệu thực tế. Thu thập phản hồi từ các bác sĩ da liễu và người dùng thử nghiệm.'
     },
     {
-        year: 2024,
-        month: 5,
-        title: 'Đánh giá & Cải thiện mô hình',
-        description: 'Đánh giá hiệu suất mô hình, xác định các điểm yếu và thực hiện các cải tiến cần thiết. Tối ưu hoá độ chính xác trong việc nhận diện bệnh.'
-    },
-    {
-        year: 2024,
-        month: 6,
-        title: 'Phát triển API & Backend',
-        description: 'Xây dựng hệ thống API và backend để tích hợp mô hình AI. Thiết kế cơ sở dữ liệu và các endpoint cần thiết cho ứng dụng.'
-    },
-    {
-        year: 2024,
-        month: 7,
-        title: 'Phát triển giao diện người dùng',
-        description: 'Thiết kế và phát triển giao diện web/mobile thân thiện cho người dùng. Tích hợp các tính năng upload ảnh và hiển thị kết quả chẩn đoán.'
-    },
-    {
-        year: 2024,
-        month: 8,
-        title: 'Thử nghiệm & Kiểm thử',
-        description: 'Tiến hành thử nghiệm hệ thống với dữ liệu thực tế. Thu thập phản hồi từ các bác sĩ da liễu và người dùng thử nghiệm.'
-    },
-    {
-        year: 2024,
-        month: 9,
-        title: 'Tối ưu hoá & Hoàn thiện',
-        description: 'Cải thiện hiệu suất tổng thể của hệ thống. Tối ưu hoá tốc độ xử lý và độ chính xác. Hoàn thiện tài liệu hướng dẫn sử dụng.'
-    },
-    {
-        year: 2024,
-        month: 10,
-        title: 'Triển khai & Vận hành',
-        description: 'Triển khai hệ thống lên môi trường production. Đào tạo người dùng và bắt đầu giai đoạn vận hành thử nghiệm trong thực tế.'
+        year: 2025,
+        month: '9-10',
+        title: 'Tối ưu hoá & Triển khai',
+        description: 'Cải thiện hiệu suất tổng thể của hệ thống. Tối ưu hoá tốc độ xử lý và độ chính xác. Hoàn thiện tài liệu hướng dẫn sử dụng. Triển khai hệ thống lên môi trường production. Đào tạo người dùng và bắt đầu giai đoạn vận hành thử nghiệm trong thực tế.'
     }
 ]);
 </script>
@@ -204,14 +175,70 @@ const developmentTimeline = ref<Milestone[]>([
     padding: 5rem 0;
 }
 
+.system-intro {
+    position: relative;
+}
+
+.system-intro .section-title {
+    margin-bottom: 4.5rem;
+}
+
 .section-title {
     text-align: center;
     margin-bottom: 3rem;
     color: #00447c;
     font-weight: 700;
+    font-size: 2.5rem;
+    line-height: 1.3;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 4px;
+    background: linear-gradient(90deg, #5b9fd9 0%, #00447c 100%);
+    border-radius: 2px;
 }
 
 /* System Intro Styles */
+.content-box {
+    padding: 0 2rem;
+}
+
+.content-box h3 {
+    color: #00447c;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.content-box h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #5b9fd9 0%, #00447c 100%);
+    border-radius: 2px;
+}
+
+.content-box p {
+    color: #64748b;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
 .features-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -223,6 +250,28 @@ const developmentTimeline = ref<Milestone[]>([
     display: flex;
     align-items: center;
     gap: 1rem;
+    padding: 1rem;
+    background: #f0f7ff;
+    border-radius: 8px;
+    border-left: 4px solid #5b9fd9;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background: #e8f0f7;
+    transform: translateX(5px);
+}
+
+.feature-item i {
+    font-size: 1.5rem;
+    color: #5b9fd9;
+    min-width: 2rem;
+}
+
+.feature-item span {
+    color: #00447c;
+    font-weight: 500;
+    font-size: 1rem;
 }
 
 /* Center Card Styles */
@@ -257,235 +306,419 @@ const developmentTimeline = ref<Milestone[]>([
 }
 
 /* Timeline Styles */
-.timeline {
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.timeline-item {
-    position: relative;
-    padding: 2rem;
-    border-left: 2px solid #00447c !important;
-    margin-left: 3rem;
-    margin-bottom: 2rem;
-}
-
-.timeline-badge {
-    position: absolute;
-    left: -4.5rem;
-    background: #00447c;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    right: 0 !important;
-}
-
-@media (max-width: 768px) {
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .timeline-item {
-        margin-left: 2rem;
-    }
+.development-timeline {
+    background: white;
+    padding-top: 3rem;
 }
 
 .section-header {
     max-width: 700px;
     margin: 0 auto 4rem;
+    position: relative;
 }
 
 .section-subtitle {
     color: #64748b;
     font-size: 1.125rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    font-weight: 400;
+    line-height: 1.6;
 }
 
 .timeline {
     position: relative;
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 0;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
 }
 
+/* Vertical center line */
 .timeline::before {
     content: '';
     position: absolute;
+    left: 0;
     top: 0;
-    left: 50%;
-    width: 2px;
-    height: 100%;
-    background: linear-gradient(to bottom,
-            rgba(0, 68, 124, 0) 0%,
-            rgba(0, 68, 124, 1) 10%,
-            rgba(0, 68, 124, 1) 90%,
-            rgba(0, 68, 124, 0) 100%);
+    bottom: 0;
+    width: 20px;
     transform: translateX(-50%);
+    background: linear-gradient(180deg,
+            rgba(91, 159, 217, 0.2) 0%,
+            rgba(91, 159, 217, 0.6) 50%,
+            rgba(91, 159, 217, 0.2) 100%);
+    z-index: 1;
 }
 
 .timeline-item {
     position: relative;
-    width: 50%;
-    padding: 2rem;
-    margin-bottom: 2rem;
+    width: 100%;
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+    display: flex;
+    gap: 2rem;
 }
 
-.timeline-item-left {
-    left: 0;
-    padding-right: 3rem;
-}
-
-.timeline-item:not(.timeline-item-left) {
-    left: 50%;
-    padding-left: 3rem;
-}
-
-.timeline-badge {
-    position: absolute;
+.timeline-left {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background: #00447c;
-    color: #fff;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.timeline-item-left .timeline-badge {
-    right: -1.5rem;
-}
-
-.timeline-item:not(.timeline-item-left) .timeline-badge {
-    left: -1.5rem;
-}
-
-.badge-month {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.badge-year {
-    font-size: 0.875rem;
-    opacity: 0.8;
-}
-
-.timeline-content {
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    align-items: flex-end;
     position: relative;
-    transition: transform 0.3s ease;
 }
 
-.timeline-content:hover {
-    transform: translateY(-5px);
+.timeline-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: #5b9fd9;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(91, 159, 217, 0.3);
+    border: 4px solid #fff;
+    position: relative;
+    z-index: 10;
 }
 
 .timeline-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    background: #eff6ff;
-    color: #00447c;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+
+.timeline-right {
+    flex: 1;
+    width: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-content-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #5b9fd9;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.timeline-content-box:hover {
+    box-shadow: 0 4px 16px rgba(91, 159, 217, 0.2);
+    transform: translateY(-2px);
 }
 
 .timeline-title {
-    color: #00447c;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
+    color: #00447c;
     margin-bottom: 0.75rem;
+    line-height: 1.4;
 }
 
 .timeline-description {
+    font-size: 0.95rem;
     color: #64748b;
     line-height: 1.6;
-    margin: 0;
+    margin-bottom: 1rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    justify-content: flex-start;
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    color: #5b9fd9;
+    font-weight: 600;
 }
 
 /* Animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.timeline-item {
-    animation: fadeInUp 0.5s ease forwards;
-    opacity: 0;
-}
-
-.timeline-item:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.timeline-item:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.timeline-item:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.timeline-item:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.timeline-item:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.timeline-item:nth-child(6) {
-    animation-delay: 0.6s;
-}
-
-.timeline-item:nth-child(7) {
-    animation-delay: 0.7s;
-}
-
-.timeline-item:nth-child(8) {
-    animation-delay: 0.8s;
-}
-
-.timeline-item:nth-child(9) {
-    animation-delay: 0.9s;
-}
-
-.timeline-item:nth-child(10) {
-    animation-delay: 1s;
-}
+/* Animation delays */
+.timeline-item:nth-child(1) { animation-delay: 0.1s; }
+.timeline-item:nth-child(2) { animation-delay: 0.2s; }
+.timeline-item:nth-child(3) { animation-delay: 0.3s; }
+.timeline-item:nth-child(4) { animation-delay: 0.4s; }
+.timeline-item:nth-child(5) { animation-delay: 0.5s; }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .timeline::before {
-        left: 2rem;
+
+/* Full HD (1920px and above) */
+@media (min-width: 1920px) {
+    .timeline {
+        max-width: 900px;
+        padding: 3rem;
+        gap: 4rem;
+    }
+
+    .timeline-icon-wrapper {
+        width: 70px;
+        height: 70px;
+    }
+
+    .timeline-icon {
+        font-size: 1.75rem;
+    }
+
+    .timeline-title {
+        font-size: 1.25rem;
+    }
+
+    .timeline-description {
+        font-size: 1rem;
+    }
+
+    .timeline-date {
+        font-size: 0.9rem;
+    }
+
+    .timeline-content-box {
+        padding: 2rem;
+    }
+}
+
+/* HD (1280px - 1919px) */
+@media (min-width: 1280px) and (max-width: 1919px) {
+    .timeline {
+        max-width: 850px;
+        padding: 2.5rem;
+        gap: 3.5rem;
+    }
+
+    .timeline-icon-wrapper {
+        width: 65px;
+        height: 65px;
+    }
+
+    .timeline-icon {
+        font-size: 1.6rem;
+    }
+
+    .timeline-title {
+        font-size: 1.15rem;
+    }
+
+    .timeline-description {
+        font-size: 0.95rem;
+    }
+
+    .timeline-content-box {
+        padding: 1.75rem;
+    }
+}
+
+/* Laptop (1025px - 1279px) */
+@media (min-width: 1025px) and (max-width: 1279px) {
+    .timeline {
+        max-width: 800px;
+        padding: 2rem;
+        gap: 3rem;
+    }
+
+    .timeline-icon-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+
+    .timeline-icon {
+        font-size: 1.4rem;
+    }
+
+    .timeline-title {
+        font-size: 1.05rem;
+    }
+
+    .timeline-description {
+        font-size: 0.9rem;
+    }
+
+    .timeline-content-box {
+        padding: 1.5rem;
+    }
+}
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .timeline {
+        max-width: 100%;
+        padding: 2rem 1.5rem;
+        gap: 2.5rem;
+    }
+
+    .timeline-icon-wrapper {
+        width: 55px;
+        height: 55px;
+    }
+
+    .timeline-icon {
+        font-size: 1.3rem;
+    }
+
+    .timeline-left,
+    .timeline-right {
+        width: 100%;
     }
 
     .timeline-item {
-        width: 100%;
-        left: 0 !important;
-        padding: 1rem 1rem 1rem 4rem !important;
+        flex-direction: column;
     }
 
-    .timeline-badge {
-        left: 0 !important;
+    .timeline-title {
+        font-size: 1rem;
     }
 
-    .timeline-content {
+    .timeline-description {
+        font-size: 0.85rem;
+    }
+
+    .timeline-content-box {
+        padding: 1.25rem;
+    }
+}
+
+/* Mobile (max-width 768px) */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .content-box {
+        padding: 0 1rem;
+    }
+
+    .content-box h3 {
+        font-size: 1.5rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .timeline {
+        max-width: 100%;
+        padding: 2rem 1rem;
+        gap: 2rem;
+    }
+
+    .timeline::before {
+        left: 30px;
+        width: 2px;
+    }
+
+    .timeline-item {
+        flex-direction: row;
+        gap: 1.5rem;
+        padding-left: 2rem;
+    }
+
+    .timeline-left {
+        width: auto;
+        align-items: center;
+        position: relative;
+        min-width: 60px;
+        margin-left: -2rem;
+    }
+
+    .timeline-icon-wrapper {
+        width: 50px;
+        height: 50px;
+    }
+
+    .timeline-icon {
+        font-size: 1.2rem;
+    }
+
+    .timeline-connector {
+        display: none;
+    }
+
+    .timeline-right {
+        width: auto;
+        flex: 1;
+    }
+
+    .timeline-title {
+        font-size: 0.95rem;
+    }
+
+    .timeline-description {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .timeline-date {
+        font-size: 0.8rem;
+    }
+
+    .timeline-content-box {
         padding: 1rem;
+        border-left-width: 3px;
+    }
+}
+
+/* Small Mobile (max-width 576px) */
+@media (max-width: 576px) {
+    .timeline {
+        padding: 1.5rem 0.5rem;
+        gap: 1.5rem;
+    }
+
+    .timeline::before {
+        left: 25px;
+        width: 2px;
+    }
+
+    .timeline-item {
+        padding-left: 1.5rem;
+    }
+
+    .timeline-left {
+        min-width: 50px;
+        margin-left: -1.5rem;
+    }
+
+    .timeline-icon-wrapper {
+        width: 45px;
+        height: 45px;
+    }
+
+    .timeline-icon {
+        font-size: 1rem;
+    }
+
+    .timeline-title {
+        font-size: 0.9rem;
+    }
+
+    .timeline-description {
+        font-size: 0.75rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .timeline-date {
+        font-size: 0.75rem;
+    }
+
+    .timeline-content-box {
+        padding: 0.75rem;
     }
 }
 </style>

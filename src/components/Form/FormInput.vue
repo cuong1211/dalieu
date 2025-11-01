@@ -94,8 +94,8 @@ const handleInput = (event: Event) => {
 
 .custom-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: #5b9fd9;
+    box-shadow: 0 0 0 4px rgba(91, 159, 217, 0.1);
 }
 
 .custom-input.has-error {
