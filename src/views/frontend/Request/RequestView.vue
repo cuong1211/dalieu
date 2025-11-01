@@ -487,8 +487,16 @@ const generateReportHTML = () => {
 
     // Generate Mã Phiếu from sessionId
     const maPhieu = `AI-[${safeValue(diagnosisSession.value.sessionId).substring(0, 8)}]`;
-    const today = new Date();
-    const ngayThuTuc = today.toLocaleDateString('vi-VN').replace(/\//g, '/');
+    let today;
+    let ngayThuTuc = '';
+
+    try {
+        today = new Date();
+        ngayThuTuc = today.toLocaleDateString('vi-VN');
+    } catch (error) {
+        console.error('Date error:', error);
+        ngayThuTuc = new Date().toLocaleDateString('vi-VN');
+    }
 
     // Generate other diseases list (name + percentage only)
     const otherDiseasesList = otherDiseases.map(disease =>
@@ -709,7 +717,7 @@ const generateReportHTML = () => {
 
                 <div style="text-align: center; margin-top: 20px; font-size: 11px;">
                     <p>═══════════════════════════════════════</p>
-                    <p>Ngày In: ${today.toLocaleDateString('vi-VN')} - Hệ Thống Truy Xuất và Tạo Sinh cho Chuẩn Đoán Bệnh Lý Về Da</p>
+                    <p>Ngày In: ${ngayThuTuc} - Hệ Thống Truy Xuất và Tạo Sinh cho Chuẩn Đoán Bệnh Lý Về Da</p>
                 </div>
             </div>
         </body>

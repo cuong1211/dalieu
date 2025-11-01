@@ -62,7 +62,7 @@
                     <div class="timeline-left">
                         <div class="timeline-icon-wrapper">
                             <div class="timeline-icon">
-                                <i :class="getTimelineIcon(index)"></i>
+                                <i :class="getTimelineIcon(index)" style="color: white; font-size: 20px;"></i>
                             </div>
                         </div>
                         <div class="timeline-connector" v-if="index < developmentTimeline.length - 1"></div>
@@ -335,21 +335,7 @@ const developmentTimeline = ref<Milestone[]>([
     gap: 3rem;
 }
 
-/* Vertical center line */
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    transform: translateX(-50%);
-    background: linear-gradient(180deg,
-            rgba(91, 159, 217, 0.2) 0%,
-            rgba(91, 159, 217, 0.6) 50%,
-            rgba(91, 159, 217, 0.2) 100%);
-    z-index: 1;
-}
+
 
 .timeline-item {
     position: relative;
@@ -358,6 +344,7 @@ const developmentTimeline = ref<Milestone[]>([
     opacity: 0;
     display: flex;
     gap: 2rem;
+    z-index: 10000;
 }
 
 .timeline-left {
@@ -388,6 +375,7 @@ const developmentTimeline = ref<Milestone[]>([
     justify-content: center;
     color: #fff;
     font-size: 1.5rem;
+    margin: 0!important;
 }
 
 
@@ -422,14 +410,14 @@ const developmentTimeline = ref<Milestone[]>([
 }
 
 .timeline-description {
-    font-size: 0.95rem;
+    display: block;
+    font-size: 0.8rem;
     color: #64748b;
-    line-height: 1.6;
-    margin-bottom: 1rem;
+    line-height: 1.5;
+    text-align: justify;
+    flex: 1;
     -webkit-line-clamp: 3;
-    line-clamp: 3;
-    overflow: hidden;
-    justify-content: flex-start;
+    -webkit-box-orient: vertical;
 }
 
 .timeline-date {
