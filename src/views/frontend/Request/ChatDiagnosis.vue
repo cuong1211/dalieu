@@ -50,9 +50,11 @@
                     <div class="symptoms-header">
                         <i class="bi bi-clipboard2-pulse"></i>
                         <h4>Triệu chứng đã phát hiện</h4>
+                        <span class="symptom-count">{{ session.symptoms.length }}</span>
                     </div>
                     <div class="symptoms-tags">
                         <span v-for="symptom in session.symptoms" :key="symptom" class="symptom-tag">
+                            <i class="bi bi-check-circle-fill"></i>
                             {{ symptom }}
                         </span>
                     </div>
@@ -72,6 +74,16 @@
                             </div>
                             <div class="message-content">
                                 <div class="message-text" v-html="formatMessage(message.content)"></div>
+
+                                <!-- Audio Player for TTS -->
+                                <div class="audio-player-wrapper">
+                                    <AudioPlayer
+                                        :text="message.content"
+                                        voice="female"
+                                        :speed="0"
+                                        :autoplay="false"
+                                    />
+                                </div>
 
                                 <!-- Show new symptoms detected if any -->
                                 <div v-if="message.metadata?.new_symptoms_detected?.length" class="new-symptoms-alert">
@@ -178,6 +190,7 @@
 import { ref, nextTick, watch, defineProps, defineEmits, withDefaults } from 'vue';
 import type { DiagnosisSession } from '@/types/chatDiagnosis';
 import type { DermatologyRequestForm } from '@/types/request';
+import AudioPlayer from '@/components/AudioPlayer/AudioPlayer.vue';
 
 interface Props {
     session: DiagnosisSession;
@@ -281,7 +294,7 @@ const handlePrintReport = () => {
 
 .header-content>i {
     font-size: 2rem;
-    color: #5b9fd9;
+    color: #1abc9c;
 }
 
 .header-logo {
@@ -308,7 +321,7 @@ const handlePrintReport = () => {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     border: none;
     border-radius: 10px;
     padding: 0.65rem 1.5rem;
@@ -368,7 +381,7 @@ const handlePrintReport = () => {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
 }
 
@@ -401,7 +414,7 @@ const handlePrintReport = () => {
 }
 
 .disease-item:hover {
-    border-color: #5b9fd9;
+    border-color: #1abc9c;
     box-shadow: 0 2px 8px rgba(91, 159, 217, 0.1);
 }
 
@@ -409,7 +422,7 @@ const handlePrintReport = () => {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     border-radius: 8px;
     display: flex;
@@ -469,44 +482,82 @@ const handlePrintReport = () => {
 
 /* Symptoms section */
 .symptoms-section {
-    padding: 1rem;
-    border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
+    padding: 1.25rem;
+    border-top: 2px solid #a7f3d0;
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    margin: 0;
 }
 
 .symptoms-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    justify-content: space-between;
 }
 
 .symptoms-header i {
-    color: #5b9fd9;
-    font-size: 1.25rem;
+    color: #1abc9c;
+    font-size: 1.35rem;
+    flex-shrink: 0;
 }
 
 .symptoms-header h4 {
     margin: 0;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #1e293b;
+    font-size: 0.975rem;
+    font-weight: 700;
+    color: #0d7d6e;
+    flex: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.symptom-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
 }
 
 .symptoms-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.55rem;
 }
 
 .symptom-tag {
     background: white;
-    border: 1px solid #e2e8f0;
-    padding: 0.375rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8125rem;
-    color: #475569;
-    font-weight: 500;
+    border: 1.5px solid #a7f3d0;
+    padding: 0.45rem 0.85rem;
+    border-radius: 24px;
+    font-size: 0.8rem;
+    color: #0d7d6e;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(26, 188, 156, 0.08);
+}
+
+.symptom-tag i {
+    font-size: 0.75rem;
+    color: #1abc9c;
+    flex-shrink: 0;
+}
+
+.symptom-tag:hover {
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    border-color: #1abc9c;
+    box-shadow: 0 2px 6px rgba(26, 188, 156, 0.15);
+    transform: translateY(-1px);
 }
 
 /* Chat Main */
@@ -578,7 +629,7 @@ const handlePrintReport = () => {
 }
 
 .assistant-message .message-avatar {
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
 }
 
@@ -594,7 +645,7 @@ const handlePrintReport = () => {
 }
 
 .user-message .message-avatar {
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
 }
 
@@ -611,7 +662,7 @@ const handlePrintReport = () => {
 }
 
 .user-message .message-content {
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     border-radius: 12px;
     padding: 1rem 1.25rem;
@@ -683,7 +734,7 @@ const handlePrintReport = () => {
 /* Final Result */
 .final-result {
     background: white;
-    border: 2px solid #5b9fd9;
+    border: 2px solid #1abc9c;
     border-radius: 16px;
     padding: 2rem;
     margin-top: 1rem;
@@ -734,7 +785,7 @@ const handlePrintReport = () => {
     flex-shrink: 0;
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     border-radius: 12px;
     display: flex;
@@ -771,7 +822,7 @@ const handlePrintReport = () => {
 
 .final-probability-fill {
     height: 100%;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     border-radius: 6px;
     transition: width 0.5s ease;
 }
@@ -820,7 +871,7 @@ const handlePrintReport = () => {
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -860,7 +911,7 @@ const handlePrintReport = () => {
 }
 
 .result-action-btn.print {
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     box-shadow: 0 2px 8px rgba(91, 159, 217, 0.2);
 }
@@ -906,7 +957,7 @@ const handlePrintReport = () => {
 }
 
 .message-input:focus {
-    border-color: #5b9fd9;
+    border-color: #1abc9c;
     box-shadow: 0 0 0 3px rgba(91, 159, 217, 0.1);
 }
 
@@ -919,7 +970,7 @@ const handlePrintReport = () => {
     flex-shrink: 0;
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -977,6 +1028,33 @@ const handlePrintReport = () => {
     }
 }
 
+/* Audio Player Styles */
+.audio-player-wrapper {
+    display: flex;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(26, 188, 156, 0.1);
+}
+
+.audio-player-wrapper :deep(.player-button) {
+    background-color: #f0f9f7;
+    color: #1abc9c;
+    border-color: #1abc9c;
+    font-size: 0.875rem;
+}
+
+.audio-player-wrapper :deep(.player-button:hover:not(:disabled)) {
+    background-color: #e6f7f4;
+    border-color: #16a085;
+    color: #16a085;
+}
+
+.audio-player-wrapper :deep(.player-button.is-playing) {
+    background-color: #1abc9c;
+    color: white;
+    border-color: #1abc9c;
+}
+
 @media (max-width: 576px) {
     .message-content {
         max-width: 90%;
@@ -989,6 +1067,11 @@ const handlePrintReport = () => {
 
     .message-text {
         font-size: 0.95rem;
+    }
+
+    .audio-player-wrapper {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
     }
 }
 </style>

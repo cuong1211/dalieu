@@ -5,8 +5,7 @@
       <RouterLink to="/" class="sidebar-logo">
         <img src="/media/logos/logo.png" alt="Logo" class="logo-img" />
         <div class="logo-text">
-          <div class="text-primary">TRƯỜNG THPT SỐ 1</div>
-          <div class="text-secondary">HUYỆN BẢO THẮNG</div>
+          <div class="text-primary">DERMARAG</div>
         </div>
       </RouterLink>
     </div>
@@ -20,14 +19,6 @@
         </RouterLink>
       </div>
     </nav>
-
-    <!-- Footer Info (Optional) -->
-    <div class="sidebar-footer">
-      <div class="footer-icon">🩺</div>
-      <div class="school-info">
-        <p class="school-name">HỆ THỐNG TRUY XUẤT VÀ TẠO SINH CHO CHUẨN ĐOÁN BỆNH LÝ VỀ DA </p>
-      </div>
-    </div>
   </aside>
 </template>
 
@@ -88,7 +79,7 @@ const navigateTo = (item: MenuItem) => {
   display: flex;
   align-items: center;
   text-decoration: none;
-  gap: 0.75rem;
+  gap: 0.5rem;
   transition: all 0.3s ease;
 }
 
@@ -97,21 +88,26 @@ const navigateTo = (item: MenuItem) => {
 }
 
 .sidebar-logo .logo-img {
-  height: 48px;
-  width: 48px;
+  height: 50px;
+  width: 50px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .logo-text {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  flex-shrink: 0;
 }
 
 .logo-text .text-primary {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #5b9fd9;
-  line-height: 1.2;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1abc9c!important;
+  line-height: 1;
+  letter-spacing: -0.5px;
 }
 
 .logo-text .text-secondary {
@@ -155,7 +151,7 @@ const navigateTo = (item: MenuItem) => {
 }
 
 .nav-link.active {
-  background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+  background: linear-gradient(90deg, #1abc9c 0%, #0d7d6e 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(91, 159, 217, 0.3);
 }

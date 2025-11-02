@@ -7,13 +7,13 @@
         <!-- Giới thiệu về hệ thống -->
         <section class="section system-intro">
             <div class="container">
-                <h2 class="section-title">HỆ THỐNG TRUY XUẤT VÀ TẠO SINH<br>CHO CHUẨN ĐOÁN BỆNH LÝ VỀ DA</h2>
+                <!-- <h2 class="section-title">HỆ THỐNG TRUY XUẤT VÀ TẠO SINH<br>CHO CHUẨN ĐOÁN BỆNH LÝ VỀ DA</h2> -->
                 <div class="row align-items-center">
                     <div class="col-lg-6">
                         <div class="content-box">
                             <h3>Công Nghệ AI Trong Chẩn Đoán Da Liễu</h3>
                             <p>Hệ thống của chúng tôi sử dụng trí tuệ nhân tạo tiên tiến để hỗ trợ chẩn đoán các bệnh về
-                                da một cách nhanh chóng và chính xác. Với độ chính xác lên đến 95%, chúng tôi tự hào
+                                da một cách nhanh chóng và chính xác. Với độ chính xác cao, chúng tôi tự hào
                                 mang đến giải pháp hiệu quả cho việc chẩn đoán sớm các vấn đề về da.</p>
                             <div class="features-grid">
                                 <div class="feature-item">
@@ -186,7 +186,7 @@ const developmentTimeline = ref<Milestone[]>([
 .section-title {
     text-align: center;
     margin-bottom: 3rem;
-    color: #00447c;
+    color: #0d7d6e;
     font-weight: 700;
     font-size: 2.5rem;
     line-height: 1.3;
@@ -203,7 +203,7 @@ const developmentTimeline = ref<Milestone[]>([
     transform: translateX(-50%);
     width: 120px;
     height: 4px;
-    background: linear-gradient(90deg, #5b9fd9 0%, #00447c 100%);
+    background: linear-gradient(90deg, #1abc9c 0%, #0d7d6e 100%);
     border-radius: 2px;
 }
 
@@ -213,7 +213,7 @@ const developmentTimeline = ref<Milestone[]>([
 }
 
 .content-box h3 {
-    color: #00447c;
+    color: #0d7d6e;
     font-size: 1.75rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
@@ -228,7 +228,7 @@ const developmentTimeline = ref<Milestone[]>([
     left: 0;
     width: 50px;
     height: 3px;
-    background: linear-gradient(90deg, #5b9fd9 0%, #00447c 100%);
+    background: linear-gradient(90deg, #1abc9c 0%, #0d7d6e 100%);
     border-radius: 2px;
 }
 
@@ -251,25 +251,25 @@ const developmentTimeline = ref<Milestone[]>([
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: #f0f7ff;
+    background: #d4f1e9;
     border-radius: 8px;
-    border-left: 4px solid #5b9fd9;
+    border-left: 4px solid #1abc9c;
     transition: all 0.3s ease;
 }
 
 .feature-item:hover {
-    background: #e8f0f7;
+    background: #c1ebe2;
     transform: translateX(5px);
 }
 
 .feature-item i {
     font-size: 1.5rem;
-    color: #5b9fd9;
+    color: #1abc9c;
     min-width: 2rem;
 }
 
 .feature-item span {
-    color: #00447c;
+    color: #0d7d6e;
     font-weight: 500;
     font-size: 1rem;
 }
@@ -361,9 +361,9 @@ const developmentTimeline = ref<Milestone[]>([
     justify-content: center;
     width: 60px;
     height: 60px;
-    background: #5b9fd9;
+    background: #1abc9c;
     border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(91, 159, 217, 0.3);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
     border: 4px solid #fff;
     position: relative;
     z-index: 10;
@@ -391,20 +391,20 @@ const developmentTimeline = ref<Milestone[]>([
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-left: 4px solid #5b9fd9;
+    border-left: 4px solid #1abc9c;
     width: 100%;
     transition: all 0.3s ease;
 }
 
 .timeline-content-box:hover {
-    box-shadow: 0 4px 16px rgba(91, 159, 217, 0.2);
+    box-shadow: 0 4px 16px rgba(26, 188, 156, 0.2);
     transform: translateY(-2px);
 }
 
 .timeline-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #00447c;
+    color: #0d7d6e;
     margin-bottom: 0.75rem;
     line-height: 1.4;
 }
@@ -422,7 +422,7 @@ const developmentTimeline = ref<Milestone[]>([
 
 .timeline-date {
     font-size: 0.85rem;
-    color: #5b9fd9;
+    color: #1abc9c;
     font-weight: 600;
 }
 

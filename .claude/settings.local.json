@@ -4,7 +4,9 @@
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
       "Bash(awk '{print $9, \"\"\"\"(\"\"\"\" $5 \"\"\"\")\"\"\"\"}')",
-      "Bash(npm run build-only:*)"
+      "Bash(npm run build-only:*)",
+      "Bash(find:*)",
+      "Bash(npx vue-tsc:*)"
     ],
     "deny": [],
     "ask": []

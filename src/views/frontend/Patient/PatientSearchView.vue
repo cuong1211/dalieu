@@ -1,150 +1,140 @@
 <template>
-    <div class="container my-8 w-100">
-        <div class="row justify-content-center">
-            <div class="col-lg-12">
-                <!-- Search Card -->
-                <div class="card mb-6">
-                    <div class="card-body py-8 px-lg-10">
-                        <div class="text-center mb-8">
-                            <h2 class="fs-2hx fw-bold mb-3">Tra cứu lịch sử khám bệnh</h2>
-                            <p class="text-gray-400 fs-6">
-                                Nhập số CMND/CCCD để xem lịch sử khám bệnh của bạn
-                            </p>
-                        </div>
-                        <form @submit.prevent="handleSearch">
-                            <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-4">
-                                <div class="position-relative flex-grow-1">
-                                    <span class="position-absolute top-50 translate-middle-y ms-4">
-                                        <i class="bi bi-search fs-2 text-gray-500"></i>
-                                    </span>
-                                    <input type="text" v-model="searchQuery"
-                                        class="form-control form-control-lg form-control-solid ps-14"
-                                        placeholder="VD: 123456789" pattern="[0-9]*"
-                                        :class="{ 'is-invalid': validationError }" />
-                                    <div class="invalid-feedback" v-if="validationError">
-                                        {{ validationError }}
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-lg btn-primary min-w-150px" :disabled="loading">
-                                    <span v-if="loading" class="spinner-border spinner-border-sm me-2"
-                                        role="status"></span>
-                                    <span>
-                                        <i class="bi bi-search me-2"></i>
-                                        Tìm kiếm
-                                    </span>
-                                </button>
+    <div class="patient-search-container">
+        <!-- Header Section -->
+        <div class="search-header">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="bi bi-search" style="color: white;"></i>
+                    Tra cứu lịch sử khám bệnh
+                </h1>
+                <p class="header-subtitle">Nhập số CMND/CCCD để xem lịch sử khám bệnh của bạn</p>
+            </div>
+        </div>
+
+        <div class="search-wrapper">
+            <!-- Search Card -->
+            <div class="search-card">
+                <form @submit.prevent="handleSearch">
+                    <div class="search-form-group">
+                        <div class="search-input-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input
+                                type="text"
+                                v-model="searchQuery"
+                                class="search-input"
+                                placeholder="VD: 123456789"
+                                pattern="[0-9]*"
+                                :class="{ 'is-invalid': validationError }"
+                            />
+                            <div class="validation-error" v-if="validationError">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ validationError }}
                             </div>
-                        </form>
+                        </div>
+                        <button type="submit" class="search-button" :disabled="loading">
+                            <span v-if="loading" class="button-loading">
+                                <i class="bi bi-hourglass-split"></i>
+                            </span>
+                            <span v-else>
+                                <i class="bi bi-search" style="color: white;"></i>
+                            </span>
+                            <span class="button-text">{{ loading ? 'Đang tìm...' : 'Tìm kiếm' }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <template v-if="searched">
+                <!-- Loading State -->
+                <div v-if="loading" class="results-loading">
+                    <div class="spinner">
+                        <div class="spinner-ring"></div>
+                        <p>Đang tìm kiếm...</p>
                     </div>
                 </div>
 
-                <!-- Results Table -->
-                <template v-if="searched">
-                    <div v-if="loading" class="d-flex justify-content-center py-10">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Đang tải...</span>
+                <!-- Error State -->
+                <div v-else-if="error" class="error-alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <div>
+                        <h4>Lỗi tìm kiếm</h4>
+                        <p>{{ error }}</p>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <template v-else>
+                    <!-- Results Header -->
+                    <div v-if="patients.length > 0" class="results-header">
+                        <i class="bi bi-check-circle"></i>
+                        <div>
+                            <h3>Kết quả tìm kiếm</h3>
+                            <p>Tìm thấy <strong>{{ patients.length }}</strong> kết quả cho CMND/CCCD: <strong>{{ searchQuery }}</strong></p>
                         </div>
                     </div>
 
-                    <div v-else-if="error" class="alert alert-danger d-flex align-items-center p-5">
-                        <i class="bi bi-exclamation-circle fs-2 me-4"></i>
-                        <div class="d-flex flex-column">
-                            <span>{{ error }}</span>
-                        </div>
+                    <!-- Empty State -->
+                    <div v-else class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h3>Không tìm thấy kết quả</h3>
+                        <p>Không có thông tin bệnh nhân với CMND/CCCD đã nhập. Vui lòng kiểm tra lại.</p>
                     </div>
 
-                    <template v-else>
-                        <!-- Patient Info Card -->
-                        <div v-if="patients.length > 0" class="card">
-                            <div class="card-header border-0 pt-6">
-                                <div class="card-title">
-                                    <div class="d-flex align-items-center position-relative">
-                                        <i class="bi bi-journal-medical fs-1 text-primary me-4"></i>
-                                        <div>
-                                            <h3 class="fw-bold m-0">Lịch sử khám bệnh</h3>
-                                            <span class="text-gray-400 mt-1">
-                                                Tìm thấy {{ patients.length }} kết quả cho CMND/CCCD: {{ searchQuery }}
+                    <!-- Results Table -->
+                    <div v-if="patients.length > 0" class="table-wrapper">
+                        <div class="table-responsive">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Họ tên</th>
+                                        <th>CMND/CCCD</th>
+                                        <th>Tuổi</th>
+                                        <th>Giới tính</th>
+                                        <th>Điện thoại</th>
+                                        <th>Triệu chứng</th>
+                                        <th>Kết quả</th>
+                                        <th>Ngày khám</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(patient, index) in patients" :key="patient.id">
+                                        <td class="row-number">{{ index + 1 }}</td>
+                                        <td class="patient-name">
+                                            <strong>{{ patient.name }}</strong>
+                                        </td>
+                                        <td class="patient-id">{{ patient.identification }}</td>
+                                        <td>{{ patient.age }}</td>
+                                        <td>
+                                            <span :class="patient.gender === 'Nam' ? 'gender-badge-male' : 'gender-badge-female'"
+                                                class="gender-badge">
+                                                {{ patient.gender}}
                                             </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                                        </td>
+                                        <td class="phone-number">{{ patient.phone }}</td>
+                                        <td class="truncate">{{ truncateText(patient.symptom, 50) }}</td>
+                                        <td class="truncate">{{ truncateText(patient.result || '', 50) }}</td>
+                                        <td class="date-cell">
+                                            <i class="bi bi-calendar-event"></i>
+                                            {{ formatDate(patient.created_at) }}
+                                        </td>
+                                        <td class="action-cell">
+                                            <button class="view-button" @click="showDetails(patient.id)" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-
-                        <div v-else class="alert alert-info d-flex align-items-center p-5">
-                            <i class="bi bi-info-circle fs-2 me-4"></i>
-                            <div class="d-flex flex-column">
-                                <span>Không tìm thấy thông tin bệnh nhân với CMND/CCCD đã nhập</span>
-                            </div>
-                        </div>
-                    </template>
+                    </div>
                 </template>
-
-            </div>
-
+            </template>
         </div>
     </div>
-    <div v-if="patients.length > 0" class="card-body py-0">
-        <div class="table-responsive w-100">
-            <table class="table table-hover table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
-                <thead>
-                    <tr class="fw-bold text-muted bg-light">
-                        <th class="ps-4 min-w-25px">#</th>
-                        <th class="min-w-150px">Họ tên</th>
-                        <th class="min-w-125px">CMND/CCCD</th>
-                        <th class="min-w-50px">Tuổi</th>
-                        <th class="min-w-100px">Giới tính</th>
-                        <th class="min-w-125px">Điện thoại</th>
-                        <th class="min-w-200px">Triệu chứng</th>
-                        <th class="min-w-200px">Kết quả</th>
-                        <th class="min-w-150px">Ngày khám</th>
-                        <th class="min-w-100px text-end pe-4">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(patient, index) in patients" :key="patient.id">
-                        <td class="ps-4">
-                            <span class="text-dark fw-semibold">{{ index + 1 }}</span>
-                        </td>
-                        <td>
-                            <span class="text-dark fw-semibold">{{ patient.name }}</span>
-                        </td>
-                        <td>
-                            <span>{{ patient.identification }}</span>
-                        </td>
-                        <td>{{ patient.age }}</td>
-                        <td>
-                            <span :class="patient.gender === 'Nam' ? 'badge-light-primary' : 'badge-light-success'"
-                                class="badge">
-                                {{ patient.gender}}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="text-primary">{{ patient.phone }}</span>
-                        </td>
-                        <td>
-                            <span>{{ truncateText(patient.symptom, 50) }}</span>
-                        </td>
-                        <td>
-                            <span>{{ truncateText(patient.result, 50) }}</span>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center text-gray-600">
-                                <i class="bi bi-calendar-event me-2"></i>
-                                {{ formatDate(patient.created_at) }}
-                            </div>
-                        </td>
-                        <td class="text-end pe-4">
-                            <button class="btn btn-icon btn-light-primary btn-sm" @click="showDetails(patient.id)">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+
     <DetailModal v-if="showModal" :patient-id="selectedPatientId" @close="closeModal" />
 </template>
 
@@ -229,77 +219,590 @@ const truncateText = (text: string, length: number): string => {
 </script>
 
 <style scoped>
-.min-w-150px {
-    min-width: 150px;
+/* Main Container */
+.patient-search-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #f0fdfb 100%);
 }
 
-.min-w-125px {
-    min-width: 125px;
+/* Header */
+.search-header {
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    padding: 1.2rem 2rem;
+    box-shadow: 0 4px 20px rgba(26, 188, 156, 0.15);
 }
 
-.min-w-100px {
-    min-width: 100px;
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.min-w-50px {
-    min-width: 50px;
+.header-title {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.min-w-25px {
-    min-width: 25px;
+.header-title i {
+    font-size: 2.8rem;
 }
 
-.min-w-200px {
-    min-width: 200px;
+.header-subtitle {
+    margin: 0.75rem 0 0 0;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 300;
 }
 
-.ps-14 {
-    padding-left: 3.5rem !important;
+/* Wrapper */
+.search-wrapper {
+    /* max-width: 1200px; */
+    margin: 0 auto;
+    padding: 3rem 2rem;
 }
 
-.form-control.is-invalid {
-    background-image: none;
+/* Search Card */
+.search-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 2px 12px rgba(26, 188, 156, 0.08);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 3rem;
 }
 
-.badge {
-    padding: 0.5em 0.85em;
+.search-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 1rem;
+    font-size: 1.25rem;
+    color: #1abc9c;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3.5rem;
+    border: 2px solid #a7f3d0;
+    border-radius: 12px;
+    font-size: 1rem;
     font-weight: 500;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    color: #1e293b;
 }
 
-.badge-light-primary {
-    color: #009ef7;
-    background-color: #f1faff;
+.search-input::placeholder {
+    color: #94a3b8;
 }
 
-.badge-light-success {
-    color: #50cd89;
-    background-color: #e8fff3;
+.search-input:focus {
+    border-color: #1abc9c;
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
+    background: white;
 }
 
-.table> :not(caption)>*>* {
-    padding: 1rem;
+.search-input.is-invalid {
+    border-color: #dc2626;
+}
+
+.validation-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #dc2626;
+    animation: slideDown 0.3s ease;
+}
+
+.validation-error i {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Search Button */
+.search-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.search-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 188, 156, 0.3);
+}
+
+.search-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(26, 188, 156, 0.2);
+}
+
+.search-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.button-loading {
+    display: inline-flex;
+    align-items: center;
+}
+
+.button-loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.button-text {
+    display: inline-block;
+}
+
+/* Results Loading */
+.results-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    margin-bottom: 2rem;
+}
+
+.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.spinner-ring {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #a7f3d0;
+    border-top-color: #1abc9c;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.spinner p {
+    color: #64748b;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Error Alert */
+.error-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.error-alert i {
+    font-size: 1.5rem;
+    color: #dc2626;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.error-alert h4 {
+    margin: 0 0 0.5rem 0;
+    color: #991b1b;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.error-alert p {
+    margin: 0;
+    color: #7f1d1d;
+    font-size: 0.95rem;
+}
+
+/* Results Header */
+.results-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    border: 1.5px solid #a7f3d0;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.results-header i {
+    font-size: 1.8rem;
+    color: #1abc9c;
+    flex-shrink: 0;
+}
+
+.results-header h3 {
+    margin: 0 0 0.5rem 0;
+    color: #0d7d6e;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.results-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #cbd5e1;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #475569;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+    color: #94a3b8;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(26, 188, 156, 0.08);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
 }
 
 .table-responsive {
-    max-height: 600px;
+    overflow-x: auto;
+    max-height: 700px;
     overflow-y: auto;
 }
 
+/* Results Table */
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.results-table thead {
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    border-bottom: 2px solid #a7f3d0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.results-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: #0d7d6e;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.results-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.results-table tbody tr:hover {
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+}
+
+.results-table td {
+    padding: 1rem;
+    color: #1e293b;
+}
+
+.row-number {
+    font-weight: 600;
+    color: #64748b;
+    min-width: 40px;
+}
+
+.patient-name {
+    min-width: 150px;
+    font-weight: 600;
+    color: #0d7d6e;
+}
+
+.patient-id {
+    min-width: 120px;
+    color: #1abc9c;
+    font-weight: 600;
+}
+
+.gender-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 70px;
+    text-align: center;
+}
+
+.gender-badge-male {
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    color: #1abc9c;
+    border: 1px solid #a7f3d0;
+}
+
+.gender-badge-female {
+    background: #fef3f2;
+    color: #c4220e;
+    border: 1px solid #fdccc9;
+}
+
+.phone-number {
+    min-width: 120px;
+    color: #1abc9c;
+    font-weight: 500;
+}
+
+.truncate {
+    min-width: 150px;
+    max-width: 200px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.date-cell {
+    min-width: 140px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.date-cell i {
+    color: #1abc9c;
+    font-size: 1rem;
+}
+
+.action-cell {
+    min-width: 80px;
+    text-align: center;
+    padding: 1rem !important;
+}
+
+.view-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    border: 1.5px solid #a7f3d0;
+    border-radius: 8px;
+    color: #1abc9c;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(26, 188, 156, 0.08);
+}
+
+.view-button:hover {
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    border-color: #1abc9c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.2);
+}
+
+.view-button:active {
+    transform: translateY(0);
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #f1f5f9;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #a7f3d0;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #1abc9c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-header {
+        padding: 2rem 1.5rem;
+    }
+
+    .header-title {
+        font-size: 1.875rem;
+    }
+
+    .header-title i {
+        font-size: 2rem;
+    }
+
+    .search-wrapper {
+        padding: 2rem 1.5rem;
+    }
+
+    .search-card {
+        padding: 1.5rem;
+    }
+
+    .search-form-group {
+        flex-direction: column;
+    }
+
+    .search-button {
+        width: 100%;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .results-table th {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-header {
+        padding: 1.5rem 1rem;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+        gap: 0.75rem;
+    }
+
+    .header-title i {
+        font-size: 1.75rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .search-wrapper {
+        padding: 1.5rem 1rem;
+    }
+
+    .results-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .results-header i {
+        font-size: 1.5rem;
+    }
+
+    .results-table {
+        font-size: 0.8rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.5rem;
+    }
+
+    .patient-name,
+    .patient-id,
+    .truncate,
+    .date-cell {
+        min-width: auto;
+        max-width: 100px;
+    }
+
+    .results-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .results-header p {
+        font-size: 0.85rem;
+    }
 }
 </style>

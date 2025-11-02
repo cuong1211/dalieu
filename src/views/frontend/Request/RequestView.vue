@@ -833,7 +833,7 @@ const generateReportHTML = async () => {
 }
 
 .form-section:hover {
-    border-color: #5b9fd9;
+    border-color: #1abc9c;
     box-shadow: 0 2px 8px rgba(91, 159, 217, 0.08);
 }
 
@@ -843,7 +843,7 @@ const generateReportHTML = async () => {
     color: #1e293b;
     margin: 0 0 1.25rem 0;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid #5b9fd9;
+    border-bottom: 2px solid #1abc9c;
     display: inline-block;
 }
 
@@ -888,7 +888,7 @@ const generateReportHTML = async () => {
     justify-content: center;
     gap: 0.75rem;
     padding: 0.875rem 2.5rem;
-    background: linear-gradient(135deg, #5b9fd9 0%, #4a8bc2 100%);
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -904,7 +904,7 @@ const generateReportHTML = async () => {
 .submit-button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(91, 159, 217, 0.3);
-    background: linear-gradient(135deg, #4a8bc2 0%, #3a7bb0 100%);
+    background: linear-gradient(135deg, #16a085 0%, #3a7bb0 100%);
 }
 
 .submit-button:active:not(:disabled) {

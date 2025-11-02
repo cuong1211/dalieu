@@ -2,7 +2,7 @@
 <template>
     <div class="audio-player">
         <button class="player-button" @click="togglePlay" :disabled="isLoading" :class="{ 'is-playing': isPlaying }">
-            <i class="bi" :class="buttonIcon" style="color: gray;"></i>
+            <i class="bi" :class="buttonIcon"></i>
             <span>{{ buttonText }}</span>
         </button>
 
@@ -15,6 +15,7 @@
 import { ref, computed, onUnmounted, watch, nextTick } from 'vue';
 import { ttsService } from '@/stores/ttsService';
 import type { TTSOptions } from '@/stores/ttsService';
+import { useAudioStore } from '@/stores/audioStore';
 
 interface Props {
     text: string;
@@ -32,6 +33,11 @@ const emit = defineEmits<{
     (e: 'audioReady'): void;
     (e: 'audioError'): void;
 }>();
+
+// Tạo unique ID cho instance này
+const instanceId = Math.random().toString(36).substr(2, 9);
+const { setActiveAudio, clearActiveAudio, stopCurrentAudio, isCurrentlyActive } = useAudioStore();
+
 const audioPlayer = ref<HTMLAudioElement | null>(null);
 const isLoading = ref(false);
 const isPlaying = ref(false);
@@ -68,6 +74,14 @@ const playAudio = async () => {
     if (!audioPlayer.value || !isAudioReady.value) return;
 
     try {
+        // Dừng audio khác đang chạy
+        stopCurrentAudio();
+
+        // Đặt audio này là audio đang chạy
+        if (audioPlayer.value) {
+            setActiveAudio(instanceId, audioPlayer.value);
+        }
+
         const playPromise = audioPlayer.value.play();
         if (playPromise !== undefined) {
             await playPromise;
@@ -83,6 +97,7 @@ const pauseAudio = () => {
     if (audioPlayer.value) {
         audioPlayer.value.pause();
         isPlaying.value = false;
+        clearActiveAudio(instanceId);
     }
 };
 
@@ -142,6 +157,7 @@ const togglePlay = async () => {
 // Event handlers
 const handleEnded = () => {
     isPlaying.value = false;
+    clearActiveAudio(instanceId);
 };
 
 const handleError = (event: Event) => {
@@ -150,6 +166,7 @@ const handleError = (event: Event) => {
     errorMessage.value = 'Lỗi phát audio. Vui lòng thử lại.';
     isPlaying.value = false;
     isAudioReady.value = false;
+    clearActiveAudio(instanceId);
 };
 
 const handleLoaded = () => {
@@ -165,8 +182,17 @@ watch(() => props.text, () => {
     }
 }, { immediate: true });
 
+// Watch if this audio instance is still active
+// When another audio starts playing and stops this one, update UI to show play button
+watch(() => isCurrentlyActive(instanceId), (isActive) => {
+    if (!isActive && isPlaying.value) {
+        isPlaying.value = false;
+    }
+});
+
 onUnmounted(() => {
     cleanup();
+    clearActiveAudio(instanceId);
 });
 </script>
 
@@ -180,33 +206,58 @@ onUnmounted(() => {
 .player-button {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 0.4rem;
     padding: 0.5rem 1rem;
-    background-color: #f8fafc;
-    color: #3b82f6;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+    color: #1abc9c;
+    border: 1.5px solid #a7f3d0;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(26, 188, 156, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.player-button i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
 }
 
 .player-button:hover:not(:disabled) {
-    background-color: #eff6ff;
-    border-color: #3b82f6;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #d4f1e9 0%, #c6eee5 100%);
+    border-color: #1abc9c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.15);
+}
+
+.player-button:hover:not(:disabled) i {
+    transform: scale(1.1);
+}
+
+.player-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(26, 188, 156, 0.1);
 }
 
 .player-button:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
 .player-button.is-playing {
-    background-color: #3b82f6;
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
     color: white;
-    border-color: #3b82f6;
+    border-color: #1abc9c;
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.25);
+}
+
+.player-button.is-playing:hover:not(:disabled) {
+    background: linear-gradient(135deg, #16a085 0%, #0d7d6e 100%);
+    box-shadow: 0 6px 16px rgba(26, 188, 156, 0.3);
 }
 
 .error-message {
@@ -230,4 +281,4 @@ onUnmounted(() => {
 .bi-hourglass-split {
     animation: spin 1s linear infinite;
 }
-</style>y
+</style>
