@@ -141,7 +141,6 @@
 import { ref, onMounted } from 'vue';
 import { api } from '@/utils/api';
 import { formatDate } from '@/utils/dateUtils';
-import DiagnosisPrintForm from '@/views/frontend/Request/DiagnosisPrintForm.vue';
 
 interface Patient {
     id: number;
