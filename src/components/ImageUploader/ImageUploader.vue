@@ -112,6 +112,8 @@ const handleFileChange = (event: Event): void => {
     preview.value = URL.createObjectURL(file)
     emit('update:modelValue', file)
     emit('file-changed', file)
+    // Tự động bật modal crop ảnh
+    showCropper.value = true
   }
 }
 
@@ -123,6 +125,8 @@ const handleDrop = (event: DragEvent): void => {
     preview.value = URL.createObjectURL(file)
     emit('update:modelValue', file)
     emit('file-changed', file)
+    // Tự động bật modal crop ảnh
+    showCropper.value = true
   }
 }
 

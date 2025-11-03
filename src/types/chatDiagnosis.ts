@@ -83,6 +83,8 @@ export interface ChatMessage {
         top_5_diseases?: DiseaseCandidate[];
         new_symptoms_detected?: string[];
         questions_asked?: number;
+        imageUrl?: string;
+        imageBase64?: string;
     };
 }
 

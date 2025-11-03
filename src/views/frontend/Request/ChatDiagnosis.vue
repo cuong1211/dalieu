@@ -64,44 +64,57 @@
             <!-- Chat Messages Area -->
             <div class="chat-main">
                 <div ref="messagesContainer" class="messages-container">
-                    <div v-for="message in session.messages" :key="message.id" class="message-wrapper"
-                        :class="message.role">
-
-                        <!-- Assistant Message -->
-                        <div v-if="message.role === 'assistant'" class="message assistant-message">
-                            <div class="message-avatar assistant-avatar">
-                                <img src="/media/logos/logo.png" alt="AI Assistant" class="avatar-logo" />
-                            </div>
-                            <div class="message-content">
-                                <div class="message-text" v-html="formatMessage(message.content)"></div>
-
-                                <!-- Audio Player for TTS -->
-                                <div class="audio-player-wrapper">
-                                    <AudioPlayer
-                                        :text="message.content"
-                                        voice="female"
-                                        :speed="0"
-                                        :autoplay="false"
-                                    />
-                                </div>
-
-                                <!-- Show new symptoms detected if any -->
-                                <div v-if="message.metadata?.new_symptoms_detected?.length" class="new-symptoms-alert">
-                                    <i class="bi bi-exclamation-circle-fill"></i>
-                                    <span>Phát hiện thêm triệu chứng:
-                                        <strong>{{ message.metadata.new_symptoms_detected.join(', ') }}</strong>
-                                    </span>
+                    <div v-for="message in session.messages" :key="message.id" class="message-group">
+                        <!-- User Message Image (Outside message box) -->
+                        <div v-if="message.role === 'user' && message.metadata?.imageBase64" class="user-image-thumbnail-wrapper">
+                            <div class="user-image-thumbnail" @click="openImageModal(message.metadata.imageBase64)">
+                                <img :src="message.metadata.imageBase64" alt="Triệu chứng" class="user-thumbnail" />
+                                <div class="image-overlay">
+                                    <i class="bi bi-search"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- User Message -->
-                        <div v-if="message.role === 'user'" class="message user-message">
-                            <div class="message-avatar">
-                                <i class="bi bi-person-fill" style="color: white;"></i>
+                        <div class="message-wrapper" :class="message.role">
+
+                            <!-- Assistant Message -->
+                            <div v-if="message.role === 'assistant'" class="message assistant-message">
+                                <div class="message-avatar assistant-avatar">
+                                    <img src="/media/logos/logo.png" alt="AI Assistant" class="avatar-logo" />
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-text" v-html="formatMessage(message.content)"></div>
+
+                                    <!-- Audio Player for TTS -->
+                                    <div class="audio-player-wrapper">
+                                        <AudioPlayer
+                                            :key="message.id"
+                                            :text="message.content"
+                                            voice="female"
+                                            :speed="0"
+                                            :autoplay="isMessageNew(message.id)"
+                                            @play="onAudioPlay"
+                                        />
+                                    </div>
+
+                                    <!-- Show new symptoms detected if any -->
+                                    <div v-if="message.metadata?.new_symptoms_detected?.length" class="new-symptoms-alert">
+                                        <i class="bi bi-exclamation-circle-fill"></i>
+                                        <span>Phát hiện thêm triệu chứng:
+                                            <strong>{{ message.metadata.new_symptoms_detected.join(', ') }}</strong>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="message-content">
-                                <div class="message-text">{{ message.content }}</div>
+
+                            <!-- User Message -->
+                            <div v-if="message.role === 'user'" class="message user-message">
+                                <div class="message-avatar">
+                                    <i class="bi bi-person-fill" style="color: white;"></i>
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-text">{{ message.content }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -183,6 +196,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- Image Modal -->
+        <div v-if="showImageModal" class="image-modal-overlay" @click="closeImageModal">
+            <div class="image-modal-content" @click.stop>
+                <button class="close-modal-btn" @click="closeImageModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <img :src="selectedImage" alt="Hình ảnh phóng đại" class="modal-image" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -222,6 +245,9 @@ const emit = defineEmits<{
 const userInput = ref('');
 const messagesContainer = ref<HTMLElement | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
+const showImageModal = ref(false);
+const selectedImage = ref<string>('');
+const newMessageIds = ref<Set<string>>(new Set());
 
 // Handle submit
 const handleSubmit = () => {
@@ -265,6 +291,43 @@ watch(() => props.isLoading, (newVal) => {
 const handlePrintReport = () => {
     emit('print-report');
 };
+
+// Open image modal
+const openImageModal = (imageBase64: string) => {
+    selectedImage.value = imageBase64;
+    showImageModal.value = true;
+};
+
+// Close image modal
+const closeImageModal = () => {
+    showImageModal.value = false;
+    selectedImage.value = '';
+};
+
+// Check if message is new
+const isMessageNew = (messageId: string): boolean => {
+    return newMessageIds.value.has(messageId);
+};
+
+// Track new messages for autoplay
+const onAudioPlay = () => {
+    // This callback is triggered when audio starts playing
+    console.log('Audio started playing');
+};
+
+// Watch for new assistant messages to mark them as new
+watch(() => props.session.messages.length, (newLength, oldLength) => {
+    if (newLength > oldLength) {
+        const lastMessage = props.session.messages[newLength - 1];
+        if (lastMessage?.role === 'assistant') {
+            newMessageIds.value.add(lastMessage.id);
+            // Remove from new messages after audio finishes (or after 30 seconds)
+            setTimeout(() => {
+                newMessageIds.value.delete(lastMessage.id);
+            }, 30000);
+        }
+    }
+});
 </script>
 
 <style scoped>
@@ -577,9 +640,66 @@ const handlePrintReport = () => {
     gap: 1.5rem;
 }
 
+.message-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-image-thumbnail-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
+}
+
+.user-image-thumbnail {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.user-image-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+}
+
+.user-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.user-image-thumbnail:hover .image-overlay {
+    opacity: 1;
+}
+
+.image-overlay i {
+    color: white;
+    font-size: 1.5rem;
+}
+
 .message-wrapper {
     display: flex;
     animation: slideIn 0.3s ease-out;
+    width: 100%;
 }
 
 .message-wrapper.assistant {
@@ -994,6 +1114,72 @@ const handlePrintReport = () => {
 
 .send-btn i {
     font-size: 1.25rem;
+}
+
+/* Image Modal */
+.image-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+.image-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-image {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 85vh;
+    object-fit: contain;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.2s ease;
+    z-index: 10000;
+}
+
+.close-modal-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* Responsive */

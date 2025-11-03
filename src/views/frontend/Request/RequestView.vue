@@ -125,6 +125,7 @@ import { useRequestValidation } from '@/utils/validations/requestValidation';
 import { useToast } from 'vue-toastification';
 import chatDiagnosisService from '@/services/chatDiagnosisService';
 import diseasesService from '@/services/diseasesService';
+import imageStorageService from '@/services/imageStorageService';
 
 const isProcessing = ref(false);
 const toast = useToast();
@@ -206,7 +207,8 @@ const saveFormData = () => {
             phone: form.value.phone,
             email: form.value.email,
             address: form.value.address,
-            symptom: form.value.symptom
+            symptom: form.value.symptom,
+            imagePath: imageStorageService.getImagePath()
         };
         localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formDataToSave));
     } catch (error) {
@@ -282,9 +284,19 @@ const handleIdNumberChange = (value: string | number) => {
 };
 
 // Xử lý thay đổi hình ảnh
-const handleImageChanged = (file: File | null) => {
+const handleImageChanged = async (file: File | null) => {
     form.value.image = file;
     handleInput('image', file);
+
+    // Lưu ảnh vào localStorage
+    if (file) {
+        try {
+            await imageStorageService.saveImageToStorage(file);
+        } catch (error) {
+            console.error('Error saving image:', error);
+            toast.error('Không thể lưu ảnh. Vui lòng thử lại.');
+        }
+    }
 };
 
 // Generate unique ID for messages
@@ -317,12 +329,28 @@ const handleSubmit = async () => {
             }
         );
 
+        // Lấy thông tin ảnh từ storage
+        const imageData = imageStorageService.getImageFromStorage();
+
+        // Tạo tin nhắn đầu tiên từ user với triệu chứng và ảnh
+        const userFirstMessage: ChatMessage = {
+            id: generateMessageId(),
+            role: 'user',
+            content: form.value.symptom,
+            timestamp: new Date(),
+            metadata: {
+                imageUrl: imageData.path || '',
+                imageBase64: imageData.base64 || ''
+            }
+        };
+
         // Initialize session
         diagnosisSession.value = {
             sessionId: response.session_id,
             finished: response.finished,
             symptoms: response.symptoms,
             messages: [
+                userFirstMessage,
                 {
                     id: generateMessageId(),
                     role: 'assistant',
@@ -444,6 +472,12 @@ const handleReset = () => {
         localStorage.removeItem(FORM_DATA_KEY);
     } catch (error) {
         console.error('Error clearing form data:', error);
+    }
+    // Clear image from storage
+    try {
+        imageStorageService.clearImage();
+    } catch (error) {
+        console.error('Error clearing image:', error);
     }
     toast.info('Đã đặt lại form');
 };
