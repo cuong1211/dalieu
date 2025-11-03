@@ -142,7 +142,6 @@
 import { ref } from 'vue';
 import { api } from '@/utils/api';
 import DetailModal from './DetailModal.vue';
-import DiagnosisPrintForm from '../Request/DiagnosisPrintForm.vue';
 interface Patient {
     id: number;
     identification: string;
