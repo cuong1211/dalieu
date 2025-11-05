@@ -73,6 +73,11 @@
           <div class="symptom-box">
             {{ patientInfo.symptom }}
           </div>
+          <!-- Patient Image -->
+          <div v-if="hasPatientImage" class="image-section">
+            <h4>Hình Ảnh Bệnh Nhân:</h4>
+            <img :src="patientImageBase64" alt="Hình ảnh bệnh nhân" class="patient-image" />
+          </div>
         </div>
 
         <!-- Diagnosis Results Section -->
@@ -81,10 +86,20 @@
 
           <!-- Detected Symptoms -->
           <div class="subsection">
-            <h4>Triệu Chứng Phát Hiện:</h4>
+            <h4>Triệu Chứng Ban Đầu Phát Hiện:</h4>
             <div class="symptoms-tags">
               <span v-for="symptom in diagnosisInfo.symptoms" :key="symptom" class="tag">
                 {{ symptom }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Additional Detected Symptoms -->
+          <div v-if="hasAdditionalSymptoms" class="subsection">
+            <h4>Triệu Chứng Bổ Sung Phát Hiện:</h4>
+            <div class="symptoms-tags additional-tags">
+              <span v-for="symptom in allDetectedSymptoms" :key="symptom" class="tag additional-tag">
+                <i class="bi bi-plus-circle"></i> {{ symptom }}
               </span>
             </div>
           </div>
@@ -180,10 +195,12 @@ interface Props {
   patientInfo: DermatologyRequestForm
   diagnosisInfo: DiagnosisSession
   showConversation?: boolean
+  patientImageBase64?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showConversation: false
+  showConversation: false,
+  patientImageBase64: ''
 })
 
 const isPreview = ref(false)
@@ -192,6 +209,27 @@ const printContent = ref<HTMLElement | null>(null)
 const currentDate = computed(() => {
   const today = new Date()
   return today.toLocaleDateString('vi-VN')
+})
+
+const hasPatientImage = computed(() => {
+  return !!props.patientImageBase64
+})
+
+const hasAdditionalSymptoms = computed(() => {
+  return allDetectedSymptoms.value.length > 0
+})
+
+// Get all additional symptoms from messages
+const allDetectedSymptoms = computed(() => {
+  const symptoms = new Set<string>()
+  props.diagnosisInfo.messages.forEach(message => {
+    if (message.metadata?.new_symptoms_detected) {
+      message.metadata.new_symptoms_detected.forEach(symptom => {
+        symptoms.add(symptom)
+      })
+    }
+  })
+  return Array.from(symptoms)
 })
 
 const openPrintPreview = () => {
@@ -411,6 +449,42 @@ const getStyles = () => {
       border-radius: 4px;
       font-size: 11px;
       font-weight: 500;
+    }
+
+    .tag.additional-tag {
+      background: #dbeafe;
+      color: #1e40af;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .tag.additional-tag i {
+      font-size: 9px;
+    }
+
+    .image-section {
+      margin-top: 8px;
+      padding: 8px;
+      background: #f0f9ff;
+      border-radius: 4px;
+      border-left: 3px solid #5b9fd9;
+    }
+
+    .image-section h4 {
+      font-size: 11px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 6px;
+      margin-top: 0;
+    }
+
+    .patient-image {
+      max-width: 100%;
+      height: auto;
+      max-height: 250px;
+      border-radius: 4px;
+      margin-top: 6px;
     }
 
     .diseases-table {
@@ -773,6 +847,42 @@ const getStyles = () => {
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
+}
+
+.tag.additional-tag {
+  background: #dbeafe;
+  color: #1e40af;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tag.additional-tag i {
+  font-size: 0.7rem;
+}
+
+.image-section {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f0f9ff;
+  border-radius: 4px;
+  border-left: 4px solid #5b9fd9;
+}
+
+.image-section h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  margin-top: 0;
+}
+
+.patient-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .diseases-table {

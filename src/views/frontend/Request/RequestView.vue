@@ -138,6 +138,7 @@ const FORM_DATA_KEY = 'diagnosis_form_data';
 // Chat states
 const showChat = ref(false);
 const isChatLoading = ref(false);
+const patientImageBase64 = ref<string>('');
 const diagnosisSession = ref<DiagnosisSession>({
     sessionId: '',
     finished: false,
@@ -224,6 +225,11 @@ const loadFormData = () => {
             const formData = JSON.parse(savedFormData);
             form.value = { ...form.value, ...formData };
         }
+        // Restore image base64 from storage
+        const imageData = imageStorageService.getImageFromStorage();
+        if (imageData.base64) {
+            patientImageBase64.value = imageData.base64;
+        }
     } catch (error) {
         console.error('Error loading form data:', error);
     }
@@ -292,6 +298,12 @@ const handleImageChanged = async (file: File | null) => {
     if (file) {
         try {
             await imageStorageService.saveImageToStorage(file);
+            // Convert to base64 for printing
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                patientImageBase64.value = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
         } catch (error) {
             console.error('Error saving image:', error);
             toast.error('Không thể lưu ảnh. Vui lòng thử lại.');
@@ -735,6 +747,16 @@ const generateReportHTML = async () => {
                     </tr>
                 </table>
 
+                <!-- Patient Image -->
+                ${patientImageBase64.value ? `
+                <div class="info-row" style="margin-top: 15px;">
+                    <strong>Hình ảnh bệnh nhân:</strong>
+                </div>
+                <div style="text-align: center; margin: 10px 0;">
+                    <img src="${patientImageBase64.value}" alt="Hình ảnh bệnh nhân" style="max-width: 300px; max-height: 300px; border: 1px solid #000; border-radius: 4px;" />
+                </div>
+                ` : ''}
+
                 <!-- PHẦN 2: KẾT QUẢ PHÂN TÍCH VÀ CHẨN ĐOÁN BỆNH LÝ -->
                 <div class="section-title">PHẦN 2: KẾT QUẢ PHÂN TÍCH VÀ CHẨN ĐOÁN BỆNH LÝ</div>
 
@@ -752,8 +774,36 @@ const generateReportHTML = async () => {
                 </div>
                 `}
 
+                <!-- Detected Symptoms -->
+                ${diagnosisSession.value.symptoms && diagnosisSession.value.symptoms.length > 0 ? `
                 <div class="info-row" style="margin-top: 10px;">
-                    <strong>2.2. Xác suất các bệnh khác có thể (Differential Diagnosis):</strong>
+                    <strong>2.2. Triệu chứng phát hiện ban đầu:</strong>
+                </div>
+                <div class="info-row" style="margin-left: 20px;">
+                    ${diagnosisSession.value.symptoms.map(s => `• ${s}`).join('<br/>')}
+                </div>
+                ` : ''}
+
+                <!-- Additional Detected Symptoms -->
+                ${diagnosisSession.value.messages && diagnosisSession.value.messages.some(m => m.metadata?.new_symptoms_detected?.length) ? `
+                <div class="info-row" style="margin-top: 10px;">
+                    <strong>2.3. Triệu chứng bổ sung phát hiện thêm:</strong>
+                </div>
+                <div class="info-row" style="margin-left: 20px;">
+                    ${(() => {
+                        const additionalSymptoms = new Set<string>();
+                        diagnosisSession.value.messages.forEach(m => {
+                            if (m.metadata?.new_symptoms_detected) {
+                                m.metadata.new_symptoms_detected.forEach(s => additionalSymptoms.add(s));
+                            }
+                        });
+                        return Array.from(additionalSymptoms).map(s => `• ${s}`).join('<br/>');
+                    })()}
+                </div>
+                ` : ''}
+
+                <div class="info-row" style="margin-top: 10px;">
+                    <strong>2.4. Xác suất các bệnh khác có thể (Differential Diagnosis):</strong>
                 </div>
                 ${otherDiseases.length > 0 ? `
                 <div class="info-row" style="margin-left: 20px;">

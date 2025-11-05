@@ -1,8 +1,8 @@
 <template>
     <div class="fe-layout">
-        <Sidebar />
+        <Sidebar @collapse-change="handleCollapse" />
 
-        <div class="fe-main-content">
+        <div class="fe-main-content" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
             <!-- Hero Section with Banner -->
             <!-- <div class="fe-hero-section" id="home">
                 <div class="hero-bg" style="background-image: url(assets/media/svg/illustrations/landing.svg)"></div>
@@ -35,6 +35,12 @@
 import Sidebar from '@/layout/frontend/sidebar/SidebarMain.vue'
 import Footer from '@/layout/frontend/footer/FooterMain.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
+
+const isSidebarCollapsed = ref(false)
+
+const handleCollapse = (isCollapsed: boolean) => {
+    isSidebarCollapsed.value = isCollapsed
+}
 </script>
 
 <style scoped>
@@ -49,6 +55,11 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
     margin-left: 280px;
     display: flex;
     flex-direction: column;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fe-main-content.sidebar-collapsed {
+    margin-left: 80px;
 }
 
 .fe-hero-section {
@@ -119,8 +130,12 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 /* Responsive Design */
 @media (max-width: 991.98px) {
+    .fe-layout {
+        flex-direction: column;
+    }
+
     .fe-main-content {
-        margin-left: 220px;
+        margin-left: 0;
     }
 
     .fe-hero-section {
@@ -134,8 +149,12 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 }
 
 @media (max-width: 575.98px) {
+    .fe-layout {
+        flex-direction: column;
+    }
+
     .fe-main-content {
-        margin-left: 70px;
+        margin-left: 0;
     }
 
     .fe-hero-section {
