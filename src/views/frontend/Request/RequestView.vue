@@ -780,7 +780,7 @@ const generateReportHTML = async () => {
                     <strong>2.2. Triệu chứng phát hiện ban đầu:</strong>
                 </div>
                 <div class="info-row" style="margin-left: 20px;">
-                    ${diagnosisSession.value.symptoms.map(s => `• ${s}`).join('<br/>')}
+                    ${diagnosisSession.value.symptoms.filter(s => s).map(s => `• ${String(s)}`).join('<br/>')}
                 </div>
                 ` : ''}
 
@@ -792,9 +792,11 @@ const generateReportHTML = async () => {
                 <div class="info-row" style="margin-left: 20px;">
                     ${(() => {
                         const additionalSymptoms = new Set<string>();
-                        diagnosisSession.value.messages.forEach(m => {
-                            if (m.metadata?.new_symptoms_detected) {
-                                m.metadata.new_symptoms_detected.forEach(s => additionalSymptoms.add(s));
+                        (diagnosisSession.value.messages || []).forEach(m => {
+                            if (m.metadata?.new_symptoms_detected && Array.isArray(m.metadata.new_symptoms_detected)) {
+                                m.metadata.new_symptoms_detected.forEach(s => {
+                                    if (s) additionalSymptoms.add(String(s));
+                                });
                             }
                         });
                         return Array.from(additionalSymptoms).map(s => `• ${s}`).join('<br/>');
