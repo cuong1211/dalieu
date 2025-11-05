@@ -356,6 +356,20 @@ const handleSubmit = async () => {
             }
         };
 
+        // Create initial assistant message
+        const initialAssistantMessage: ChatMessage = {
+            id: generateMessageId(),
+            role: 'assistant',
+            content: response.finished
+                ? 'Cảm ơn bạn đã cung cấp thông tin. Dưới đây là kết quả chẩn đoán:'
+                : response.question,
+            timestamp: new Date(),
+            metadata: {
+                symptoms: response.symptoms,
+                top_5_diseases: response.top_5_diseases
+            }
+        };
+
         // Initialize session
         diagnosisSession.value = {
             sessionId: response.session_id,
@@ -363,16 +377,7 @@ const handleSubmit = async () => {
             symptoms: response.symptoms,
             messages: [
                 userFirstMessage,
-                {
-                    id: generateMessageId(),
-                    role: 'assistant',
-                    content: response.question,
-                    timestamp: new Date(),
-                    metadata: {
-                        symptoms: response.symptoms,
-                        top_5_diseases: response.top_5_diseases
-                    }
-                }
+                initialAssistantMessage
             ],
             top5Diseases: response.top_5_diseases,
             questionsAsked: 1,
@@ -381,7 +386,11 @@ const handleSubmit = async () => {
 
         // Switch to chat view
         showChat.value = true;
-        toast.success('Bắt đầu chẩn đoán!');
+        if (response.finished) {
+            toast.success('Chẩn đoán hoàn tất!');
+        } else {
+            toast.success('Bắt đầu chẩn đoán!');
+        }
 
     } catch (error) {
         console.error(error);
@@ -774,48 +783,55 @@ const generateReportHTML = async () => {
                 </div>
                 `}
 
-                <!-- Detected Symptoms -->
-                ${diagnosisSession.value.symptoms && diagnosisSession.value.symptoms.length > 0 ? `
-                <div class="info-row" style="margin-top: 10px;">
-                    <strong>2.2. Triệu chứng phát hiện ban đầu:</strong>
-                </div>
-                <div class="info-row" style="margin-left: 20px;">
-                    ${diagnosisSession.value.symptoms.filter(s => s).map(s => `• ${String(s)}`).join('<br/>')}
-                </div>
-                ` : ''}
+                ${(() => {
+                    let sectionNumber = 1;
+                    let html = '';
 
-                <!-- Additional Detected Symptoms -->
-                ${diagnosisSession.value.messages && diagnosisSession.value.messages.some(m => m.metadata?.new_symptoms_detected?.length) ? `
-                <div class="info-row" style="margin-top: 10px;">
-                    <strong>2.3. Triệu chứng bổ sung phát hiện thêm:</strong>
-                </div>
-                <div class="info-row" style="margin-left: 20px;">
-                    ${(() => {
-                        const additionalSymptoms = new Set<string>();
+                    // Check for initial symptoms
+                    const hasInitialSymptoms = diagnosisSession.value.symptoms && diagnosisSession.value.symptoms.length > 0;
+                    const hasAdditionalSymptoms = diagnosisSession.value.messages && diagnosisSession.value.messages.some(m => m.metadata?.new_symptoms_detected?.length);
+
+                    // Extract additional symptoms
+                    let additionalSymptoms: string[] = [];
+                    if (hasAdditionalSymptoms) {
+                        const symptomSet = new Set<string>();
                         (diagnosisSession.value.messages || []).forEach(m => {
                             if (m.metadata?.new_symptoms_detected && Array.isArray(m.metadata.new_symptoms_detected)) {
                                 m.metadata.new_symptoms_detected.forEach(s => {
-                                    if (s) additionalSymptoms.add(String(s));
+                                    if (s) symptomSet.add(String(s));
                                 });
                             }
                         });
-                        return Array.from(additionalSymptoms).map(s => `• ${s}`).join('<br/>');
-                    })()}
-                </div>
-                ` : ''}
+                        additionalSymptoms = Array.from(symptomSet);
+                    }
 
-                <div class="info-row" style="margin-top: 10px;">
-                    <strong>2.4. Xác suất các bệnh khác có thể (Differential Diagnosis):</strong>
-                </div>
-                ${otherDiseases.length > 0 ? `
-                <div class="info-row" style="margin-left: 20px;">
-                    ${otherDiseasesList}
-                </div>
-                ` : `
-                <div class="info-row" style="margin-left: 20px;">
-                    [Các bệnh khác có triệu chứng tương tự, được AI liệt kê theo xác suất thấp hơn.] (Ví dụ: Nấm da (15%), Viêm nang lông (5%))
-                </div>
-                `}
+                    // Section 2.2 - Initial Symptoms
+                    if (hasInitialSymptoms) {
+                        sectionNumber++;
+                        const symptomsHtml = diagnosisSession.value.symptoms.filter(s => s).map(s => '• ' + String(s)).join('<br/>');
+                        html += '<div class="info-row" style="margin-top: 10px;"><strong>2.' + sectionNumber + '. Triệu chứng phát hiện ban đầu:</strong></div>';
+                        html += '<div class="info-row" style="margin-left: 20px;">' + symptomsHtml + '</div>';
+                    }
+
+                    // Section 2.3 - Additional Symptoms
+                    if (additionalSymptoms.length > 0) {
+                        sectionNumber++;
+                        const additionalHtml = additionalSymptoms.map(s => '• ' + s).join('<br/>');
+                        html += '<div class="info-row" style="margin-top: 10px;"><strong>2.' + sectionNumber + '. Triệu chứng bổ sung phát hiện thêm:</strong></div>';
+                        html += '<div class="info-row" style="margin-left: 20px;">' + additionalHtml + '</div>';
+                    }
+
+                    // Section 2.4 (or 2.2/2.3) - Differential Diagnosis
+                    sectionNumber++;
+                    html += '<div class="info-row" style="margin-top: 10px;"><strong>2.' + sectionNumber + '. Xác suất các bệnh khác có thể (Differential Diagnosis):</strong></div>';
+                    if (otherDiseases.length > 0) {
+                        html += '<div class="info-row" style="margin-left: 20px;">' + otherDiseasesList + '</div>';
+                    } else {
+                        html += '<div class="info-row" style="margin-left: 20px;">[Các bệnh khác có triệu chứng tương tự, được AI liệt kê theo xác suất thấp hơn.] (Ví dụ: Nấm da (15%), Viêm nang lông (5%))</div>';
+                    }
+
+                    return html;
+                })()}
 
                 <!-- PHẦN 3: ĐỀ XUẤT PHƯƠNG PHÁP ĐIỀU TRỊ -->
                 <div class="section-title">PHẦN 3: ĐỀ XUẤT PHƯƠNG PHÁP ĐIỀU TRỊ</div>
@@ -832,7 +848,7 @@ const generateReportHTML = async () => {
 
                 <!-- Footer Note -->
                 <div class="footer-note">
-                    <strong>Trên đây là kết quả chẩn đoán và đề xuất phương pháp điều trị về bệnh  ${primaryDisease.disease} mà chúng tôi đã chuẩn đoán và đề xuất gửi tới bạn tham khảo. Bạn cần tham vấn và thăm khám thêm từ các Bác sỹ về Da liễu.</strong>
+                    <strong>Trên đây là kết quả chẩn đoán và đề xuất phương pháp điều trị về bệnh  ${primaryDisease.disease} mà chúng tôi đã chuẩn đoán và đề xuất gửi tới bạn tham khảo. Bạn cần tham vấn và thăm khám thêm từ các Bác sĩ về Da liễu.</strong>
                 </div>
 
                 <div style="text-align: center; margin-top: 20px; font-size: 11px;">
