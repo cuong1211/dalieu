@@ -32,6 +32,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
     (e: 'audioReady'): void;
     (e: 'audioError'): void;
+    (e: 'play'): void;
 }>();
 
 // Tạo unique ID cho instance này
@@ -58,15 +59,18 @@ const buttonText = computed(() => {
 
 // Audio control functions
 const cleanup = () => {
+    console.log('[AudioPlayer] Cleanup called');
     if (audioPlayer.value) {
         audioPlayer.value.pause();
         audioPlayer.value.currentTime = 0;
-        audioPlayer.value.src = '';
-        audioPlayer.value.load();
+        // Không set src = '' để tránh lỗi Empty src
+        // audioPlayer.value.src = '';
+        // audioPlayer.value.load();
     }
     isPlaying.value = false;
     isAudioReady.value = false;
-    audioUrl.value = '';
+    // Giữ audioUrl để có thể replay
+    // audioUrl.value = '';
     errorMessage.value = '';
 };
 
@@ -86,6 +90,7 @@ const playAudio = async () => {
         if (playPromise !== undefined) {
             await playPromise;
             isPlaying.value = true;
+            emit('play'); // Emit khi audio bắt đầu phát
         }
     } catch (error) {
         console.error('Lỗi khi phát audio:', error);
@@ -105,13 +110,24 @@ const loadAndPlayAudio = async () => {
     try {
         isLoading.value = true;
         errorMessage.value = '';
-        cleanup();
+
+        // Dừng audio hiện tại nhưng không xóa src
+        if (audioPlayer.value) {
+            audioPlayer.value.pause();
+            audioPlayer.value.currentTime = 0;
+        }
+        isPlaying.value = false;
+        isAudioReady.value = false;
+
+        console.log('[AudioPlayer] Calling TTS service with text:', props.text.substring(0, 50));
 
         const response = await ttsService.synthesize({
             text: props.text,
             voice: props.voice,
             speed: props.speed
         });
+
+        console.log('[AudioPlayer] TTS response URL:', response);
 
         if (!response) {
             throw new Error('Không nhận được URL audio từ server');
@@ -120,22 +136,101 @@ const loadAndPlayAudio = async () => {
         audioUrl.value = response;
 
         if (audioPlayer.value) {
-            audioPlayer.value.src = audioUrl.value;
+            // Thử load audio với retry mechanism
+            const maxRetries = 3;
+            let retryCount = 0;
+            let audioLoaded = false;
 
-            await new Promise((resolve, reject) => {
-                if (audioPlayer.value) {
-                    audioPlayer.value.onloadeddata = resolve;
-                    audioPlayer.value.onerror = reject;
+            while (retryCount < maxRetries && !audioLoaded) {
+                try {
+                    // Tăng thời gian chờ đáng kể - FPT API cần thời gian để tạo file MP3
+                    const waitTime = 2000 + (retryCount * 1500); // 2s, 3.5s, 5s
+                    console.log(`[AudioPlayer] Attempt ${retryCount + 1}/${maxRetries} - Waiting ${waitTime}ms before loading audio...`);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+
+                    console.log('[AudioPlayer] Setting audio src:', audioUrl.value);
+
+                    // Reset audio element trước khi thử lại
+                    if (retryCount > 0) {
+                        audioPlayer.value.src = '';
+                        audioPlayer.value.load();
+                        await new Promise(resolve => setTimeout(resolve, 100)); // Chờ một chút
+                    }
+
+                    audioPlayer.value.src = audioUrl.value;
+                    audioPlayer.value.load();
+
+                    // Đợi audio load xong
+                    await new Promise<void>((resolve, reject) => {
+                        if (!audioPlayer.value) {
+                            reject(new Error('Audio player không tồn tại'));
+                            return;
+                        }
+
+                        let canPlayListener: ((e: Event) => void) | null = null;
+                        let errorListener: ((e: Event) => void) | null = null;
+                        let timeoutId: NodeJS.Timeout | null = null;
+
+                        const cleanup = () => {
+                            if (audioPlayer.value && canPlayListener) {
+                                audioPlayer.value.removeEventListener('canplay', canPlayListener);
+                            }
+                            if (audioPlayer.value && errorListener) {
+                                audioPlayer.value.removeEventListener('error', errorListener);
+                            }
+                            if (timeoutId) {
+                                clearTimeout(timeoutId);
+                            }
+                        };
+
+                        canPlayListener = () => {
+                            console.log('[AudioPlayer] Audio can play, ready to start');
+                            isAudioReady.value = true;
+                            cleanup();
+                            resolve();
+                        };
+
+                        errorListener = (e: Event) => {
+                            const target = e.target as HTMLAudioElement;
+                            console.error('[AudioPlayer] Audio load error:', target.error);
+                            cleanup();
+                            reject(new Error(target.error?.message || 'Lỗi tải audio'));
+                        };
+
+                        audioPlayer.value.addEventListener('canplay', canPlayListener, { once: true });
+                        audioPlayer.value.addEventListener('error', errorListener, { once: true });
+
+                        // Timeout sau 8 giây cho mỗi lần thử
+                        timeoutId = setTimeout(() => {
+                            if (audioPlayer.value && !isAudioReady.value) {
+                                cleanup();
+                                reject(new Error('Timeout khi tải audio'));
+                            }
+                        }, 8000);
+                    });
+
+                    audioLoaded = true;
+                    console.log('[AudioPlayer] Audio loaded successfully, starting playback');
+                } catch (loadError) {
+                    retryCount++;
+                    console.log(`[AudioPlayer] Load attempt ${retryCount} failed:`, loadError);
+
+                    if (retryCount >= maxRetries) {
+                        throw new Error(`Không thể tải audio sau ${maxRetries} lần thử`);
+                    }
+
+                    // Tiếp tục retry
+                    console.log(`[AudioPlayer] Retrying... (${retryCount}/${maxRetries})`);
                 }
-            });
+            }
 
             await playAudio();
-            emit('audioReady'); // Emit khi audio đã sẵn sàng
+            emit('audioReady');
         }
     } catch (error) {
-        console.error('Lỗi khi tải audio:', error);
+        console.error('[AudioPlayer] Lỗi khi tải audio:', error);
         errorMessage.value = 'Không thể tạo audio. Vui lòng thử lại sau.';
-        emit('audioError'); // Emit khi có lỗi
+        emit('audioError');
     } finally {
         isLoading.value = false;
     }
@@ -174,8 +269,24 @@ const handleLoaded = () => {
 };
 
 // Watchers and lifecycle hooks
-watch(() => props.text, () => {
-    if (props.text && props.autoplay) {
+// Watch cả text và autoplay để load ngay khi có đủ điều kiện
+watch([() => props.text, () => props.autoplay], ([newText, newAutoplay], [oldText]) => {
+    // Trigger autoplay khi:
+    // 1. autoplay = true VÀ text có giá trị
+    // 2. Và (text vừa thay đổi HOẶC chưa có audioUrl - tức là lần đầu)
+    const shouldLoad = newAutoplay && newText && (newText !== oldText || !audioUrl.value);
+
+    if (shouldLoad) {
+        console.log('[AudioPlayer] Conditions met for autoplay - text:', newText.substring(0, 50));
+        console.log('[AudioPlayer] Text changed:', newText !== oldText, '| No audio URL:', !audioUrl.value);
+
+        // Reset trạng thái nếu text thay đổi
+        if (newText !== oldText && audioUrl.value) {
+            console.log('[AudioPlayer] Resetting for new text');
+            audioUrl.value = '';
+            isAudioReady.value = false;
+        }
+
         nextTick(() => {
             loadAndPlayAudio();
         });

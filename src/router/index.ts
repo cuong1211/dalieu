@@ -62,6 +62,12 @@ const routes = [
         ]
       },
       { path: 'contact', name: 'contact', component: () => import('@/views/frontend/Contact/ContactView.vue'),meta: { hideFooter: true } },
+      {
+        path: 'research-results',
+        name: 'research.results',
+        component: () => import('@/views/frontend/ResearchResultsView.vue'),
+        meta: { hideFooter: true, title: 'Kết quả thực nghiệm' }
+      },
     ],
   },
   {

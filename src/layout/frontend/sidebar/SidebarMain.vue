@@ -55,6 +55,7 @@ const emit = defineEmits<{
 
 const menuItems = ref<MenuItem[]>([
   { name: 'home', to: { name: 'home' }, label: 'Trang chủ', icon: '🏠' },
+  {name: 'research', to: { name: 'research.results' }, label: 'Kết quả thực nghiệm', icon: '🔬' },
   { name: 'request', to: { name: 'request' }, label: 'Tạo yêu cầu', icon: '📝' },
   { name: 'search', to: { name: 'search' }, label: 'Tìm kiếm', icon: '🔍' },
   { name: 'diseases', to: { name: 'diseases' }, label: 'Từ điển bệnh', icon: '📚' },

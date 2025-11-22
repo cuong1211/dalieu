@@ -210,7 +210,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch, defineProps, defineEmits, withDefaults } from 'vue';
+import { ref, nextTick, watch, onMounted, defineProps, defineEmits, withDefaults } from 'vue';
 import type { DiagnosisSession } from '@/types/chatDiagnosis';
 import type { DermatologyRequestForm } from '@/types/request';
 import AudioPlayer from '@/components/AudioPlayer/AudioPlayer.vue';
@@ -315,11 +315,28 @@ const onAudioPlay = () => {
     console.log('Audio started playing');
 };
 
+// Mark last assistant message as new when component mounts
+onMounted(() => {
+    const messages = props.session.messages;
+    if (messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage?.role === 'assistant') {
+            console.log('[ChatDiagnosis] Marking initial message as new:', lastMessage.id);
+            newMessageIds.value.add(lastMessage.id);
+            // Remove from new messages after 30 seconds
+            setTimeout(() => {
+                newMessageIds.value.delete(lastMessage.id);
+            }, 30000);
+        }
+    }
+});
+
 // Watch for new assistant messages to mark them as new
 watch(() => props.session.messages.length, (newLength, oldLength) => {
     if (newLength > oldLength) {
         const lastMessage = props.session.messages[newLength - 1];
         if (lastMessage?.role === 'assistant') {
+            console.log('[ChatDiagnosis] Marking new message as new:', lastMessage.id);
             newMessageIds.value.add(lastMessage.id);
             // Remove from new messages after audio finishes (or after 30 seconds)
             setTimeout(() => {
