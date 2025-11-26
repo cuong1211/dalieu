@@ -4,7 +4,7 @@
             <router-link to="/admin" class="logo-link">
                 <div class="logo-container">
                     <img src="/media/logos/logo.png" alt="" class="logo-img w-60px"/>
-                    <h1 class="logo-text">DLHV</h1>
+                    <h1 class="logo-text">DERMARAG</h1>
                 </div>
             </router-link>
             <div id="kt_aside_toggle" class="btn btn-icon w-auto px-0 btn-active-color-primary aside-minimize"
@@ -42,20 +42,6 @@
                 <div class="page-title d-flex flex-column me-5">
                     <h1 class="d-flex flex-column text-dark fw-bolder fs-3 mb-0">{{ pageTitle }}</h1>
                     <Breadcrumb />
-                </div>
-                <div class="d-flex align-items-center overflow-auto pt-3 pt-lg-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex">
-                            <div class="d-flex align-items-center">
-                                <RouterLink :to="{ name: 'home' }"
-                                    class="btn btn-sm btn-icon btn-active-light-primary position-relative">
-                                    <span class="svg-icon svg-icon-1">
-                                        <i class="bi bi-house-door-fill text-primary" style="font-size: 1.5rem;"></i>
-                                    </span>
-                                </RouterLink>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

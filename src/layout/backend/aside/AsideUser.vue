@@ -6,8 +6,7 @@
         <div class="aside-user-info flex-row-fluid flex-wrap ms-5">
             <div class="d-flex">
                 <div class="flex-grow-1 me-2">
-                    <a href="#" class="text-white text-hover-primary fs-6 fw-bold">{{ userName }}</a>
-                    <span class="text-gray-600 fw-bold d-block fs-8 mb-1">{{ userEmail }}</span>
+                    <a href="#" class="text-hover-primary fs-6 fw-bold" style="color: black;">{{ userName }}</a>
                     <div class="d-flex align-items-center text-success fs-9">
                         <span class="bullet bullet-dot bg-success me-1"></span>online
                     </div>

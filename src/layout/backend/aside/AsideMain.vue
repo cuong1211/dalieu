@@ -13,7 +13,7 @@ const closeAside = () => {
 
 <template>
     <div id="kt_aside" class="aside" :class="{ 'aside-minimize': !isOpen }">
-        <div class="aside-toolbar flex-column-auto" id="kt_aside_toolbar">
+        <div class="aside-toolbar flex-column-auto">
             <User />
         </div>
         <div class="aside-menu flex-column-fluid">
@@ -30,7 +30,7 @@ const closeAside = () => {
     position: fixed;
     z-index: 1001;
     transition: all 0.3s ease;
-    background-color: #1e1e2d;
+    background-color: #ffffff;
 }
 
 .aside-minimize {
@@ -40,6 +40,7 @@ const closeAside = () => {
 .aside-minimize .aside-toolbar,
 .aside-minimize .aside-menu {
     overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
 .drawer-overlay {

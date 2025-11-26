@@ -10,7 +10,7 @@ interface MenuItem {
 export const menuItems: MenuItem[] = [
     {
         title: 'Danh sách chuẩn đoán',
-        icon: 'bi bi-list-task',
+        icon: 'bi bi-file-text',
         route: 'request.index',
     },
     {
@@ -27,21 +27,21 @@ export const menuItems: MenuItem[] = [
                 route: 'user.index',
                 icon: 'bi bi-person-gear'
             },
-            {
-                title: 'Phân quyền',
-                route: 'permission',
-                icon: 'bi bi-shield-lock'
-            },
-            {
-                title: 'Vai trò',
-                route: 'role',
-                icon: 'bi bi-person-badge'
-            },
-            {
-                title: 'Cấu hình URL',
-                route: 'config',
-                icon: 'bi bi-sliders'
-            },
+            // {
+            //     title: 'Phân quyền',
+            //     route: 'permission',
+            //     icon: 'bi bi-shield-lock'
+            // },
+            // {
+            //     title: 'Vai trò',
+            //     route: 'role',
+            //     icon: 'bi bi-person-badge'
+            // },
+            // {
+            //     title: 'Cấu hình URL',
+            //     route: 'config',
+            //     icon: 'bi bi-sliders'
+            // },
             // {
             //     title: 'Cấu hình',
             //     route: 'settings',

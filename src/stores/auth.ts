@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async login(credentials: { username: string; password: string }) {
             try {
-                const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, credentials);
+                const response = await axios.post(`${import.meta.env.VITE_API_DF}/login`, credentials);
 
                 this.setUserAndToken(response.data.user, response.data.token, response.data.role, response.data.is_super_admin, response.data.resource);
                 return response.data;
