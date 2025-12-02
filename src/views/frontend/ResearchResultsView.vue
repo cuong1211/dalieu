@@ -5,7 +5,7 @@
             <div class="header-content">
                 <h1 class="header-title">
                     <i class="bi bi-clipboard-data" style="color: white;"></i>
-                    Kết Quả Thực Nghiệm Hệ Thống
+                    Kết Quả Kiểm thử Hệ Thống
                 </h1>
                 <p class="header-subtitle">Đánh giá hiệu quả của hệ thống DERMARAG</p>
             </div>
@@ -15,9 +15,9 @@
         <section class="section doctor-presentation">
             <div class="container">
                 <div class="section-header text-center mb-5">
-                    <h2 class="section-title">Giới Thiệu Từ Chuyên Gia</h2>
+                    <h2 class="section-title">Đánh Giá Từ Chuyên Gia</h2>
                     <p class="section-subtitle">
-                        Bác sĩ chuyên khoa giới thiệu về hệ thống và kết quả nghiên cứu
+                        Bác sĩ chuyên khoa đánh giá về hệ thống và kết quả nghiên cứu
                     </p>
                 </div>
 
@@ -50,7 +50,7 @@
                                     <i class="bi bi-person-circle"></i>
                                 </div>
                                 <div>
-                                    <h5 class="mb-1">Phạm Văn Thinh</h5>
+                                    <h5 class="mb-1">Th.S Bác sĩ Phạm Văn Thinh</h5>
                                     <p class="text-muted mb-0">Giám đốc - Bệnh viện Đa khoa số 2 Tỉnh Lào Cai</p>
                                 </div>
                             </div>
@@ -68,7 +68,7 @@
         <section class="section system-usage bg-light">
             <div class="container">
                 <div class="section-header text-center mb-5">
-                    <h2 class="section-title">Quá Trình Thực Nghiệm</h2>
+                    <h2 class="section-title">Quá Trình Kiểm Thử</h2>
                     <p class="section-subtitle">
                         Học sinh và bác sĩ cùng tham gia đánh giá hệ thống
                     </p>
