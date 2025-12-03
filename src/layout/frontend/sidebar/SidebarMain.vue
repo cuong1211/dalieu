@@ -55,7 +55,7 @@ const emit = defineEmits<{
 
 const menuItems = ref<MenuItem[]>([
   { name: 'home', to: { name: 'home' }, label: 'Trang chủ', icon: '🏠' },
-  {name: 'research', to: { name: 'research.results' }, label: 'Kết quả thực nghiệm', icon: '🔬' },
+  {name: 'research', to: { name: 'research.results' }, label: 'Kết quả Đánh giá từ chuyên gia và Kiểm thử', icon: '🔬' },
   { name: 'request', to: { name: 'request' }, label: 'Tạo yêu cầu', icon: '📝' },
   { name: 'search', to: { name: 'search' }, label: 'Tìm kiếm', icon: '🔍' },
   { name: 'diseases', to: { name: 'diseases' }, label: 'Từ điển bệnh', icon: '📚' },
@@ -320,7 +320,7 @@ const handleNavClick = (item: MenuItem): void => {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .sidebar-footer {
@@ -453,7 +453,7 @@ const handleNavClick = (item: MenuItem): void => {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
   }
 }
 </style>
