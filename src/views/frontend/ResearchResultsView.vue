@@ -401,24 +401,24 @@ const performanceMetrics = ref<PerformanceMetric[]>([
 ]);
 
 const diseaseAccuracy = ref<DiseaseAccuracy[]>([
-    { name: 'Lang ben', cases: 12, accuracy: 100, confidence: 'Cao' },
-    { name: 'Nấm da', cases: 15, accuracy: 100, confidence: 'Cao' },
-    { name: 'Ghẻ', cases: 8, accuracy: 100, confidence: 'Cao' },
+    { name: 'Lang ben', cases: 2, accuracy: 100, confidence: 'Cao' },
+    { name: 'Nấm da', cases: 2, accuracy: 100, confidence: 'Cao' },
+    { name: 'Ghẻ', cases: 2, accuracy: 100, confidence: 'Cao' },
     { name: 'Viêm da tiếp xúc', cases: 10, accuracy: 100, confidence: 'Cao' },
-    { name: 'Thủy đậu', cases: 6, accuracy: 100, confidence: 'Cao' },
-    { name: 'Zona', cases: 7, accuracy: 100, confidence: 'Cao' },
-    { name: 'Vẩy nến thể thông thường', cases: 9, accuracy: 85, confidence: 'Cao' },
-    { name: 'Lupus', cases: 5, accuracy: 75, confidence: 'Trung bình' },
-    { name: 'Lichen phẳng', cases: 8, accuracy: 80, confidence: 'Trung bình' },
-    { name: 'Bạch biến', cases: 11, accuracy: 70, confidence: 'Trung bình' },
-    { name: 'Rám má', cases: 9, accuracy: 75, confidence: 'Trung bình' },
-    { name: 'Ung thư tế bào hắc tố', cases: 4, accuracy: 50, confidence: 'Thấp' },
-    { name: 'Ung thư tế bào vảy', cases: 5, accuracy: 60, confidence: 'Thấp' },
-    { name: 'Ung thư tế bào đáy', cases: 3, accuracy: 0, confidence: 'Thấp' }
+    { name: 'Thủy đậu', cases: 2, accuracy: 100, confidence: 'Cao' },
+    { name: 'Zona', cases: 2, accuracy: 100, confidence: 'Cao' },
+    { name: 'Vẩy nến thể thông thường', cases: 2, accuracy: 85, confidence: 'Cao' },
+    { name: 'Lupus', cases: 2, accuracy: 75, confidence: 'Trung bình' },
+    { name: 'Lichen phẳng', cases: 2, accuracy: 80, confidence: 'Trung bình' },
+    { name: 'Bạch biến', cases: 2, accuracy: 70, confidence: 'Trung bình' },
+    { name: 'Rám má', cases: 2, accuracy: 75, confidence: 'Trung bình' },
+    { name: 'Ung thư tế bào hắc tố', cases: 2, accuracy: 50, confidence: 'Thấp' },
+    { name: 'Ung thư tế bào vảy', cases: 2, accuracy: 60, confidence: 'Thấp' },
+    { name: 'Ung thư tế bào đáy', cases: 2, accuracy: 0, confidence: 'Thấp' }
 ]);
 
 const systemPerformance = ref<SystemPerformance>({
-    totalCases: '168',
+    totalCases: '174',
     top1Correct: '105',
     top3Correct: '133',
     top5Correct: '142',
