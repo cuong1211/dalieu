@@ -86,10 +86,10 @@
 
             <!-- Submit Button -->
             <div class="form-footer">
-                <button type="button" class="autofill-button" @click="handleAutoFill">
+                <!-- <button type="button" class="autofill-button" @click="handleAutoFill">
                     <i class="bi bi-lightning-fill"></i>
                     Tự động điền mẫu
-                </button>
+                </button> -->
                 <button type="submit" class="submit-button" :disabled="isProcessing">
                     <template v-if="isProcessing">
                         <span class="spinner-border spinner-border-sm me-2"></span>
