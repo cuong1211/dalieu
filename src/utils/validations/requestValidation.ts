@@ -210,13 +210,13 @@ export const useRequestValidation = (form: Ref<DermatologyRequestForm>) => {
             isValid = false;
         }
 
-        // Validate symptom
+        // Validate symptom - REQUIRED
         const symptomTrimmed = form.value.symptom?.trim() || '';
 
-        if (!symptomTrimmed && !form.value.image) {
-            errors.value.symptom = 'Vui lòng nhập mô tả triệu chứng hoặc chụp ảnh';
+        if (!symptomTrimmed) {
+            errors.value.symptom = 'Vui lòng nhập mô tả triệu chứng';
             isValid = false;
-        } else if (symptomTrimmed) {
+        } else {
             const validationResult = validateSymptom(symptomTrimmed);
             if (!validationResult.isValid) {
                 // Use suggestion if available, otherwise use reason

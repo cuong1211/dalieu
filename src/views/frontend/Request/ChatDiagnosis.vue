@@ -85,13 +85,33 @@
                                 <div class="message-content">
                                     <div class="message-text" v-html="formatMessage(message.content)"></div>
 
+                                    <!-- Mobile Compact Disease List inside message -->
+                                    <div v-if="message.metadata?.top_5_diseases?.length" class="message-disease-compact">
+                                        <div class="compact-header">
+                                            <i class="bi bi-graph-up-arrow"></i>
+                                            <span>Kết quả phân tích</span>
+                                        </div>
+                                        <div class="compact-disease-list">
+                                            <div v-for="(disease, index) in message.metadata.top_5_diseases" :key="index"
+                                                class="compact-disease-item">
+                                                <span class="compact-rank">#{{ index + 1 }}</span>
+                                                <div class="compact-info">
+                                                    <span class="compact-name">{{ disease.disease }}</span>
+                                                    <span class="compact-probability" :style="{ color: getProbabilityColorText(disease.probability) }">
+                                                        {{ (disease.probability * 100).toFixed(1) }}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Audio Player for TTS -->
                                     <div class="audio-player-wrapper">
                                         <AudioPlayer
                                             :key="message.id"
                                             :text="message.content"
-                                            voice="female"
-                                            :speed="0"
+                                            voice="south_female_1"
+                                            :speed="1.0"
                                             :autoplay="isMessageNew(message.id)"
                                             @play="onAudioPlay"
                                         />
@@ -259,7 +279,8 @@ const handleSubmit = () => {
 
 // Format message with line breaks
 const formatMessage = (text: string) => {
-    return text.replace(/\n/g, '<br>');
+    if (!text) return '';
+    return String(text).replace(/\n/g, '<br>');
 };
 
 // Get color based on probability
@@ -268,6 +289,14 @@ const getProbabilityColor = (probability: number) => {
     if (probability >= 0.5) return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
     if (probability >= 0.3) return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
     return 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+};
+
+// Get text color based on probability (for mobile compact view)
+const getProbabilityColorText = (probability: number) => {
+    if (probability >= 0.7) return '#f5576c';
+    if (probability >= 0.5) return '#00f2fe';
+    if (probability >= 0.3) return '#38f9d7';
+    return '#fee140';
 };
 
 // Auto scroll to bottom when new message
@@ -646,6 +675,125 @@ watch(() => props.session.messages.length, (newLength, oldLength) => {
     display: flex;
     flex-direction: column;
     background: white;
+}
+
+/* Mobile Compact Disease List - Hidden by default */
+.mobile-disease-compact {
+    display: none;
+}
+
+/* Message Disease Compact - Inside assistant message */
+.message-disease-compact {
+    display: none; /* Hidden by default on desktop */
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(26, 188, 156, 0.15);
+}
+
+.message-disease-compact .compact-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    color: #0d7d6e;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.message-disease-compact .compact-header i {
+    font-size: 0.95rem;
+    color: #1abc9c;
+}
+
+.message-disease-compact .compact-disease-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar for disease list */
+.message-disease-compact .compact-disease-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.message-disease-compact .compact-disease-list::-webkit-scrollbar-track {
+    background: rgba(226, 232, 240, 0.3);
+    border-radius: 2px;
+}
+
+.message-disease-compact .compact-disease-list::-webkit-scrollbar-thumb {
+    background: rgba(26, 188, 156, 0.5);
+    border-radius: 2px;
+}
+
+.message-disease-compact .compact-disease-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(26, 188, 156, 0.7);
+}
+
+.message-disease-compact .compact-disease-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(240, 253, 251, 0.5);
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #d1f4e0;
+    transition: all 0.2s ease;
+}
+
+.message-disease-compact .compact-disease-item:hover {
+    background: rgba(240, 253, 251, 1);
+    border-color: #1abc9c;
+    box-shadow: 0 1px 3px rgba(26, 188, 156, 0.1);
+}
+
+.message-disease-compact .compact-rank {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    color: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.message-disease-compact .compact-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.message-disease-compact .compact-name {
+    flex: 1;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message-disease-compact .compact-probability {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.4rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
 }
 
 .messages-container {
@@ -1211,23 +1359,555 @@ watch(() => props.session.messages.length, (newLength, oldLength) => {
 }
 
 @media (max-width: 768px) {
-    .chat-layout {
-        flex-direction: column;
+    .chat-container {
+        height: 100vh;
+        overflow: hidden;
     }
 
+    .chat-header {
+        flex-shrink: 0;
+        padding: 0.75rem 1rem;
+    }
+
+    .header-content {
+        gap: 0.75rem;
+    }
+
+    .header-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .header-title {
+        font-size: 1rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .reset-btn {
+        padding: 0.5rem 0.875rem;
+    }
+
+    .reset-btn h4 {
+        font-size: 0.8rem;
+    }
+
+    .reset-btn i {
+        font-size: 1rem;
+    }
+
+    .chat-layout {
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    /* Sidebar ở trên, có thể scroll ngang */
     .sidebar {
         width: 100%;
-        max-height: 40vh;
+        max-height: none;
+        height: auto;
         border-right: none;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 2px solid #1abc9c;
+        flex-shrink: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        order: 0;
+    }
+
+    .sidebar-header {
+        padding: 1rem;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+    }
+
+    .sidebar-header h4 {
+        font-size: 0.9rem;
+    }
+
+    .disease-list {
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
+        overflow-x: auto;
+        overflow-y: visible;
+        flex-wrap: nowrap;
+    }
+
+    .disease-item {
+        flex: 0 0 280px;
+        min-width: 280px;
+    }
+
+    .disease-rank {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+
+    .disease-name {
+        font-size: 0.875rem;
+    }
+
+    .probability-text {
+        font-size: 0.8rem;
+        min-width: 40px;
+    }
+
+    /* Symptoms section */
+    .symptoms-section {
+        padding: 1rem;
+    }
+
+    .symptoms-header {
+        margin-bottom: 0.75rem;
+    }
+
+    .symptoms-header h4 {
+        font-size: 0.85rem;
+    }
+
+    .symptom-count {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+    }
+
+    .symptoms-tags {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.5rem;
+        padding-bottom: 0.25rem;
+    }
+
+    .symptom-tag {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    /* Chat main - chiếm phần còn lại */
+    .chat-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* Mobile Compact Disease List - Show on mobile */
+    .mobile-disease-compact {
+        display: block;
+        background: linear-gradient(135deg, #f0fdfb 0%, #ecfdf5 100%);
+        border-bottom: 1px solid #a7f3d0;
+        padding: 0.5rem 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .compact-header {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.5rem;
+        color: #0d7d6e;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+
+    .compact-header i {
+        font-size: 0.9rem;
+        color: #1abc9c;
+    }
+
+    .compact-disease-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .compact-disease-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: white;
+        padding: 0.35rem 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #d1f4e0;
+        transition: all 0.2s ease;
+    }
+
+    .compact-disease-item:hover {
+        border-color: #1abc9c;
+        box-shadow: 0 1px 3px rgba(26, 188, 156, 0.15);
+    }
+
+    .compact-rank {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+        color: white;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.625rem;
+        font-weight: 700;
+    }
+
+    .compact-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+        min-width: 0;
+    }
+
+    .compact-name {
+        flex: 1;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .compact-probability {
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.1rem 0.35rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 3px;
+    }
+
+    /* Hide sidebar on mobile */
+    .sidebar {
+        display: none;
+    }
+
+    /* Messages container - cho phép scroll */
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1rem;
+        gap: 1rem;
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
     }
 
     .message {
-        max-width: 90%;
+        max-width: 95%;
     }
 
     .message-content {
-        max-width: 85%;
+        max-width: 90%;
+    }
+
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .avatar-logo {
+        width: 24px;
+        height: 24px;
+    }
+
+    .assistant-message .message-content,
+    .user-message .message-content {
+        padding: 0.875rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Message Disease Compact on mobile - Show only on mobile */
+    .message-disease-compact {
+        display: block; /* Show on mobile */
+        margin-top: 0.6rem;
+        padding-top: 0.6rem;
+    }
+
+    .message-disease-compact .compact-header {
+        font-size: 0.75rem;
+        gap: 0.35rem;
+    }
+
+    .message-disease-compact .compact-header i {
+        font-size: 0.85rem;
+    }
+
+    .message-disease-compact .compact-disease-list {
+        gap: 0.35rem;
+    }
+
+    .message-disease-compact .compact-disease-item {
+        padding: 0.35rem 0.5rem;
+    }
+
+    .message-disease-compact .compact-rank {
+        width: 18px;
+        height: 18px;
+        font-size: 0.6rem;
+    }
+
+    .message-disease-compact .compact-name {
+        font-size: 0.75rem;
+    }
+
+    .message-disease-compact .compact-probability {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.35rem;
+    }
+
+    .user-image-thumbnail {
+        width: 70px;
+        height: 70px;
+    }
+
+    /* Input area */
+    .input-area {
+        flex-shrink: 0;
+        padding: 0.75rem;
+        background: white;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .input-form {
+        gap: 0.5rem;
+        max-width: 100%;
+    }
+
+    .message-input {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+    }
+
+    .send-btn {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+
+    .send-btn i {
+        font-size: 1.1rem;
+    }
+
+    /* Final Result */
+    .final-result {
+        padding: 1.25rem;
+        margin-top: 0.75rem;
+    }
+
+    .result-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .final-disease-rank {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .final-disease-name {
+        font-size: 1rem;
+    }
+
+    .result-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .result-action-btn {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-header {
+        padding: 0.625rem 0.75rem;
+    }
+
+    .header-content {
+        gap: 0.5rem;
+    }
+
+    .header-logo {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-title {
+        font-size: 0.9rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.7rem;
+    }
+
+    .reset-btn {
+        padding: 0.45rem 0.85rem;
+    }
+
+    .reset-btn h4 {
+        font-size: 0.8rem;
+    }
+
+    .reset-btn i {
+        font-size: 1rem;
+    }
+
+    /* Mobile Compact - Smaller on very small screens */
+    .mobile-disease-compact {
+        padding: 0.4rem 0.6rem;
+    }
+
+    .compact-header {
+        font-size: 0.7rem;
+        margin-bottom: 0.4rem;
+        gap: 0.3rem;
+    }
+
+    .compact-header i {
+        font-size: 0.85rem;
+    }
+
+    .compact-disease-list {
+        gap: 0.3rem;
+    }
+
+    .compact-disease-item {
+        padding: 0.3rem 0.45rem;
+        border-radius: 5px;
+    }
+
+    .compact-rank {
+        width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+        border-radius: 3px;
+    }
+
+    .compact-name {
+        font-size: 0.7rem;
+    }
+
+    .compact-probability {
+        font-size: 0.65rem;
+        padding: 0.08rem 0.3rem;
+    }
+
+    .messages-container {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .message {
+        gap: 0.5rem;
+    }
+
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .avatar-logo {
+        width: 22px;
+        height: 22px;
+    }
+
+    .assistant-message .message-content,
+    .user-message .message-content {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.875rem;
+        border-radius: 10px;
+    }
+
+    .user-image-thumbnail {
+        width: 60px;
+        height: 60px;
+    }
+
+    .input-area {
+        padding: 0.5rem;
+    }
+
+    .message-input {
+        padding: 0.65rem 0.875rem;
+        font-size: 0.9rem;
+    }
+
+    .send-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .send-btn i {
+        font-size: 1rem;
+    }
+
+    .final-result {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .result-header {
+        gap: 0.75rem;
+    }
+
+    .result-header i {
+        font-size: 2rem;
+    }
+
+    .result-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .result-message {
+        font-size: 0.875rem;
+    }
+
+    .final-disease-card {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .final-disease-rank {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .final-disease-name {
+        font-size: 0.95rem;
+    }
+
+    .final-probability-text {
+        font-size: 0.9rem;
+    }
+
+    .result-action-btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .disclaimer {
+        font-size: 0.85rem;
+        padding: 0.75rem;
     }
 }
 

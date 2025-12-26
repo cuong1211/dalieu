@@ -25,8 +25,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    voice: 'female',
-    speed: 0,
+    voice: 'south_female_1',
+    speed: 1.0,
     autoplay: true
 });
 const emit = defineEmits<{

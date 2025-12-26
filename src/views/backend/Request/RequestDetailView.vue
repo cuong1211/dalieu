@@ -13,6 +13,12 @@
                         <p class="header-subtitle">Thông tin khám bệnh và chẩn đoán</p>
                     </div>
                 </div>
+                <div class="header-actions">
+                    <button class="print-btn" @click="handlePrintReport" :disabled="!patient">
+                        <i class="bi bi-printer"></i>
+                        <span>In phiếu</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -222,6 +228,233 @@ const initializeModal = (): void => {
     }
 };
 
+// Handle print report
+const handlePrintReport = async (): Promise<void> => {
+    if (!patient.value) return;
+
+    const printWindow = window.open('', '', 'height=800,width=1000');
+    if (printWindow) {
+        try {
+            const reportHTML = await generateReportHTML();
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        } catch (error) {
+            console.error('Error generating report:', error);
+            printWindow.close();
+        }
+    }
+};
+
+// Generate report HTML for printing
+const generateReportHTML = async (): Promise<string> => {
+    if (!patient.value) return '';
+
+    const safeValue = (value: any): string => {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+        return String(value).trim();
+    };
+
+    const patientName = safeValue(patient.value.name);
+    const patientAge = safeValue(patient.value.age);
+    const patientGender = formatGender(patient.value.gender);
+    const patientId = safeValue(patient.value.identification);
+    const patientPhone = safeValue(patient.value.phone);
+    const patientAddress = safeValue(patient.value.address);
+    const symptomDescription = safeValue(patient.value.symptom);
+    const diagnosisResult = safeValue(patient.value.result);
+
+    const maPhieu = `BN-${patientId.substring(0, 8)}`;
+    const ngayKham = formatDate(patient.value.created_at);
+
+    // Get patient image as base64
+    let patientImageBase64 = '';
+    if (patient.value.file_id) {
+        try {
+            const imageUrl = getImageUrl(patient.value.file_id);
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            patientImageBase64 = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.error('Error loading image:', error);
+        }
+    }
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Phiếu Khám Bệnh</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: 'Times New Roman', Times, serif;
+                    line-height: 1.4;
+                    color: #000;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 900px;
+                    margin: 0 auto;
+                }
+                .header-info {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 15px;
+                    margin-bottom: 15px;
+                    font-size: 11px;
+                }
+                .header-logo {
+                    flex-shrink: 0;
+                }
+                .header-logo img {
+                    width: 60px;
+                    height: 60px;
+                    object-fit: contain;
+                }
+                .header-text {
+                    flex: 1;
+                    text-align: center;
+                }
+                .header-info p {
+                    margin: 3px 0;
+                }
+                .title {
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 13px;
+                    margin-bottom: 15px;
+                }
+                .meta-row {
+                    margin-bottom: 10px;
+                    font-size: 11px;
+                }
+                .section-title {
+                    font-weight: bold;
+                    font-size: 12px;
+                    margin-top: 15px;
+                    margin-bottom: 10px;
+                    text-decoration: underline;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 11px;
+                    margin: 10px 0;
+                }
+                table td {
+                    border: 1px solid #000;
+                    padding: 6px;
+                    vertical-align: top;
+                }
+                .info-row {
+                    margin-bottom: 5px;
+                    font-size: 11px;
+                }
+                .patient-image {
+                    max-width: 300px;
+                    margin: 10px 0;
+                    border: 1px solid #000;
+                }
+                @media print {
+                    body { margin: 0; padding: 20px; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <!-- Header -->
+                <div class="header-info">
+                    <div class="header-logo">
+                        <img src="/media/logos/logo.png" alt="Logo" />
+                    </div>
+                    <div class="header-text">
+                        <p>HỆ THỐNG QUẢN LÝ BỆNH NHÂN</p>
+                        <p>PHÒNG KHÁM DA LIỄU</p>
+                    </div>
+                </div>
+
+                <div class="title">
+                    PHIẾU KHÁM BỆNH
+                </div>
+
+                <div class="meta-row">
+                    <strong>Mã Phiếu:</strong> ${maPhieu} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong>Ngày Khám:</strong> ${ngayKham}
+                </div>
+
+                <!-- PHẦN 1: THÔNG TIN BỆNH NHÂN -->
+                <div class="section-title">PHẦN 1: THÔNG TIN BỆNH NHÂN</div>
+                <table>
+                    <tr>
+                        <td style="width: 30%;">Họ và Tên:</td>
+                        <td><strong>${patientName}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Tuổi:</td>
+                        <td>${patientAge} tuổi</td>
+                    </tr>
+                    <tr>
+                        <td>Giới tính:</td>
+                        <td>${patientGender}</td>
+                    </tr>
+                    <tr>
+                        <td>CMND/CCCD:</td>
+                        <td>${patientId}</td>
+                    </tr>
+                    <tr>
+                        <td>Số điện thoại:</td>
+                        <td>${patientPhone}</td>
+                    </tr>
+                    <tr>
+                        <td>Địa chỉ:</td>
+                        <td>${patientAddress}</td>
+                    </tr>
+                </table>
+
+                <!-- PHẦN 2: THÔNG TIN KHÁM BỆNH -->
+                <div class="section-title">PHẦN 2: THÔNG TIN KHÁM BỆNH</div>
+                <table>
+                    <tr>
+                        <td style="width: 30%;">Triệu chứng:</td>
+                        <td>${symptomDescription}</td>
+                    </tr>
+                    <tr>
+                        <td>Kết quả chẩn đoán:</td>
+                        <td>${diagnosisResult || 'Chưa có kết quả'}</td>
+                    </tr>
+                </table>
+
+                <!-- HÌNH ẢNH BỆNH ÁN -->
+                ${patientImageBase64 ? `
+                <div class="section-title">PHẦN 3: HÌNH ẢNH BỆNH ÁN</div>
+                <img src="${patientImageBase64}" alt="Hình ảnh bệnh án" class="patient-image" />
+                ` : ''}
+
+                <div class="info-row" style="margin-top: 30px; text-align: center; font-size: 10px; color: #666;">
+                    <p>--- HẾT ---</p>
+                    <p style="margin-top: 10px;">Phiếu được in từ Hệ thống Quản lý Bệnh nhân</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+};
+
 onMounted(async () => {
     try {
         const id = parseInt(route.params.id as string);
@@ -264,12 +497,56 @@ onUnmounted(() => {
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .header-left {
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+}
+
+.print-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.print-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.print-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+}
+
+.print-btn i {
+    font-size: 1rem;
 }
 
 .back-btn {

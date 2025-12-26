@@ -86,6 +86,10 @@
 
             <!-- Submit Button -->
             <div class="form-footer">
+                <button type="button" class="autofill-button" @click="handleAutoFill">
+                    <i class="bi bi-lightning-fill"></i>
+                    Tự động điền mẫu
+                </button>
                 <button type="submit" class="submit-button" :disabled="isProcessing">
                     <template v-if="isProcessing">
                         <span class="spinner-border spinner-border-sm me-2"></span>
@@ -309,6 +313,28 @@ const handleImageChanged = async (file: File | null) => {
             toast.error('Không thể lưu ảnh. Vui lòng thử lại.');
         }
     }
+};
+
+// Xử lý tự động điền mẫu
+const handleAutoFill = () => {
+    form.value.name = 'Nguyễn Văn A';
+    form.value.age = '35';
+    form.value.gender = 'Nam';
+    form.value.identification = '001234567890';
+    form.value.phone = '0912345678';
+    form.value.email = 'nguyenvana@example.com';
+    form.value.address = '123 Đường ABC, Phường XYZ, Quận 1, TP.HCM';
+
+    // Trigger validation to clear errors
+    handleInput('name', form.value.name);
+    handleInput('age', form.value.age);
+    handleInput('gender', form.value.gender);
+    handleInput('identification', form.value.identification);
+    handleInput('phone', form.value.phone);
+    handleInput('email', form.value.email);
+    handleInput('address', form.value.address);
+
+    toast.success('Đã tự động điền thông tin mẫu!');
 };
 
 // Generate unique ID for messages
@@ -980,8 +1006,41 @@ const generateReportHTML = async () => {
     border-top: 1px solid #e8eaed;
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 1rem;
     flex-shrink: 0;
     margin-top: auto;
+}
+
+.autofill-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.autofill-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.autofill-button:active {
+    transform: translateY(0);
+}
+
+.autofill-button i {
+    font-size: 1rem;
 }
 
 .submit-button {
@@ -1079,6 +1138,12 @@ const generateReportHTML = async () => {
 
     .form-footer {
         padding: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .autofill-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
     }
 
     .submit-button {
@@ -1130,6 +1195,14 @@ const generateReportHTML = async () => {
 
     .form-footer {
         padding: 1.25rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .autofill-button {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
     }
 
     .submit-button {
@@ -1182,6 +1255,18 @@ const generateReportHTML = async () => {
 
     .form-footer {
         padding: 1rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .autofill-button {
+        width: 100%;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .autofill-button i {
+        font-size: 0.95rem;
     }
 
     .submit-button {
